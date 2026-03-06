@@ -1,4 +1,5 @@
-﻿using GP.Infrastructure.Services;
+﻿using GP.Application.Common;
+using GP.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GP.Api.Controllers
@@ -51,12 +52,15 @@ namespace GP.Api.Controllers
         public async Task<IActionResult> ImportTrains()
         {
             var baseDir = AppContext.BaseDirectory;
-
             var dataPath = Path.Combine(baseDir, "Data", "SeedData", "ENR");
 
             if (!Directory.Exists(dataPath))
             {
-                return NotFound(new { message = $"SeedData folder not found at {dataPath}. Make sure the CSV files are set to 'Copy if newer'." });
+                return NotFound(new ApiResponse<object>
+                {
+                    Success = false,
+                    Message = $"SeedData folder not found at {dataPath}. Make sure the CSV files are set to 'Copy if newer'."
+                });
             }
 
             var result = await _trainImporter.ImportFromCsvAsync(
@@ -69,7 +73,23 @@ namespace GP.Api.Controllers
                 stopTimesPath: Path.Combine(dataPath, "trip_stop_times.csv"),
                 pricingPath: Path.Combine(dataPath, "trip_class_pricing.csv")
             );
-            return Ok(result);
+
+            if (!result.Success)
+            {
+                return BadRequest(new ApiResponse<object>
+                {
+                    Success = false,
+                    Message = result.Message ?? "Failed to import train data due to a validation or file error.",
+                    Data = result 
+                });
+            }
+
+            return Ok(new ApiResponse<object>
+            {
+                Success = true,
+                Message = "Train blueprints imported successfully!",
+                Data = result
+            });
         }
     }
 }
