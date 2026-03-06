@@ -3,7 +3,7 @@
 ![.NET 9](https://img.shields.io/badge/.NET-9.0-512BD4?style=flat&logo=dotnet)
 ![EF Core](https://img.shields.io/badge/EF%20Core-9.0-512BD4?style=flat)
 ![SQL Server](https://img.shields.io/badge/SQL%20Server-2022-CC2927?style=flat&logo=microsoftsqlserver)
-![License](https://img.shields.io/badge/License-MIT-green?style=flat)
+
 
 > **University Graduation Project**  
 > A unified backend API for booking inter-governorate transportation across Egypt, supporting both **Egyptian National Railways (ENR)** and **GoBus** services.
