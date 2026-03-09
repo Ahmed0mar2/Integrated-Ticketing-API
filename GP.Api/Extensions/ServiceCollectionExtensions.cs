@@ -13,6 +13,7 @@ using GP.Infrastructure.Data;
 using GP.Infrastructure.Identity;
 using GP.Infrastructure.Interfaces;
 using GP.Infrastructure.Repositories;
+using GP.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -206,6 +207,15 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAuthService, AuthenticationService>();
         services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
         services.AddScoped<IAdminUserService, AdminUserService>();
+
+        // Database Importers
+        services.AddScoped<GoBusDatabaseImporter>();
+        services.AddScoped<TrainDatabaseImporter>();
+
+        // User profile & files 
+        services.AddScoped<IFileService, FileService>();
+        services.AddScoped<IUserProfileService, UserProfileService>();
+
         services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
 
         return services;
