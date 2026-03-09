@@ -237,6 +237,16 @@ After running migrations, you can log in with the seeded admin account:
 | `POST` | `/api/Seed/import-gobus`  | Import GoBus data from CSV files     | ❌ |
 | `POST` | `/api/Seed/import-trains` | Import Train (ENR) data from CSV files | ❌      |
 
+### 🛡️ Admin Users (`/api/admin/users`)
+
+| Method | Endpoint | Auth Required | Description |
+|--------|----------|---------------|-------------|
+| `GET` | `/api/admin/users` | Yes | List all domain users alongside their country metadata |
+| `GET` | `/api/admin/users/{id}` | Yes | View complete details of a specific user |
+| `PATCH` | `/api/admin/users/{id}/toggle-status` | Yes | Suspend or activate a user account |
+| `POST` | `/api/admin/users/{id}/roles` | Yes | Assign a system role to a user |
+| `DELETE` | `/api/admin/users/{id}` | Yes | Permanently delete a user | 
+
 > 📖 For complete API documentation with request/response schemas, visit `/scalar/v1` when the application is running.
 
 ---
