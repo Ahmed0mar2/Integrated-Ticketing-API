@@ -115,6 +115,10 @@ namespace GP.Infrastructure.Data.Configurations
                 .HasPrecision(10, 2)
                 .HasDefaultValue(0);
 
+            builder.Property(u => u.WalletBalance)
+                .HasColumnType("decimal(18,2)")
+                .HasDefaultValue(0m);
+
             builder.HasIndex(u => u.CurrentCity);
 
             builder.HasIndex(u => u.CountryId);

@@ -32,6 +32,7 @@ namespace GP.Domain.Entities
         public decimal? Longitude { get; set; }
         public int TotalTripsCount { get; set; }  // Completed trips count
         public decimal TotalDistanceTraveled { get; set; }  // In kilometers
+        public decimal WalletBalance { get; set; } = 0m;
         public int CountryId { get; set; }
 
         // Account
