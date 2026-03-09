@@ -40,6 +40,7 @@ namespace GP.Infrastructure.Data
         public DbSet<TrainType> TrainTypes { get; set; }
         public DbSet<CoachClass> CoachClasses { get; set; }
         public DbSet<TrainTypeCoachConfig> TrainTypeCoachConfigs { get; set; }
+        public DbSet<MarketplaceListing> MarketplaceListings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
