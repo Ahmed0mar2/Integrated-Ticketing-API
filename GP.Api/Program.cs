@@ -1,4 +1,6 @@
 using GP.API.Extensions;
+using GP.Application.Interfaces;
+using GP.Application.Services;
 using GP.Infrastructure.Data;
 using GP.Infrastructure.Services;
 using Microsoft.OpenApi;
@@ -8,8 +10,6 @@ using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddApplicationServices(builder.Configuration);
-builder.Services.AddScoped<GoBusDatabaseImporter>();
-builder.Services.AddScoped<TrainDatabaseImporter>();
 
 // Configure OpenAPI/Swagger with JWT support
 builder.Services.AddOpenApi(options =>
@@ -86,6 +86,7 @@ if (app.Environment.IsDevelopment())
 app.UseRateLimiter();
 app.UseExceptionHandler();
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseCors("AllowAll"); //Todo: Change to "Production" for production
 app.UseAuthentication();
 app.UseAuthorization();

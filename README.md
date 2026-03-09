@@ -247,6 +247,19 @@ After running migrations, you can log in with the seeded admin account:
 | `POST` | `/api/admin/users/{id}/roles` | Yes | Assign a system role to a user |
 | `DELETE` | `/api/admin/users/{id}` | Yes | Permanently delete a user | 
 
+### 🧑‍💻 User Profile (New)
+
+These endpoints were added as part of the User Profile epic. They allow authenticated users to view and manage their profile and upload a profile picture. All endpoints require a valid JWT (Bearer) token.
+
+#### User Profile (`/api/users`)
+
+| Method | Endpoint | Auth Required | Description |
+|--------|----------|---------------|-------------|
+| `GET` | `/api/users/me` | Yes | Get current user's profile, gamification stats and wallet balance |
+| `PUT` | `/api/users/me` | Yes | Update current user's basic profile info (first/family/last name, email, phone). Email & phone uniqueness validated at domain and identity levels |
+| `POST` | `/api/users/me/profile-picture` | Yes | Upload or replace user's profile picture (multipart file). Allowed extensions: `.jpg`, `.jpeg`, `.png` |
+
+
 > 📖 For complete API documentation with request/response schemas, visit `/scalar/v1` when the application is running.
 
 ---

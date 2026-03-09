@@ -34,7 +34,8 @@ namespace GP.Infrastructure.Repositories
 
         public async Task<T?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
         {
-            return await _dbSet.FindAsync([id], cancellationToken);
+            var found = await _dbSet.FindAsync(new object[] { id }, cancellationToken);
+            return found is null ? null : (T?)found;
         }
 
         public async Task<T?> FirstOrDefaultAsync(
