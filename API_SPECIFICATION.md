@@ -81,9 +81,9 @@ The access token includes these important claims:
 
 From the currently open controllers:
 
-- No endpoint currently requires a specific role policy.
-- Some endpoints require authentication only.
-- A policy named `RequireAdminRole` exists in DI configuration, but it is not currently used by the open controllers.
+- Authentication endpoints use anonymous access or authenticated access depending on the route.
+- Admin user management endpoints require the `RequireAdminRole` policy.
+- The `RequireAdminRole` policy maps to the `Admin` role.
 
 ---
 
@@ -1292,6 +1292,319 @@ If seed folder does not exist, the endpoint now returns a standard wrapper:
 
 ---
 
+# 4. Admin Users API
+
+Base route: `/api/admin/users`
+
+> All endpoints below require a valid JWT Bearer token and the `RequireAdminRole` policy (Admin role).
+
+---
+
+## 4.1 Get All Users
+
+### Endpoint Overview
+
+- **Method:** `GET`
+- **URL:** `/api/admin/users`
+- **Business Use Case:** Retrieves a complete, alphabetically sorted list of all registered users.
+
+### Authentication / Authorization
+
+- **JWT Required:** Yes
+- **Role Required:** Admin (`RequireAdminRole`)
+
+### Request Payload
+
+No request body.
+
+### Business Rules
+
+- Reads all users via the generic repository with `AsNoTracking`.
+- Includes the linked `Country` navigation property for each user.
+- Results are ordered by first name then last name.
+
+### Expected Responses
+
+#### 200 Success Response
+
+```json
+{
+  "success": true,
+  "message": "Users retrieved successfully.",
+  "data": [
+    {
+      "userId": 15,
+      "email": "user@example.com",
+      "fullName": "Ahmed Mohamed Hassan",
+      "phoneNumber": "+201234567890",
+      "gender": "Male",
+      "countryCode": "EG",
+      "countryName": "Egypt",
+      "profilePictureUrl": null
+    }
+  ],
+  "errors": null,
+  "timestamp": "2026-03-09T12:00:00Z"
+}
+```
+
+---
+
+## 4.2 Get User by ID
+
+### Endpoint Overview
+
+- **Method:** `GET`
+- **URL:** `/api/admin/users/{id}`
+- **Business Use Case:** Retrieves comprehensive user details for the admin dashboard, combining domain profile data with identity authentication statistics.
+
+### Authentication / Authorization
+
+- **JWT Required:** Yes
+- **Role Required:** Admin (`RequireAdminRole`)
+
+### Request Payload
+
+No request body.
+
+### Business Rules
+
+- Fetches profile data from the `Users` table (including Country relations).
+- Fetches authentication data from the `AspNetUsers` Identity table.
+- Both data sets are merged into a single `AdminUserDetailDto`.
+
+### Expected Responses
+
+#### 200 Success Response
+
+```json
+{
+  "success": true,
+  "message": "User retrieved successfully.",
+  "data": {
+    "userId": 15,
+    "fullName": "Ahmed Mohamed Hassan",
+    "email": "user@example.com",
+    "phone": "+201234567890",
+    "nationalIdNumber": "29805151234567",
+    "totalTripsCount": 5,
+    "totalDistanceTraveled": 1250.5,
+    "createdAt": "2026-03-01T08:30:00Z",
+    "lastLoginAt": "2026-03-09T10:15:00Z",
+    "isActive": true
+  },
+  "errors": null,
+  "timestamp": "2026-03-09T12:00:00Z"
+}
+```
+
+#### 404 Not Found
+
+```json
+{
+  "success": false,
+  "message": "User not found.",
+  "data": null,
+  "errors": null,
+  "timestamp": "2026-03-09T12:00:00Z"
+}
+```
+
+---
+
+## 4.3 Toggle User Status
+
+### Endpoint Overview
+
+- **Method:** `PATCH`
+- **URL:** `/api/admin/users/{id}/toggle-status`
+- **Business Use Case:** Soft-bans or unbans a user by flipping their active status flag, preventing or allowing future logins.
+
+### Authentication / Authorization
+
+- **JWT Required:** Yes
+- **Role Required:** Admin (`RequireAdminRole`)
+
+### Request Payload
+
+No request body.
+
+### Business Rules
+
+- Locates the Identity user using the `DomainUserId`.
+- Flips the `IsActive` boolean flag.
+- **Last Admin Safeguard:** If the target user is an Admin and is currently active, the system checks the database to ensure at least one *other* active Admin exists. The system will reject the request if it would result in zero active admins.
+
+### Expected Responses
+
+#### 200 Success Response
+
+```json
+{
+  "success": true,
+  "message": "User disabled successfully.", 
+  "data": null,
+  "errors": null,
+  "timestamp": "2026-03-09T12:00:00Z"
+}
+```
+
+#### 400 Bad Request
+
+```json
+{
+  "success": false,
+  "message": "Cannot deactivate the last active Admin account.",
+  "data": null,
+  "errors": null,
+  "timestamp": "2026-03-09T12:00:00Z"
+}
+```
+
+#### 404 Not Found
+
+```json
+{
+  "success": false,
+  "message": "User not found.",
+  "data": null,
+  "errors": null,
+  "timestamp": "2026-03-09T12:00:00Z"
+}
+```
+
+---
+
+## 4.4 Assign Role
+
+### Endpoint Overview
+
+- **Method:** `POST`
+- **URL:** `/api/admin/users/{id}/roles`
+- **Business Use Case:** Promotes a standard user to a specific system role, such as Admin.
+
+### Authentication / Authorization
+
+- **JWT Required:** Yes
+- **Role Required:** Admin (`RequireAdminRole`)
+
+### Request Payload
+
+```json
+{
+  "role": "Admin"
+}
+```
+
+### Business Rules
+
+- Validates that the requested role string exists in the Identity `AspNetRoles` table using `RoleManager`.
+- Checks if the user already possesses the role to prevent duplicate assignments.
+- Uses `UserManager` to apply the new role.
+
+### Expected Responses
+
+#### 200 Success Response
+
+```json
+{
+  "success": true,
+  "message": "Role assigned successfully.",
+  "data": null,
+  "errors": null,
+  "timestamp": "2026-03-09T12:00:00Z"
+}
+```
+
+#### 400 Bad Request
+
+```json
+{
+  "success": false,
+  "message": "Role is required.",
+  "data": null,
+  "errors": null,
+  "timestamp": "2026-03-09T12:00:00Z"
+}
+```
+
+#### 404 Not Found
+
+```json
+{
+  "success": false,
+  "message": "Role does not exist.",
+  "data": null,
+  "errors": null,
+  "timestamp": "2026-03-09T12:00:00Z"
+}
+```
+
+---
+
+## 4.5 Delete User
+
+### Endpoint Overview
+
+- **Method:** `DELETE`
+- **URL:** `/api/admin/users/{id}`
+- **Business Use Case:** Permanently deletes a user from both the Identity system and the Domain database.
+
+### Authentication / Authorization
+
+- **JWT Required:** Yes
+- **Role Required:** Admin (`RequireAdminRole`)
+
+### Request Payload
+
+No request body.
+
+### Business Rules
+
+- Deletion is executed within a transaction to guarantee Identity and Domain consistency.
+- A user **cannot** be deleted if they have associated records in the `Bookings` table.
+
+### Expected Responses
+
+#### 200 Success Response
+
+```json
+{
+  "success": true,
+  "message": "User deleted successfully.",
+  "data": null,
+  "errors": null,
+  "timestamp": "2026-03-09T12:00:00Z"
+}
+```
+
+#### 404 Not Found
+
+```json
+{
+  "success": false,
+  "message": "User not found.",
+  "data": null,
+  "errors": null,
+  "timestamp": "2026-03-09T12:00:00Z"
+}
+```
+
+#### 409 Conflict
+
+```json
+{
+  "success": false,
+  "message": "User cannot be deleted because related bookings exist.",
+  "data": null,
+  "errors": null,
+  "timestamp": "2026-03-09T12:00:00Z"
+}
+```
+
+
+---
+
 # Additional Frontend Notes
 
 
@@ -1354,3 +1667,8 @@ The current open `Program.cs` applies `app.UseRateLimiter()`. Frontend should be
 | `GET` | `/api/Countries` | No | List countries |
 | `POST` | `/api/Seed/import-gobus` | No | Import GoBus CSV data |
 | `POST` | `/api/Seed/import-trains` | No | Import Train CSV data |
+| `GET` | `/api/admin/users` | Yes | List all domain users alongside their country metadata |
+| `GET` | `/api/admin/users/{id}` | Yes | View complete details of a specific user |
+| `PATCH` | `/api/admin/users/{id}/toggle-status` | Yes | Suspend or activate a user account |
+| `POST` | `/api/admin/users/{id}/roles` | Yes | Assign a system role to a user |
+| `DELETE` | `/api/admin/users/{id}` | Yes | Permanently delete a user |

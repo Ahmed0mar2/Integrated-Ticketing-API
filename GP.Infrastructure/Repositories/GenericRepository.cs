@@ -1,48 +1,99 @@
-﻿using GP.Infrastructure.Data;
+﻿using System.Linq.Expressions;
+using GP.Infrastructure.Data;
 using GP.Infrastructure.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GP.Infrastructure.Repositories
 {
     public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
         protected readonly ApplicationDbContext _context;
-        protected readonly DbSet<T> _dbset;
+        protected readonly DbSet<T> _dbSet;
 
         public GenericRepository(ApplicationDbContext context)
         {
             _context = context;
-            _dbset = context.Set<T>();
+            _dbSet = context.Set<T>();
         }
 
-        public async Task Create(T entity)
+        public async Task<IReadOnlyList<T>> GetAllAsync(
+            CancellationToken cancellationToken = default,
+            params Expression<Func<T, object>>[] includes)
         {
-            await _dbset.AddAsync(entity);
+            return await ApplyIncludes(_dbSet.AsQueryable(), includes)
+                .ToListAsync(cancellationToken);
         }
 
-        public void Delete(T entity)
+        public async Task<IReadOnlyList<T>> GetAllAsNoTrackingAsync(
+            CancellationToken cancellationToken = default,
+            params Expression<Func<T, object>>[] includes)
         {
-            _dbset.Remove(entity);
+            return await ApplyIncludes(_dbSet.AsNoTracking(), includes)
+                .ToListAsync(cancellationToken);
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync()
+        public async Task<T?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
         {
-            return await _dbset.ToListAsync();
+            return await _dbSet.FindAsync([id], cancellationToken);
         }
 
-        public async Task<T> GetByIDAsync(int id)
+        public async Task<T?> FirstOrDefaultAsync(
+            Expression<Func<T, bool>> predicate,
+            CancellationToken cancellationToken = default,
+            params Expression<Func<T, object>>[] includes)
         {
-            return await _dbset.FindAsync(id);
+            return await ApplyIncludes(_dbSet.AsQueryable(), includes)
+                .FirstOrDefaultAsync(predicate, cancellationToken);
+        }
+
+        public async Task<T?> FirstOrDefaultAsNoTrackingAsync(
+            Expression<Func<T, bool>> predicate,
+            CancellationToken cancellationToken = default,
+            params Expression<Func<T, object>>[] includes)
+        {
+            return await ApplyIncludes(_dbSet.AsNoTracking(), includes)
+                .FirstOrDefaultAsync(predicate, cancellationToken);
+        }
+
+        public async Task CreateAsync(T entity, CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(entity);
+            await _dbSet.AddAsync(entity, cancellationToken);
+        }
+
+        public Task DeleteAsync(T entity, CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(entity);
+            _dbSet.Remove(entity);
+            return Task.CompletedTask;
         }
 
         public void Update(T entity)
         {
-            _dbset.Update(entity);
+            ArgumentNullException.ThrowIfNull(entity);
+            _dbSet.Update(entity);
+        }
+
+        public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            return _context.SaveChangesAsync(cancellationToken);
+        }
+
+        private static IQueryable<T> ApplyIncludes(
+            IQueryable<T> query,
+            params Expression<Func<T, object>>[] includes)
+        {
+            if (includes is null || includes.Length == 0)
+            {
+                return query;
+            }
+
+            foreach (var include in includes)
+            {
+                query = query.Include(include);
+            }
+
+            return query;
         }
     }
 }

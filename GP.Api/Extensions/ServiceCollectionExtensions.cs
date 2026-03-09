@@ -4,12 +4,15 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using GP.API.Filters;
 using GP.API.Middleware;
+using GP.Application.Common;
 using GP.Application.Interfaces;
 using GP.Application.Services;
 using GP.Application.Settings;
 using GP.Application.Validators;
 using GP.Infrastructure.Data;
 using GP.Infrastructure.Identity;
+using GP.Infrastructure.Interfaces;
+using GP.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -188,7 +191,7 @@ public static class ServiceCollectionExtensions
         // Authorization Policies
         services.AddAuthorization(options =>
         {
-            options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
+            options.AddPolicy(Policies.RequireAdminRole, policy => policy.RequireRole(Roles.Admin));
         });
 
         return services;
@@ -201,6 +204,8 @@ public static class ServiceCollectionExtensions
         // Auth Service
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IAuthService, AuthenticationService>();
+        services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+        services.AddScoped<IAdminUserService, AdminUserService>();
         services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
 
         return services;
