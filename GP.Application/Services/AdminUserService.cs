@@ -32,13 +32,68 @@ public class AdminUserService : IAdminUserService
 
     public async Task<IReadOnlyList<UserDto>> GetAllUsersAsync(CancellationToken cancellationToken = default)
     {
+        // Load domain users with their country in one query
         var users = await _userRepository.GetAllAsNoTrackingAsync(cancellationToken, user => user.Country);
 
-        return users
+        var userList = users
             .OrderBy(user => user.FirstName)
             .ThenBy(user => user.LastName)
-            .Select(MapToUserDto)
             .ToList();
+
+        if (userList.Count == 0) return Array.Empty<UserDto>();
+
+        // Collect domain ids and batch-load identity users that map to them
+        var domainIds = userList.Select(u => u.UserId).ToList();
+
+        var identityUsers = await _userManager.Users
+            .AsNoTracking()
+            .Where(au => au.DomainUserId != null && domainIds.Contains(au.DomainUserId.Value))
+            .ToListAsync(cancellationToken);
+
+        // Build mapping: identityUserId -> domainUserId
+        var identityByDomainId = identityUsers
+            .Where(iu => iu.DomainUserId.HasValue)
+            .ToDictionary(iu => iu.DomainUserId!.Value, iu => iu);
+
+        // Batch load user-role entries and role names for involved identity user ids
+        var identityIds = identityUsers.Select(iu => iu.Id).ToList();
+
+        var userRoles = await _context.Set<IdentityUserRole<int>>()
+            .Where(ur => identityIds.Contains(ur.UserId))
+            .ToListAsync(cancellationToken);
+
+        var roleIds = userRoles.Select(ur => ur.RoleId).Distinct().ToList();
+
+        var roles = await _context.Set<IdentityRole<int>>()
+            .Where(r => roleIds.Contains(r.Id))
+            .ToListAsync(cancellationToken);
+
+        var roleNameById = roles.ToDictionary(r => r.Id, r => r.Name ?? string.Empty);
+
+        // Map identity user id -> role names
+        var rolesByIdentityId = userRoles
+            .GroupBy(ur => ur.UserId)
+            .ToDictionary(g => g.Key, g => g.Select(ur => roleNameById.TryGetValue(ur.RoleId, out var rn) ? rn : string.Empty).Where(n => !string.IsNullOrEmpty(n)).ToArray());
+
+        // Now build DTOs with roles mapped by DomainUserId
+        var result = new List<UserDto>(userList.Count);
+
+        foreach (var user in userList)
+        {
+            var dto = MapToUserDto(user);
+
+            if (identityByDomainId.TryGetValue(user.UserId, out var identityUser))
+            {
+                if (rolesByIdentityId.TryGetValue(identityUser.Id, out var userRoleNames))
+                {
+                    dto = dto with { Roles = userRoleNames };
+                }
+            }
+
+            result.Add(dto);
+        }
+
+        return result;
     }
 
     public async Task<(bool Success, bool NotFound, bool Conflict, string Message)> DeleteUserAsync(
@@ -118,18 +173,25 @@ public class AdminUserService : IAdminUserService
             return null;
         }
 
-        return new AdminUserDetailDto(
-            domainUser.UserId,
-            $"{domainUser.FirstName} {domainUser.FamilyName} {domainUser.LastName}".Trim(),
-            domainUser.Email,
-            domainUser.Phone,
-            domainUser.NationalIdNumber,
-            domainUser.TotalTripsCount,
-            domainUser.TotalDistanceTraveled,
-            domainUser.CreatedAt,
-            identityUser.LastLoginAt,
-            identityUser.IsActive
-        );
+        // get roles
+        var roles = await _userManager.GetRolesAsync(identityUser);
+
+        return new AdminUserDetailDto
+        {
+            UserId = domainUser.UserId,
+            FullName = $"{domainUser.FirstName} {domainUser.FamilyName} {domainUser.LastName}".Trim(),
+            Email = domainUser.Email,
+            Phone = domainUser.Phone,
+            NationalIdNumber = domainUser.NationalIdNumber,
+            TotalTripsCount = domainUser.TotalTripsCount,
+            TotalDistanceTraveled = domainUser.TotalDistanceTraveled,
+            CreatedAt = domainUser.CreatedAt,
+            LastLoginAt = identityUser.LastLoginAt,
+            IsActive = identityUser.IsActive,
+            CountryCode = domainUser.Country?.CountryCode ?? string.Empty,
+            CountryName = domainUser.Country?.CountryName ?? string.Empty,
+            Roles = [.. roles]
+        };
     }
 
     public async Task<(bool Success, bool NotFound, string Message)> ToggleUserStatusAsync(

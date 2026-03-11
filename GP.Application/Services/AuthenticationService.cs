@@ -78,8 +78,9 @@ namespace GP.Application.Services
                     }
 
                     // VALIDATE Country exists
+                    var countryCode = request.CountryCode?.ToUpperInvariant().Trim();
                     var country = await _context.Countries
-                        .FirstOrDefaultAsync(c => c.CountryCode == request.CountryCode);
+                        .FirstOrDefaultAsync(c => c.CountryCode == countryCode);
 
                     if (country == null)
                     {
@@ -467,7 +468,7 @@ namespace GP.Application.Services
                 PhoneNumber = user.Phone,
                 Gender = user.Gender.ToString(),
                 CountryCode = user.Country?.CountryCode ?? string.Empty,
-                CountryName = user.Country?.NationalityName ?? string.Empty,
+                CountryName = user.Country?.CountryName ?? string.Empty,
                 ProfilePictureUrl = user.ProfilePictureUrl
             };
         }

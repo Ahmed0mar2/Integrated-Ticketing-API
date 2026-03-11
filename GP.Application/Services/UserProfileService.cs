@@ -15,17 +15,20 @@ public class UserProfileService : IUserProfileService
     private readonly ApplicationDbContext _context;
     private readonly IFileService _fileService;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IEmailService _emailService;
     private readonly ILogger<UserProfileService> _logger;
 
     public UserProfileService(
         ApplicationDbContext context,
         IFileService fileService,
         UserManager<ApplicationUser> userManager,
+        IEmailService emailService,
         ILogger<UserProfileService> logger)
     {
         _context = context;
         _fileService = fileService;
         _userManager = userManager;
+        _emailService = emailService;
         _logger = logger;
     }
 
@@ -33,7 +36,10 @@ public class UserProfileService : IUserProfileService
         int userId,
         CancellationToken cancellationToken = default)
     {
-        var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.UserId == userId, cancellationToken);
+        var user = await _context.Users
+            .AsNoTracking()
+            .Include(u => u.Country)
+            .FirstOrDefaultAsync(u => u.UserId == userId, cancellationToken);
 
         if (user == null)
             return (false, null, "User not found.");
@@ -48,6 +54,8 @@ public class UserProfileService : IUserProfileService
             PhoneNumber = user.Phone,
             Gender = user.Gender.ToString(),
             ProfilePictureUrl = user.ProfilePictureUrl,
+            CountryCode = user.Country?.CountryCode ?? string.Empty,
+            CountryName = user.Country?.CountryName ?? string.Empty,
             TotalTripsCount = user.TotalTripsCount,
             TotalDistanceTraveled = user.TotalDistanceTraveled,
             WalletBalance = user.WalletBalance
@@ -107,6 +115,10 @@ public class UserProfileService : IUserProfileService
 
                 // Find associated identity user (if any)
                 var identityUser = await _userManager.Users.FirstOrDefaultAsync(u => u.DomainUserId == userId, cancellationToken);
+
+                // Track if email changed so we can send verification after commit
+                var emailChanged = false;
+                var newEmail = dto.Email?.Trim();
 
                 // Update basic domain fields
                 user.FirstName = dto.FirstName;
@@ -186,6 +198,8 @@ public class UserProfileService : IUserProfileService
                                 return;
                             }
                         }
+
+                        emailChanged = true;
                     }
 
                     user.Email = dto.Email;
@@ -194,10 +208,31 @@ public class UserProfileService : IUserProfileService
                 user.UpdatedAt = DateTime.UtcNow;
 
                 await _context.SaveChangesAsync(cancellationToken);
+
+                // Commit transaction only after all updates succeeded
                 await transaction.CommitAsync(cancellationToken);
 
                 _logger.LogInformation("User profile updated for DomainUserId={UserId}", userId);
                 result = (true, false, "Profile updated successfully.");
+
+                // After commit, send verification email if email changed and identity user exists
+                if (emailChanged && identityUser != null)
+                {
+                    try
+                    {
+                        var token = await _userManager.GenerateEmailConfirmationTokenAsync(identityUser);
+                        var verificationLink = $"http://localhost:44399/verify-email?userId={identityUser.Id}&token={Uri.EscapeDataString(token)}";
+                        var sent = await _emailService.SendVerificationEmailAsync(identityUser.Email ?? dto.Email!, verificationLink);
+                        if (!sent)
+                        {
+                            _logger.LogWarning("Failed to send verification email to user {UserId}", userId);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error sending verification email after profile update for DomainUserId={UserId}", userId);
+                    }
+                }
             }
             catch (Exception ex)
             {
