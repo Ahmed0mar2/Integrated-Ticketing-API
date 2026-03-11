@@ -63,7 +63,9 @@ public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
 
     private async Task<bool> BeAValidCountryCode(string countryCode, CancellationToken cancellationToken)
     {
-        return await _context.Countries.AnyAsync(c => c.CountryCode == countryCode, cancellationToken);
+        if (string.IsNullOrWhiteSpace(countryCode)) return false;
+        var code = countryCode.ToUpperInvariant();
+        return await _context.Countries.AnyAsync(c => c.CountryCode == code, cancellationToken);
     }
 
     private bool BeAValidAge(DateOnly dateOfBirth)

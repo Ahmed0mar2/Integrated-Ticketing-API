@@ -11,6 +11,10 @@ public class UserProfileDto
     public string? Gender { get; set; }
     public string? ProfilePictureUrl { get; set; }
 
+    // Country
+    public string CountryCode { get; set; } = string.Empty;
+    public string CountryName { get; set; } = string.Empty;
+
     // The Gamification Stats
     public int TotalTripsCount { get; set; }
     public decimal TotalDistanceTraveled { get; set; }

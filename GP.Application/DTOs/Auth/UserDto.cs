@@ -16,5 +16,6 @@ namespace GP.Application.DTOs.Auth
         public string CountryCode { get; init; } = null!; 
         public string CountryName { get; init; } = null!; 
         public string? ProfilePictureUrl { get; init; }
+        public IReadOnlyList<string> Roles { get; init; } = Array.Empty<string>();
     }
 }
