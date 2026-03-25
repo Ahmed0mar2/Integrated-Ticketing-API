@@ -165,16 +165,43 @@ Base route: `/api/Countries`
 
 # 3. Data Seeder API
 Base route: `/api/Seed`
+*(Requires JWT Bearer token and `RequireAdminRole` policy)*
 
-## 3.1 Import GoBus CSV Data
+> Note: seed endpoints. Recommended sequence:
+>1. `POST /api/Seed/init-identity` (creates roles + admin) — run once before any other secure operations.
+>2. `POST /api/Seed/import-master-stations` (loads master stations & mappings) — run before agency trip imports.
+>3. Agency-specific imports: `import-horus`, `import-bluebus`, `import-gobus`, `import-trains` (order between agency imports is flexible, but master stations must exist first).
+
+## 3.1 Initialize Identity
+- **Method:** `POST`
+- **URL:** `/api/Seed/init-identity`
+- **Description:** Seeds default roles (`Admin`, `User`, `Partner`) and the default admin credentials.
+
+## 3.2 Import Master Stations
+- **Method:** `POST`
+- **URL:** `/api/Seed/import-master-stations`
+- **Description:** Imports the unified master station spatial database and agency mapping (JSON file). Must run before importing agency trips.
+
+## 3.3 Import Horus Trips
+- **Method:** `POST`
+- **URL:** `/api/Seed/import-horus`
+- **Description:** Imports Horus bus trips, schedules, and flat pricing matrices from JSON.
+
+## 3.4 Import GoBus Data
 - **Method:** `POST`
 - **URL:** `/api/Seed/import-gobus`
-- **Auth:** None
+- **Description:** Imports GoBus trips and generates synthetic Trip blueprints (CSV or JSON input supported).
 
-## 3.2 Import Train CSV Data
+## 3.5 Import Blue Bus Trips
+- **Method:** `POST`
+- **URL:** `/api/Seed/import-bluebus`
+- **Description:** Imports premium Blue Bus trips including destination-based pricing matrices.
+
+## 3.6 Import Train Data
 - **Method:** `POST`
 - **URL:** `/api/Seed/import-trains`
 - **Auth:** None
+- **Description:** Imports ENR train blueprints, multi-stop sequences, and tiered pricing matrices (JSON/CSV input supported).
 
 ---
 
@@ -314,8 +341,12 @@ Frontend should be prepared for possible `429 Too Many Requests` responses.
 | `POST` | `/api/Auth/reset-password` | No | Reset password |
 | `POST` | `/api/Auth/change-password` | Yes | Change password |
 | `GET` | `/api/Countries` | No | List countries |
-| `POST` | `/api/Seed/import-gobus` | No | Import GoBus CSV data |
-| `POST` | `/api/Seed/import-trains` | No | Import Train CSV data |
+| `POST` | `/api/Seed/init-identity` | Yes | Initialize identity data (runs once) |
+| `POST` | `/api/Seed/import-master-stations` | Yes | Import master stations data |
+| `POST` | `/api/Seed/import-horus` | Yes | Import Horus agency trips |
+| `POST` | `/api/Seed/import-gobus` | Yes | Import GoBus trip data |
+| `POST` | `/api/Seed/import-bluebus` | Yes | Import Blue Bus trip data |
+| `POST` | `/api/Seed/import-trains` | Yes | Import train schedule data |
 | `GET` | `/api/admin/users` | Yes | List all domain users alongside country metadata |
 | `GET` | `/api/admin/users/{id}` | Yes | View complete details of a specific user |
 | `PATCH`| `/api/admin/users/{id}/toggle-status` | Yes | Suspend or activate a user account |

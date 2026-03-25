@@ -1,95 +1,217 @@
 ﻿using GP.Application.Common;
+using GP.Application.Services;
 using GP.Infrastructure.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GP.Api.Controllers
 {
+    [Authorize(Policy = Policies.RequireAdminRole)]
     [Route("api/[controller]")]
     [ApiController]
     public class SeedController : ControllerBase
     {
-        private readonly GoBusDatabaseImporter _importer;
-        private readonly TrainDatabaseImporter _trainImporter;
+        private readonly MasterStationSeeder _masterSeeder;
+        private readonly GoBusTripSeeder _goBusSeeder;
+        private readonly HorusTripSeeder _horusSeeder;
+        private readonly BlueBusTripSeeder _blueBusSeeder;
+        private readonly EnrTripSeeder _enrSeeder;
+        private readonly IServiceProvider _serviceProvider;
 
-        public SeedController(GoBusDatabaseImporter importer, TrainDatabaseImporter trainImporter)
+        public SeedController(
+            MasterStationSeeder masterSeeder,
+            GoBusTripSeeder goBusSeeder,
+            HorusTripSeeder horusSeeder,
+            BlueBusTripSeeder blueBusSeeder,
+            EnrTripSeeder enrSeeder,
+            IServiceProvider serviceProvider)
         {
-            _importer = importer;
-            _trainImporter = trainImporter;
+            _masterSeeder = masterSeeder;
+            _goBusSeeder = goBusSeeder;
+            _horusSeeder = horusSeeder;
+            _blueBusSeeder = blueBusSeeder;
+            _enrSeeder = enrSeeder;
+            _serviceProvider = serviceProvider;
         }
 
+        /// <summary>
+        /// Initializes the identity system by seeding default roles and Admin credentials.
+        /// </summary>
+        /// <remarks>
+        /// This endpoint should be run first to ensure the authorization tables (Roles and Users) are populated before interacting with secure endpoints.
+        /// Responses are wrapped in `ApiResponse`.
+        /// </remarks>
+        [HttpPost("init-identity")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> InitializeIdentity()
+        {
+            try
+            {
+                await DbInitializer.InitializeAsync(_serviceProvider);
+                return Ok(ApiResponse.Ok("Roles and Admin credentials seeded successfully!"));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ApiResponse.Fail("Failed to initialize identity", new List<string> { ex.Message }));
+            }
+        }
+
+        /// <summary>
+        /// Imports the unified master station spatial database and agency identity mappings from a JSON file.
+        /// </summary>
+        /// <remarks>
+        /// This must be executed before importing any agency trips, as it builds the foundational geography (Cities, Governorates, GPS) and the cross-agency mapping table.
+        /// Responses are wrapped in `ApiResponse`.
+        /// </remarks>
+        /// <param name="filePath">The absolute file path to the master_stations.json file.</param>
+        [HttpPost("import-master-stations")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> ImportMasterStations()
+        {
+            var filePath = Path.Combine(AppContext.BaseDirectory, "Data", "SeedData", "Master_stations.json");
+            if (!System.IO.File.Exists(filePath))
+                return NotFound(ApiResponse.Fail($"File not found at: {filePath}"));
+
+            try
+            {
+                await _masterSeeder.SeedStationsAsync(filePath);
+                return Ok(ApiResponse.Ok("Master Stations imported successfully!"));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ApiResponse.Fail("Import failed", [ex.Message]));
+            }
+        }
+
+        /// <summary>
+        /// Imports Horus bus trips, schedules, and flat pricing matrices from a JSON file.
+        /// </summary>
+        /// <remarks>
+        /// Responses are wrapped in `ApiResponse`.
+        /// </remarks>
+        [HttpPost("import-horus")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> ImportHorus()
+        {
+            var filePath = Path.Combine(AppContext.BaseDirectory, "Data", "SeedData", "Horus_trips.json");
+
+            if (!System.IO.File.Exists(filePath))
+                return NotFound(ApiResponse.Fail($"File not found at: {filePath}"));
+
+            try
+            {
+                await _horusSeeder.SeedTripsAsync(filePath);
+                return Ok(ApiResponse.Ok("Horus Trips imported successfully!"));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ApiResponse.Fail("Import failed", [ex.Message]));
+            }
+        }
+
+        /// <summary>
+        /// Imports GoBus trips, normalizes class capacities, and generates unique schedule blueprints.
+        /// </summary>
+        /// <remarks>
+        /// Because GoBus data lacks static Trip IDs, this endpoint automatically groups data by origin, destination, and departure time to generate synthetic Trip Blueprints.
+        /// Responses are wrapped in `ApiResponse`.
+        /// </remarks>
         [HttpPost("import-gobus")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> ImportGoBus()
         {
-            var baseDir = AppContext.BaseDirectory;
+            var filePath = Path.Combine(AppContext.BaseDirectory, "Data", "SeedData", "gobus_trips.json");
 
-            var dataPath = Path.Combine(baseDir, "Data", "SeedData", "GoBus");
+            if (!System.IO.File.Exists(filePath))
+                return NotFound(ApiResponse.Fail($"File not found at: {filePath}"));
 
-            if (!Directory.Exists(dataPath))
+            try
             {
-                return NotFound(new { message = $"SeedData folder not found at {dataPath}. Make sure the CSV files are set to 'Copy if newer'." });
+                await _goBusSeeder.SeedTripsAsync(filePath);
+                return Ok(ApiResponse.Ok("GoBus Trips imported successfully!"));
             }
-
-            Console.WriteLine("Starting GoBus Import Process...");
-
-            var result = await _importer.ImportFromCsvAsync(
-                stationsCsvPath: Path.Combine(dataPath, "stations.csv"),
-                agenciesCsvPath: Path.Combine(dataPath, "agencies.csv"),
-                coachClassesCsvPath: Path.Combine(dataPath, "coach_classes.csv"),
-                tripsCsvPath: Path.Combine(dataPath, "normalized_trips.csv")
-            );
-
-            if (!result.Success)
+            catch (Exception ex)
             {
-                Console.WriteLine($"❌ Import Failed: {result.Message}");
-                return BadRequest(result);
+                return StatusCode(500, ApiResponse.Fail("Import failed", [ex.Message]));
             }
-
-            Console.WriteLine("✅ Import Successful!");
-            return Ok(result);
         }
 
+        /// <summary>
+        /// Imports premium Blue Bus trips, including granular destination-based pricing matrices.
+        /// </summary>
+        /// <remarks>
+        /// Responses are wrapped in `ApiResponse`.
+        /// </remarks>
+        [HttpPost("import-bluebus")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> ImportBlueBus()
+        {
+            var filePath = Path.Combine(AppContext.BaseDirectory, "Data", "SeedData", "bluebus_trips.json");
+
+            if (!System.IO.File.Exists(filePath))
+                return NotFound(ApiResponse.Fail($"File not found at: {filePath}"));
+
+            try
+            {
+                await _blueBusSeeder.SeedTripsAsync(filePath);
+                return Ok(ApiResponse.Ok("Blue Bus Trips imported successfully!"));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ApiResponse.Fail("Import failed", [ex.Message]));
+            }
+        }
+
+        /// <summary>
+        /// Imports ENR train blueprints, multi-stop sequences, and tiered pricing matrices.
+        /// </summary>
+        /// <remarks>
+        /// This endpoint requires two files: one for the train stop schedules and one for the complex class-based pricing rules. It also calculates overnight duration math automatically.
+        /// Responses are wrapped in `ApiResponse`.
+        /// </remarks>
         [HttpPost("import-trains")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> ImportTrains()
         {
-            var baseDir = AppContext.BaseDirectory;
-            var dataPath = Path.Combine(baseDir, "Data", "SeedData", "ENR");
+            var stopsFilePath = Path.Combine(AppContext.BaseDirectory, "Data", "SeedData", "train_stops.json");
+            var pricesFilePath = Path.Combine(AppContext.BaseDirectory, "Data", "SeedData", "trains_trips.json");
 
-            if (!Directory.Exists(dataPath))
+            if (!System.IO.File.Exists(stopsFilePath) || !System.IO.File.Exists(pricesFilePath))
+                return NotFound(ApiResponse.Fail("One or more train JSON files are missing from Data/SeedData."));
+
+            try
             {
-                return NotFound(new ApiResponse<object>
-                {
-                    Success = false,
-                    Message = $"SeedData folder not found at {dataPath}. Make sure the CSV files are set to 'Copy if newer'."
-                });
+                await _enrSeeder.SeedTrainsAsync(stopsFilePath, pricesFilePath);
+                return Ok(ApiResponse.Ok("ENR Trains imported successfully!"));
             }
-
-            var result = await _trainImporter.ImportFromCsvAsync(
-                agenciesPath: Path.Combine(dataPath, "agencies.csv"),
-                typesPath: Path.Combine(dataPath, "train_types.csv"),
-                classesPath: Path.Combine(dataPath, "coach_classes.csv"),
-                configPath: Path.Combine(dataPath, "train_type_coach_config.csv"),
-                stationsPath: Path.Combine(dataPath, "stations_final.csv"),
-                tripsPath: Path.Combine(dataPath, "trips.csv"),
-                stopTimesPath: Path.Combine(dataPath, "trip_stop_times.csv"),
-                pricingPath: Path.Combine(dataPath, "trip_class_pricing.csv")
-            );
-
-            if (!result.Success)
+            catch (Exception ex)
             {
-                return BadRequest(new ApiResponse<object>
-                {
-                    Success = false,
-                    Message = result.Message ?? "Failed to import train data due to a validation or file error.",
-                    Data = result 
-                });
+                return StatusCode(500, ApiResponse.Fail("Import failed", [ex.Message]));
             }
-
-            return Ok(new ApiResponse<object>
-            {
-                Success = true,
-                Message = "Train blueprints imported successfully!",
-                Data = result
-            });
         }
     }
 }

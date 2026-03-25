@@ -17,9 +17,10 @@ namespace GP.Infrastructure.Data.Configurations
             builder.Property(c => c.CoachClassId).ValueGeneratedNever();
             builder.Property(c => c.Name).IsRequired().HasMaxLength(100);
             builder.HasIndex(c => c.Name).IsUnique();
-            builder.HasMany(c => c.TrainTypeConfigs).WithOne(t => t.CoachClass).HasForeignKey(t => t.CoachClassId);
             builder.HasMany(c => c.PricingConfigs).WithOne(p => p.CoachClass).HasForeignKey(p => p.CoachClassId);
             builder.HasMany(c => c.Inventories).WithOne(i => i.CoachClass).HasForeignKey(i => i.CoachClassId);
+            builder.Property(c => c.CoachClassId)
+                   .ValueGeneratedOnAdd();
 
         }
     }

@@ -160,17 +160,26 @@ https://localhost:<PORT>/scalar/v1
 
 ### 6. Seed Transportation Data
 
-After the application is running, you **MUST** call the following API endpoints to import the GoBus and Train data from the CSV files included in the project:
+After the application is running, you **MUST** call the seed endpoints in the recommended order to import master stations and agency trips. Recommended sequence:
 
-#### Import GoBus Data
+1. Initialize Identity
 
 ```http
-POST /api/Seed/import-gobus
+POST /api/Seed/init-identity
 ```
 
-#### Import Train (ENR) Data
+2. Import Master Stations
 
 ```http
+POST /api/Seed/import-master-stations
+```
+
+3. Agency imports (order between agency imports is flexible, but master stations must exist first)
+
+```http
+POST /api/Seed/import-horus
+POST /api/Seed/import-bluebus
+POST /api/Seed/import-gobus
 POST /api/Seed/import-trains
 ```
 
@@ -185,9 +194,13 @@ curl -X POST https://localhost:<PORT>/api/Seed/import-gobus
 curl -X POST https://localhost:<PORT>/api/Seed/import-trains
 ```
 
-> 📁 The CSV seed files are located in the Infrastructure layer:
-> - `GP.Infrastructure/Data/SeedData/GoBus/` - GoBus stations, agencies, coach classes, and trips
-> - `GP.Infrastructure/Data/SeedData/ENR/` - Train stations, types, coach classes, configurations, trips, and pricing
+> 📁 The seed files are located in the API project `GP.Api/Data/SeedData/`:
+> - `GP.Api/Data/SeedData/Master_stations.json`
+> - `GP.Api/Data/SeedData/gobus_trips.json`
+> - `GP.Api/Data/SeedData/Horus_trips.json`
+> - `GP.Api/Data/SeedData/bluebus_trips.json`
+> - `GP.Api/Data/SeedData/train_stops.json`
+> - `GP.Api/Data/SeedData/trains_trips.json`
 >
 > *Note: Ensure these files are set to **"Copy if newer"** in Visual Studio properties so they are automatically moved to the output directory upon build.*
 
@@ -234,18 +247,22 @@ After running migrations, you can log in with the seeded admin account:
 
 | Method | Endpoint      | Description      | Auth Required |
 |--------|---------------------------|--------------------------------------|---------------|
-| `POST` | `/api/Seed/import-gobus`  | Import GoBus data from CSV files     | ❌ |
-| `POST` | `/api/Seed/import-trains` | Import Train (ENR) data from CSV files | ❌      |
+| `POST` | `/api/Seed/init-identity` | Create default roles + admin user | ✅ |
+| `POST` | `/api/Seed/import-master-stations` | Upload master stations JSON file | ✅ |
+| `POST` | `/api/Seed/import-horus` | Import trips from Horus JSON files | ✅ |
+| `POST` | `/api/Seed/import-bluebus` | Import Blue Bus trips data | ✅ |
+| `POST` | `/api/Seed/import-gobus` | Import GoBus CSV/JSON data | ✅ |
+| `POST` | `/api/Seed/import-trains` | Import train CSV/JSON data | ✅ |
 
 ### 🛡️ Admin Users (`/api/admin/users`)
 
 | Method | Endpoint | Auth Required | Description |
 |--------|----------|---------------|-------------|
-| `GET` | `/api/admin/users` | Yes | List all domain users alongside their country metadata |
-| `GET` | `/api/admin/users/{id}` | Yes | View complete details of a specific user |
-| `PATCH` | `/api/admin/users/{id}/toggle-status` | Yes | Suspend or activate a user account |
-| `POST` | `/api/admin/users/{id}/roles` | Yes | Assign a system role to a user |
-| `DELETE` | `/api/admin/users/{id}` | Yes | Permanently delete a user | 
+| `GET` | `/api/admin/users` | ✅ | List all domain users alongside their country metadata |
+| `GET` | `/api/admin/users/{id}` | ✅ | View complete details of a specific user |
+| `PATCH` | `/api/admin/users/{id}/toggle-status` | ✅ | Suspend or activate a user account |
+| `POST` | `/api/admin/users/{id}/roles` | ✅ | Assign a system role to a user |
+| `DELETE` | `/api/admin/users/{id}` | ✅ | Permanently delete a user | 
 
 ### 🧑‍💻 User Profile (New)
 
@@ -255,9 +272,9 @@ These endpoints were added as part of the User Profile epic. They allow authenti
 
 | Method | Endpoint | Auth Required | Description |
 |--------|----------|---------------|-------------|
-| `GET` | `/api/users/me` | Yes | Get current user's profile, gamification stats and wallet balance |
-| `PUT` | `/api/users/me` | Yes | Update current user's basic profile info (first/family/last name, email, phone). Email & phone uniqueness validated at domain and identity levels |
-| `POST` | `/api/users/me/profile-picture` | Yes | Upload or replace user's profile picture (multipart file). Allowed extensions: `.jpg`, `.jpeg`, `.png` |
+| `GET` | `/api/users/me` | ✅ | Get current user's profile, gamification stats and wallet balance |
+| `PUT` | `/api/users/me` | ✅ | Update current user's basic profile info (first/family/last name, email, phone). Email & phone uniqueness validated at domain and identity levels |
+| `POST` | `/api/users/me/profile-picture` | ✅ | Upload or replace user's profile picture (multipart file). Allowed extensions: `.jpg`, `.jpeg`, `.png` |
 
 
 > 📖 For complete API documentation with request/response schemas, visit `/scalar/v1` when the application is running.

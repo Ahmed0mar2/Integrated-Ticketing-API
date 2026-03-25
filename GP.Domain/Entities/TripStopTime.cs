@@ -12,9 +12,8 @@ namespace GP.Domain.Entities
         public int TripId { get; set; }
         public int StationId { get; set; }
         public int StopSequence { get; set; }
-        public int ArrivalOffsetMinutes { get; set; }
-        public int DepartureOffsetMinutes { get; set; }
-        public decimal DistanceFromOriginKm { get; set; }  
+        public TimeOnly? ArrivalTime { get; set; }
+        public TimeOnly? DepartureTime { get; set; }
 
         public Trip Trip { get; set; } = null!;
         public Stop Station { get; set; } = null!;

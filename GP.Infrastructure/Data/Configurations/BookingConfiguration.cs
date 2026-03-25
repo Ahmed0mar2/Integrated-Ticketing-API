@@ -18,10 +18,8 @@ namespace GP.Infrastructure.Data.Configurations
 
             // Required fields
             builder.Property(b => b.UserId).IsRequired();
-            builder.Property(b => b.TripId).IsRequired();
             builder.Property(b => b.OccurrenceId).IsRequired();  
             builder.Property(b => b.CoachClassId).IsRequired();  
-            builder.Property(b => b.TravelDate).IsRequired();
             builder.Property(b => b.SeatsBooked).IsRequired();
             builder.Property(b => b.TotalPrice).IsRequired().HasPrecision(10, 2);
             builder.Property(b => b.BookingTime).IsRequired().HasDefaultValueSql("GETUTCDATE()");
@@ -35,23 +33,15 @@ namespace GP.Infrastructure.Data.Configurations
 
             // Indexes for quick lookups
             builder.HasIndex(b => b.UserId);
-            builder.HasIndex(b => b.TripId);
             builder.HasIndex(b => b.OccurrenceId);
-            builder.HasIndex(b => new { b.TripId, b.OccurrenceId, b.CoachClassId });  
             builder.HasIndex(b => b.Status);
             builder.HasIndex(b => b.PaymentStatus);
-            builder.HasIndex(b => b.TravelDate);
 
             // Relationships
             builder.HasOne(b => b.User)
                 .WithMany(u => u.Bookings)
                 .HasForeignKey(b => b.UserId)
                 .OnDelete(DeleteBehavior.Restrict);  
-
-            builder.HasOne(b => b.Trip)
-                .WithMany()
-                .HasForeignKey(b => b.TripId)
-                .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(b => b.Occurrence)
                 .WithMany()
@@ -66,8 +56,16 @@ namespace GP.Infrastructure.Data.Configurations
             builder.HasMany(b => b.BookingPassengers)
                 .WithOne(bp => bp.Booking)
                 .HasForeignKey(bp => bp.BookingId)
-                .OnDelete(DeleteBehavior.Cascade);   
+                .OnDelete(DeleteBehavior.Cascade);
+            builder.HasOne(b => b.OriginStation)
+                    .WithMany()
+                    .HasForeignKey(b => b.OriginStationId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(b => b.DestinationStation)
+                   .WithMany()
+                   .HasForeignKey(b => b.DestinationStationId)
+                   .OnDelete(DeleteBehavior.Restrict);
         }
     }
-
 }

@@ -16,6 +16,7 @@ namespace GP.Domain.Entities
         public bool IsActive { get; set; } = true;
 
         public Trip Trip { get; set; } = null!;
+        public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
         public ICollection<TripOccurrenceClassInventory> ClassInventories { get; set; } = new List<TripOccurrenceClassInventory>();
     }
 }

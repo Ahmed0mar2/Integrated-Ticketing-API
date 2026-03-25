@@ -24,7 +24,6 @@ namespace GP.Infrastructure.Data
         // Domain DbSets
         public DbSet<Agency> Agencies { get; set; }
         public DbSet<Stop> Stops { get; set; }
-        public DbSet<Route> Routes { get; set; }
         public DbSet<Trip> Trips { get; set; }
         public DbSet<Calendar> Calendars { get; set; }
         public DbSet<CalendarDate> CalendarDates { get; set; }
@@ -36,11 +35,10 @@ namespace GP.Infrastructure.Data
         public DbSet<Country> Countries { get; set; }
         public DbSet<TripStopTime> TripStopTimes { get; set; }
         public DbSet<TripOccurrenceClassInventory> TripOccurrenceClassInventories { get; set; }
-        public DbSet<TripClassPricing> TripClassPricings { get; set; }
-        public DbSet<TrainType> TrainTypes { get; set; }
         public DbSet<CoachClass> CoachClasses { get; set; }
-        public DbSet<TrainTypeCoachConfig> TrainTypeCoachConfigs { get; set; }
         public DbSet<MarketplaceListing> MarketplaceListings { get; set; }
+        public DbSet<TripFare> TripFares { get; set; }
+        public DbSet<StopAgencyMapping> StopAgencyMappings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
