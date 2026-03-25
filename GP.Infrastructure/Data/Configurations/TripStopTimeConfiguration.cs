@@ -13,14 +13,12 @@ public class TripStopTimeConfiguration : IEntityTypeConfiguration<TripStopTime>
         builder.Property(t => t.TripId).IsRequired();
         builder.Property(t => t.StationId).IsRequired();
         builder.Property(t => t.StopSequence).IsRequired();
-        builder.Property(t => t.ArrivalOffsetMinutes).IsRequired();
-        builder.Property(t => t.DepartureOffsetMinutes).IsRequired();
-        builder.Property(t => t.DistanceFromOriginKm).IsRequired().HasPrecision(10, 2);
+        builder.Property(t => t.ArrivalTime).IsRequired(false).HasColumnType("time");
+        builder.Property(t => t.DepartureTime).IsRequired(false).HasColumnType("time");
 
         builder.HasIndex(t => new { t.TripId, t.StopSequence }).IsUnique();
-        builder.HasIndex(t => new { t.TripId, t.StationId });
 
-        builder.HasOne(t => t.Trip).WithMany(tr => tr.TripStopTimes).HasForeignKey(t => t.TripId);
-        builder.HasOne(t => t.Station).WithMany(s => s.TripStopTimes).HasForeignKey(t => t.StationId);
+        builder.HasOne(t => t.Trip).WithMany(tr => tr.TripStopTimes).HasForeignKey(t => t.TripId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne(t => t.Station).WithMany(s => s.TripStopTimes).HasForeignKey(t => t.StationId).OnDelete(DeleteBehavior.Restrict);
     }
 }

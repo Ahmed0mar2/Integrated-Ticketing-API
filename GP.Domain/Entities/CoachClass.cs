@@ -10,11 +10,10 @@ namespace GP.Domain.Entities
     {
         public int CoachClassId { get; set; }
         public string Name { get; set; } = null!;
+        public int DefaultCapacity { get; set; }
 
-        public ICollection<TrainTypeCoachConfig> TrainTypeConfigs { get; set; } = new List<TrainTypeCoachConfig>();
-        public ICollection<TripClassPricing> PricingConfigs { get; set; } = new List<TripClassPricing>();
+        public ICollection<TripFare> PricingConfigs { get; set; } = new List<TripFare>();
         public ICollection<TripOccurrenceClassInventory> Inventories { get; set; } = new List<TripOccurrenceClassInventory>();
     }
-
 }
 

@@ -14,6 +14,8 @@ namespace GP.Domain.Entities
         public int BookingId { get; set; }
         public string Name { get; set; } = null!;  
         public int Age { get; set; }
+        public int OccurrenceId { get; set; }
+        public int CoachClassId { get; set; }
         public string SeatNumber { get; set; } = null!;  
         public IdType IdType { get; set; }  
         public string IdNumber { get; set; } = null!;  

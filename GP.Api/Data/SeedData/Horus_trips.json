@@ -1,0 +1,3291 @@
+﻿[
+    {
+        "trip_id": "292388",
+        "from_ar": "القاهرة",
+        "to_ar": "اسيوط",
+        "from_en": "cairo",
+        "to_station_id": 36,
+        "to_en": "asyut",
+        "price_egp": "330",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 330
+        },
+        "stations_from": [
+            {
+                "station_ar": "الجيزة",
+                "station_en": "giza",
+                "departure_time": "12:30 AM",
+                "station_id": 15
+            },
+            {
+                "station_ar": "احمد حلمي",
+                "station_en": "ahmd-hlmy",
+                "departure_time": "1:00 AM",
+                "station_id": 5001
+            },
+            {
+                "station_ar": "نادي السكه",
+                "station_en": "nady-alskh",
+                "departure_time": "1:30 AM",
+                "station_id": 9
+            }
+        ],
+        "scraped_at": "2026-03-20T23:59:18"
+    },
+    {
+        "trip_id": "292390",
+        "from_ar": "القاهرة",
+        "to_ar": "اسيوط",
+        "from_en": "cairo",
+        "to_station_id": 36,
+        "to_en": "asyut",
+        "price_egp": "330",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 330
+        },
+        "stations_from": [
+            {
+                "station_ar": "الجيزة",
+                "station_en": "giza",
+                "departure_time": "9:00 AM",
+                "station_id": 15
+            },
+            {
+                "station_ar": "احمد حلمي",
+                "station_en": "ahmd-hlmy",
+                "departure_time": "9:30 AM",
+                "station_id": 5001
+            },
+            {
+                "station_ar": "نادي السكه",
+                "station_en": "nady-alskh",
+                "departure_time": "10:00 AM",
+                "station_id": 9
+            },
+            {
+                "station_ar": "صقر قريش",
+                "station_en": "sqr-qrysh",
+                "departure_time": "10:30 AM",
+                "station_id": 5002
+            }
+        ],
+        "scraped_at": "2026-03-20T23:59:18"
+    },
+    {
+        "trip_id": "292674",
+        "from_ar": "القاهرة",
+        "to_ar": "اسيوط",
+        "from_en": "cairo",
+        "to_en": "asyut",
+        "to_station_id": 36,
+        "price_egp": "330",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 330
+        },
+        "stations_from": [
+            {
+                "station_ar": "الجيزة",
+                "station_en": "giza",
+                "departure_time": "3:00 PM",
+                "station_id": 15
+            },
+            {
+                "station_ar": "احمد حلمي",
+                "station_en": "ahmd-hlmy",
+                "departure_time": "3:45 PM",
+                "station_id": 5001
+            },
+            {
+                "station_ar": "نادي السكه",
+                "station_en": "nady-alskh",
+                "departure_time": "4:15 PM",
+                "station_id": 9
+            },
+            {
+                "station_ar": "صقر قريش",
+                "station_en": "sqr-qrysh",
+                "departure_time": "5:00 PM",
+                "station_id": 5002
+            }
+        ],
+        "scraped_at": "2026-03-20T23:59:18"
+    },
+    {
+        "trip_id": "292595",
+        "from_ar": "القاهرة",
+        "to_ar": "البلينا",
+        "to_station_id": 5005,
+        "from_en": "cairo",
+        "to_en": "balyana",
+        "price_egp": "390",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 390
+        },
+        "stations_from": [
+            {
+                "station_ar": "نادي السكه",
+                "station_en": "nady-alskh",
+                "departure_time": "1:30 PM",
+                "station_id": 9
+            },
+            {
+                "station_ar": "احمد حلمي",
+                "station_en": "ahmd-hlmy",
+                "departure_time": "2:00 PM",
+                "station_id": 5001
+            },
+            {
+                "station_ar": "الجيزة",
+                "station_en": "giza",
+                "departure_time": "2:30 PM",
+                "station_id": 15
+            },
+            {
+                "station_ar": "صقر قريش",
+                "station_en": "sqr-qrysh",
+                "departure_time": "3:00 PM",
+                "station_id": 5002
+            }
+        ],
+        "scraped_at": "2026-03-20T23:59:27"
+    },
+    {
+        "trip_id": "292437",
+        "from_ar": "القاهرة",
+        "to_ar": "السادس من اكتوبر",
+        "to_station_id": 98,
+        "from_en": "cairo",
+        "to_en": "alsads-mn-aktwbr",
+        "price_egp": "425",
+        "bus_type": "Premium",
+        "bus_capacity": 56,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 56,
+            "price_egp": 425
+        },
+        "stations_from": [
+            {
+                "station_ar": "نادي السكه",
+                "station_en": "nady-alskh",
+                "departure_time": "6:30 AM",
+                "station_id": 9
+            },
+            {
+                "station_ar": "احمد حلمي",
+                "station_en": "ahmd-hlmy",
+                "departure_time": "7:00 AM",
+                "station_id": 5001
+            },
+            {
+                "station_ar": "الجيزة",
+                "station_en": "giza",
+                "departure_time": "7:30 AM",
+                "station_id": 15
+            }
+        ],
+        "scraped_at": "2026-03-20T23:59:40"
+    },
+    {
+        "trip_id": "292675",
+        "from_ar": "القاهرة",
+        "to_ar": "السادس من اكتوبر",
+        "to_station_id": 98,
+        "from_en": "cairo",
+        "to_en": "alsads-mn-aktwbr",
+        "price_egp": "330",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 330
+        },
+        "stations_from": [
+            {
+                "station_ar": "صقر قريش",
+                "station_en": "sqr-qrysh",
+                "departure_time": "8:30 AM",
+                "station_id": 5002
+            },
+            {
+                "station_ar": "نادي السكه",
+                "station_en": "nady-alskh",
+                "departure_time": "9:00 AM",
+                "station_id": 9
+            },
+            {
+                "station_ar": "احمد حلمي",
+                "station_en": "ahmd-hlmy",
+                "departure_time": "9:30 AM",
+                "station_id": 5001
+            },
+            {
+                "station_ar": "الجيزة",
+                "station_en": "giza",
+                "departure_time": "10:00 AM",
+                "station_id": 15
+            }
+        ],
+        "scraped_at": "2026-03-20T23:59:40"
+    },
+    {
+        "trip_id": "293045",
+        "from_ar": "القاهرة",
+        "to_ar": "السادس من اكتوبر",
+        "to_station_id": 98,
+        "from_en": "cairo",
+        "to_en": "alsads-mn-aktwbr",
+        "price_egp": "425",
+        "bus_type": "Premium",
+        "bus_capacity": 56,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 56,
+            "price_egp": 425
+        },
+        "stations_from": [
+            {
+                "station_ar": "نادي السكه",
+                "station_en": "nady-alskh",
+                "departure_time": "5:00 PM",
+                "station_id": 9
+            },
+            {
+                "station_ar": "احمد حلمي",
+                "station_en": "ahmd-hlmy",
+                "departure_time": "5:30 PM",
+                "station_id": 5001
+            },
+            {
+                "station_ar": "الجيزة",
+                "station_en": "giza",
+                "departure_time": "6:00 PM",
+                "station_id": 15
+            }
+        ],
+        "scraped_at": "2026-03-20T23:59:40"
+    },
+    {
+        "trip_id": "292736",
+        "from_ar": "القاهرة",
+        "to_ar": "السادس من اكتوبر",
+        "to_station_id": 98,
+        "from_en": "cairo",
+        "to_en": "alsads-mn-aktwbr",
+        "price_egp": "375",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 375
+        },
+        "stations_from": [
+            {
+                "station_ar": "احمد حلمي",
+                "station_en": "ahmd-hlmy",
+                "departure_time": "9:15 PM",
+                "station_id": 5001
+            },
+            {
+                "station_ar": "الجيزة",
+                "station_en": "giza",
+                "departure_time": "10:00 PM",
+                "station_id": 15
+            }
+        ],
+        "scraped_at": "2026-03-20T23:59:40"
+    },
+    {
+        "trip_id": "293044",
+        "from_ar": "القاهرة",
+        "to_ar": "الغردقة",
+        "to_station_id": 1,
+        "from_en": "cairo",
+        "to_en": "alghrdqa",
+        "price_egp": "425",
+        "bus_type": "Premium",
+        "bus_capacity": 56,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 56,
+            "price_egp": 425
+        },
+        "stations_from": [
+            {
+                "station_ar": "الجيزة",
+                "station_en": "giza",
+                "departure_time": "1:00 AM",
+                "station_id": 15
+            },
+            {
+                "station_ar": "احمد حلمي",
+                "station_en": "ahmd-hlmy",
+                "departure_time": "1:30 AM",
+                "station_id": 5001
+            },
+            {
+                "station_ar": "نادي السكه",
+                "station_en": "nady-alskh",
+                "departure_time": "2:00 AM",
+                "station_id": 9
+            }
+        ],
+        "scraped_at": "2026-03-20T23:59:50"
+    },
+    {
+        "trip_id": "292676",
+        "from_ar": "القاهرة",
+        "to_ar": "الغردقة",
+        "to_station_id": 1,
+        "from_en": "cairo",
+        "to_en": "alghrdqa",
+        "price_egp": "425",
+        "bus_type": "Premium",
+        "bus_capacity": 56,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 56,
+            "price_egp": 425
+        },
+        "stations_from": [
+            {
+                "station_ar": "الجيزة",
+                "station_en": "giza",
+                "departure_time": "4:00 PM",
+                "station_id": 15
+            },
+            {
+                "station_ar": "احمد حلمي",
+                "station_en": "ahmd-hlmy",
+                "departure_time": "4:45 PM",
+                "station_id": 5001
+            },
+            {
+                "station_ar": "نادي السكه",
+                "station_en": "nady-alskh",
+                "departure_time": "5:30 PM",
+                "station_id": 9
+            }
+        ],
+        "scraped_at": "2026-03-20T23:59:50"
+    },
+    {
+        "trip_id": "291752",
+        "from_ar": "القاهرة",
+        "to_ar": "المراغة",
+        "from_en": "cairo",
+        "to_en": "maragha",
+        "price_egp": "350",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 350
+        },
+        "stations_from": [
+            {
+                "station_ar": "نادي السكه",
+                "station_en": "nady-alskh",
+                "departure_time": "10:30 PM",
+                "station_id": 9
+            },
+            {
+                "station_ar": "احمد حلمي",
+                "station_en": "ahmd-hlmy",
+                "departure_time": "11:00 PM",
+                "station_id": 5001
+            },
+            {
+                "station_ar": "الجيزة",
+                "station_en": "giza",
+                "departure_time": "11:45 PM",
+                "station_id": 15
+            },
+            {
+                "station_ar": "صقر قريش",
+                "station_en": "sqr-qrysh",
+                "departure_time": "12:15 AM",
+                "station_id": 5002
+            }
+        ],
+        "scraped_at": "2026-03-20T23:59:59",
+        "to_station_id": 5009
+    },
+    {
+        "trip_id": "292141",
+        "from_ar": "القاهرة",
+        "to_ar": "جرجا",
+        "from_en": "cairo",
+        "to_en": "girga",
+        "price_egp": "390",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 390
+        },
+        "stations_from": [
+            {
+                "station_ar": "نادي السكه",
+                "station_en": "nady-alskh",
+                "departure_time": "12:00 PM",
+                "station_id": 9
+            },
+            {
+                "station_ar": "احمد حلمي",
+                "station_en": "ahmd-hlmy",
+                "departure_time": "12:30 PM",
+                "station_id": 5001
+            },
+            {
+                "station_ar": "الجيزة",
+                "station_en": "giza",
+                "departure_time": "1:15 PM",
+                "station_id": 15
+            },
+            {
+                "station_ar": "صقر قريش",
+                "station_en": "sqr-qrysh",
+                "departure_time": "1:45 PM",
+                "station_id": 5002
+            }
+        ],
+        "scraped_at": "2026-03-21T00:00:10",
+        "to_station_id": 5010
+    },
+    {
+        "trip_id": "289842",
+        "from_ar": "القاهرة",
+        "to_ar": "جرجا",
+        "from_en": "cairo",
+        "to_en": "girga",
+        "price_egp": "390",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 390
+        },
+        "stations_from": [
+            {
+                "station_ar": "نادي السكه",
+                "station_en": "nady-alskh",
+                "departure_time": "11:30 PM",
+                "station_id": 9
+            },
+            {
+                "station_ar": "احمد حلمي",
+                "station_en": "ahmd-hlmy",
+                "departure_time": "11:59 PM",
+                "station_id": 5001
+            },
+            {
+                "station_ar": "الجيزة",
+                "station_en": "giza",
+                "departure_time": "12:30 AM",
+                "station_id": 15
+            }
+        ],
+        "scraped_at": "2026-03-21T00:00:10",
+        "to_station_id": 5010
+    },
+    {
+        "trip_id": "292141",
+        "from_ar": "القاهرة",
+        "to_ar": "دار السلام",
+        "from_en": "cairo",
+        "to_en": "dar-alslam",
+        "price_egp": "390",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 390
+        },
+        "stations_from": [
+            {
+                "station_ar": "نادي السكه",
+                "station_en": "nady-alskh",
+                "departure_time": "12:00 PM",
+                "station_id": 9
+            },
+            {
+                "station_ar": "احمد حلمي",
+                "station_en": "ahmd-hlmy",
+                "departure_time": "12:30 PM",
+                "station_id": 5001
+            },
+            {
+                "station_ar": "الجيزة",
+                "station_en": "giza",
+                "departure_time": "1:15 PM",
+                "station_id": 15
+            },
+            {
+                "station_ar": "صقر قريش",
+                "station_en": "sqr-qrysh",
+                "departure_time": "1:45 PM",
+                "station_id": 5002
+            }
+        ],
+        "scraped_at": "2026-03-21T00:00:20",
+        "to_station_id": 5011
+    },
+    {
+        "trip_id": "289842",
+        "from_ar": "القاهرة",
+        "to_ar": "دار السلام",
+        "from_en": "cairo",
+        "to_en": "dar-alslam",
+        "price_egp": "390",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 390
+        },
+        "stations_from": [
+            {
+                "station_ar": "نادي السكه",
+                "station_en": "nady-alskh",
+                "departure_time": "11:30 PM",
+                "station_id": 9
+            },
+            {
+                "station_ar": "احمد حلمي",
+                "station_en": "ahmd-hlmy",
+                "departure_time": "11:59 PM",
+                "station_id": 5001
+            },
+            {
+                "station_ar": "الجيزة",
+                "station_en": "giza",
+                "departure_time": "12:30 AM",
+                "station_id": 15
+            }
+        ],
+        "scraped_at": "2026-03-21T00:00:20",
+        "to_station_id": 5011
+    },
+    {
+        "trip_id": "291168",
+        "from_ar": "القاهرة",
+        "to_ar": "سوهاج",
+        "from_en": "cairo",
+        "to_en": "sohag",
+        "price_egp": "590",
+        "bus_type": "Prestige",
+        "bus_capacity": 56,
+        "seats_info": {
+            "type": "double_deck",
+            "total": 52,
+            "floor_1": {
+                "seats": 12,
+                "seat_type": "single",
+                "price_egp": 470,
+                "description": "الدور الأول - مقعد منفرد"
+            },
+            "floor_2": {
+                "single": {
+                    "seats": 16,
+                    "seat_type": "single",
+                    "price_egp": 590,
+                    "description": "الدور الثاني - مقعد منفرد"
+                },
+                "double": {
+                    "seats": 24,
+                    "seat_type": "double",
+                    "price_egp": 590,
+                    "description": "الدور الثاني - مقعدان"
+                }
+            }
+        },
+        "stations_from": [
+            {
+                "station_ar": "نادي السكه",
+                "station_en": "nady-alskh",
+                "departure_time": "12:01 AM",
+                "station_id": 9
+            },
+            {
+                "station_ar": "احمد حلمي",
+                "station_en": "ahmd-hlmy",
+                "departure_time": "12:30 AM",
+                "station_id": 5001
+            },
+            {
+                "station_ar": "الجيزة",
+                "station_en": "giza",
+                "departure_time": "1:15 AM",
+                "station_id": 15
+            }
+        ],
+        "scraped_at": "2026-03-21T00:00:30",
+        "to_station_id": 5017
+    },
+    {
+        "trip_id": "291224",
+        "from_ar": "القاهرة",
+        "to_ar": "سوهاج",
+        "from_en": "cairo",
+        "to_en": "sohag",
+        "price_egp": "375",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 375
+        },
+        "stations_from": [
+            {
+                "station_ar": "نادي السكه",
+                "station_en": "nady-alskh",
+                "departure_time": "12:30 AM",
+                "station_id": 9
+            },
+            {
+                "station_ar": "احمد حلمي",
+                "station_en": "ahmd-hlmy",
+                "departure_time": "1:00 AM",
+                "station_id": 5001
+            },
+            {
+                "station_ar": "الجيزة",
+                "station_en": "giza",
+                "departure_time": "1:30 AM",
+                "station_id": 15
+            }
+        ],
+        "scraped_at": "2026-03-21T00:00:30",
+        "to_station_id": 5017
+    },
+    {
+        "trip_id": "291776",
+        "from_ar": "القاهرة",
+        "to_ar": "سوهاج",
+        "from_en": "cairo",
+        "to_en": "sohag",
+        "price_egp": "375",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 375
+        },
+        "stations_from": [
+            {
+                "station_ar": "نادي السكه",
+                "station_en": "nady-alskh",
+                "departure_time": "11:00 AM",
+                "station_id": 9
+            },
+            {
+                "station_ar": "احمد حلمي",
+                "station_en": "ahmd-hlmy",
+                "departure_time": "11:30 AM",
+                "station_id": 5001
+            },
+            {
+                "station_ar": "الجيزة",
+                "station_en": "giza",
+                "departure_time": "12:15 PM",
+                "station_id": 15
+            },
+            {
+                "station_ar": "صقر قريش",
+                "station_en": "sqr-qrysh",
+                "departure_time": "12:45 PM",
+                "station_id": 5002
+            }
+        ],
+        "scraped_at": "2026-03-21T00:00:30",
+        "to_station_id": 5017
+    },
+    {
+        "trip_id": "292737",
+        "from_ar": "القاهرة",
+        "to_ar": "سوهاج",
+        "from_en": "cairo",
+        "to_en": "sohag",
+        "price_egp": "420",
+        "bus_type": "Premium",
+        "bus_capacity": 56,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 56,
+            "price_egp": 420
+        },
+        "stations_from": [
+            {
+                "station_ar": "نادي السكه",
+                "station_en": "nady-alskh",
+                "departure_time": "1:00 PM",
+                "station_id": 9
+            },
+            {
+                "station_ar": "احمد حلمي",
+                "station_en": "ahmd-hlmy",
+                "departure_time": "1:30 PM",
+                "station_id": 5001
+            },
+            {
+                "station_ar": "الجيزة",
+                "station_en": "giza",
+                "departure_time": "2:15 PM",
+                "station_id": 15
+            },
+            {
+                "station_ar": "صقر قريش",
+                "station_en": "sqr-qrysh",
+                "departure_time": "2:45 PM",
+                "station_id": 5002
+            }
+        ],
+        "scraped_at": "2026-03-21T00:00:30",
+        "to_station_id": 5017
+    },
+    {
+        "trip_id": "292677",
+        "from_ar": "القاهرة",
+        "to_ar": "سوهاج",
+        "from_en": "cairo",
+        "to_en": "sohag",
+        "price_egp": "590",
+        "bus_type": "Prestige",
+        "bus_capacity": 56,
+        "seats_info": {
+            "type": "double_deck",
+            "total": 52,
+            "floor_1": {
+                "seats": 12,
+                "seat_type": "single",
+                "price_egp": 470,
+                "description": "الدور الأول - مقعد منفرد"
+            },
+            "floor_2": {
+                "single": {
+                    "seats": 16,
+                    "seat_type": "single",
+                    "price_egp": 590,
+                    "description": "الدور الثاني - مقعد منفرد"
+                },
+                "double": {
+                    "seats": 24,
+                    "seat_type": "double",
+                    "price_egp": 590,
+                    "description": "الدور الثاني - مقعدان"
+                }
+            }
+        },
+        "stations_from": [
+            {
+                "station_ar": "نادي السكه",
+                "station_en": "nady-alskh",
+                "departure_time": "2:30 PM",
+                "station_id": 9
+            },
+            {
+                "station_ar": "احمد حلمي",
+                "station_en": "ahmd-hlmy",
+                "departure_time": "3:00 PM",
+                "station_id": 5001
+            },
+            {
+                "station_ar": "الجيزة",
+                "station_en": "giza",
+                "departure_time": "3:45 PM",
+                "station_id": 15
+            },
+            {
+                "station_ar": "صقر قريش",
+                "station_en": "sqr-qrysh",
+                "departure_time": "4:15 PM",
+                "station_id": 5002
+            }
+        ],
+        "scraped_at": "2026-03-21T00:00:30",
+        "to_station_id": 5017
+    },
+    {
+        "trip_id": "293055",
+        "from_ar": "القاهرة",
+        "to_ar": "سوهاج",
+        "from_en": "cairo",
+        "to_en": "sohag",
+        "price_egp": "375",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 375
+        },
+        "stations_from": [
+            {
+                "station_ar": "نادي السكه",
+                "station_en": "nady-alskh",
+                "departure_time": "3:30 PM",
+                "station_id": 9
+            },
+            {
+                "station_ar": "احمد حلمي",
+                "station_en": "ahmd-hlmy",
+                "departure_time": "4:00 PM",
+                "station_id": 5001
+            },
+            {
+                "station_ar": "الجيزة",
+                "station_en": "giza",
+                "departure_time": "4:45 PM",
+                "station_id": 15
+            },
+            {
+                "station_ar": "صقر قريش",
+                "station_en": "sqr-qrysh",
+                "departure_time": "5:15 PM",
+                "station_id": 5002
+            }
+        ],
+        "scraped_at": "2026-03-21T00:00:30",
+        "to_station_id": 5017
+    },
+    {
+        "trip_id": "292736",
+        "from_ar": "القاهرة",
+        "to_ar": "سوهاج",
+        "from_en": "cairo",
+        "to_en": "sohag",
+        "price_egp": "375",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 375
+        },
+        "stations_from": [
+            {
+                "station_ar": "احمد حلمي",
+                "station_en": "ahmd-hlmy",
+                "departure_time": "9:15 PM",
+                "station_id": 5001
+            },
+            {
+                "station_ar": "الجيزة",
+                "station_en": "giza",
+                "departure_time": "10:00 PM",
+                "station_id": 15
+            }
+        ],
+        "scraped_at": "2026-03-21T00:00:30",
+        "to_station_id": 5017
+    },
+    {
+        "trip_id": "289280",
+        "from_ar": "القاهرة",
+        "to_ar": "سوهاج",
+        "from_en": "cairo",
+        "to_en": "sohag",
+        "price_egp": "375",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 375
+        },
+        "stations_from": [
+            {
+                "station_ar": "نادي السكه",
+                "station_en": "nady-alskh",
+                "departure_time": "10:00 PM",
+                "station_id": 9
+            },
+            {
+                "station_ar": "احمد حلمي",
+                "station_en": "ahmd-hlmy",
+                "departure_time": "10:30 PM",
+                "station_id": 5001
+            },
+            {
+                "station_ar": "الجيزة",
+                "station_en": "giza",
+                "departure_time": "11:15 PM",
+                "station_id": 15
+            },
+            {
+                "station_ar": "صقر قريش",
+                "station_en": "sqr-qrysh",
+                "departure_time": "11:45 PM",
+                "station_id": 5002
+            }
+        ],
+        "scraped_at": "2026-03-21T00:00:30",
+        "to_station_id": 5017
+    },
+    {
+        "trip_id": "292388",
+        "from_ar": "القاهرة",
+        "to_ar": "طما",
+        "from_en": "cairo",
+        "to_en": "tima",
+        "price_egp": "350",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 350
+        },
+        "stations_from": [
+            {
+                "station_ar": "الجيزة",
+                "station_en": "giza",
+                "departure_time": "12:30 AM",
+                "station_id": 15
+            },
+            {
+                "station_ar": "احمد حلمي",
+                "station_en": "ahmd-hlmy",
+                "departure_time": "1:00 AM",
+                "station_id": 5001
+            },
+            {
+                "station_ar": "نادي السكه",
+                "station_en": "nady-alskh",
+                "departure_time": "1:30 AM",
+                "station_id": 9
+            }
+        ],
+        "scraped_at": "2026-03-21T00:00:41",
+        "to_station_id": 5015
+    },
+    {
+        "trip_id": "292390",
+        "from_ar": "القاهرة",
+        "to_ar": "طما",
+        "from_en": "cairo",
+        "to_en": "tima",
+        "price_egp": "350",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 350
+        },
+        "stations_from": [
+            {
+                "station_ar": "الجيزة",
+                "station_en": "giza",
+                "departure_time": "9:00 AM",
+                "station_id": 15
+            },
+            {
+                "station_ar": "احمد حلمي",
+                "station_en": "ahmd-hlmy",
+                "departure_time": "9:30 AM",
+                "station_id": 5001
+            },
+            {
+                "station_ar": "نادي السكه",
+                "station_en": "nady-alskh",
+                "departure_time": "10:00 AM",
+                "station_id": 9
+            },
+            {
+                "station_ar": "صقر قريش",
+                "station_en": "sqr-qrysh",
+                "departure_time": "10:30 AM",
+                "station_id": 5002
+            }
+        ],
+        "scraped_at": "2026-03-21T00:00:41",
+        "to_station_id": 5015
+    },
+    {
+        "trip_id": "291752",
+        "from_ar": "القاهرة",
+        "to_ar": "طما",
+        "from_en": "cairo",
+        "to_en": "tima",
+        "price_egp": "350",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 350
+        },
+        "stations_from": [
+            {
+                "station_ar": "نادي السكه",
+                "station_en": "nady-alskh",
+                "departure_time": "10:30 PM",
+                "station_id": 9
+            },
+            {
+                "station_ar": "احمد حلمي",
+                "station_en": "ahmd-hlmy",
+                "departure_time": "11:00 PM",
+                "station_id": 5001
+            },
+            {
+                "station_ar": "الجيزة",
+                "station_en": "giza",
+                "departure_time": "11:45 PM",
+                "station_id": 15
+            },
+            {
+                "station_ar": "صقر قريش",
+                "station_en": "sqr-qrysh",
+                "departure_time": "12:15 AM",
+                "station_id": 5002
+            }
+        ],
+        "scraped_at": "2026-03-21T00:00:41",
+        "to_station_id": 5015
+    },
+    {
+        "trip_id": "291752",
+        "from_ar": "القاهرة",
+        "to_ar": "طهطا",
+        "from_en": "cairo",
+        "to_en": "tahta",
+        "price_egp": "350",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 350
+        },
+        "stations_from": [
+            {
+                "station_ar": "نادي السكه",
+                "station_en": "nady-alskh",
+                "departure_time": "10:30 PM",
+                "station_id": 9
+            },
+            {
+                "station_ar": "احمد حلمي",
+                "station_en": "ahmd-hlmy",
+                "departure_time": "11:00 PM",
+                "station_id": 5001
+            },
+            {
+                "station_ar": "الجيزة",
+                "station_en": "giza",
+                "departure_time": "11:45 PM",
+                "station_id": 15
+            },
+            {
+                "station_ar": "صقر قريش",
+                "station_en": "sqr-qrysh",
+                "departure_time": "12:15 AM",
+                "station_id": 5002
+            }
+        ],
+        "scraped_at": "2026-03-21T00:00:51",
+        "to_station_id": 5016
+    },
+    {
+        "trip_id": "292391",
+        "from_ar": "ابو تيج",
+        "to_ar": "اسيوط",
+        "to_station_id": 36,
+        "from_en": "abo-tij",
+        "to_en": "asyut",
+        "price_egp": "340",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 340
+        },
+        "stations_from": [
+            {
+                "station_ar": "مكتب حجز ابو تيج",
+                "station_en": "mktb-hjz-abw-tyj",
+                "departure_time": "2:15 PM",
+                "station_id": 5003
+            }
+        ],
+        "scraped_at": "2026-03-21T00:00:59"
+    },
+    {
+        "trip_id": "292403",
+        "from_ar": "ابو تيج",
+        "to_ar": "اسيوط",
+        "to_station_id": 36,
+        "from_en": "abo-tij",
+        "to_en": "asyut",
+        "price_egp": "340",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 340
+        },
+        "stations_from": [
+            {
+                "station_ar": "مكتب حجز ابو تيج",
+                "station_en": "mktb-hjz-abw-tyj",
+                "departure_time": "10:45 PM",
+                "station_id": 5003
+            }
+        ],
+        "scraped_at": "2026-03-21T00:00:59"
+    },
+    {
+        "trip_id": "292391",
+        "from_ar": "ابو تيج",
+        "to_ar": "القاهرة",
+        "from_en": "abo-tij",
+        "to_en": "cairo",
+        "price_egp": "340",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 340
+        },
+        "stations_from": [
+            {
+                "station_ar": "مكتب حجز ابو تيج",
+                "station_en": "mktb-hjz-abw-tyj",
+                "departure_time": "2:15 PM",
+                "station_id": 5003
+            }
+        ],
+        "scraped_at": "2026-03-21T00:01:07",
+        "to_station_id": 5
+    },
+    {
+        "trip_id": "292403",
+        "from_ar": "ابو تيج",
+        "to_ar": "القاهرة",
+        "to_station_id": 5,
+        "from_en": "abo-tij",
+        "to_en": "cairo",
+        "price_egp": "340",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 340
+        },
+        "stations_from": [
+            {
+                "station_ar": "مكتب حجز ابو تيج",
+                "station_en": "mktb-hjz-abw-tyj",
+                "departure_time": "10:45 PM",
+                "station_id": 5003
+            }
+        ],
+        "scraped_at": "2026-03-21T00:01:07"
+    },
+    {
+        "trip_id": "292388",
+        "from_ar": "ابو تيج",
+        "to_ar": "طما",
+        "from_en": "abo-tij",
+        "to_en": "tima",
+        "price_egp": "340",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 340
+        },
+        "stations_from": [
+            {
+                "station_ar": "مكتب حجز ابو تيج",
+                "station_en": "mktb-hjz-abw-tyj",
+                "departure_time": "7:00 AM",
+                "station_id": 5003
+            }
+        ],
+        "scraped_at": "2026-03-21T00:01:17",
+        "to_station_id": 5015
+    },
+    {
+        "trip_id": "292390",
+        "from_ar": "ابو تيج",
+        "to_ar": "طما",
+        "from_en": "abo-tij",
+        "to_en": "tima",
+        "price_egp": "340",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 340
+        },
+        "stations_from": [
+            {
+                "station_ar": "مكتب حجز ابو تيج",
+                "station_en": "mktb-hjz-abw-tyj",
+                "departure_time": "4:00 PM",
+                "station_id": 5003
+            }
+        ],
+        "scraped_at": "2026-03-21T00:01:17",
+        "to_station_id": 5015
+    },
+    {
+        "trip_id": "292675",
+        "from_ar": "اسيوط",
+        "to_station_id": 98,
+        "to_ar": "السادس من اكتوبر",
+        "from_en": "asyut",
+        "to_en": "alsads-mn-aktwbr",
+        "price_egp": "330",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 330
+        },
+        "stations_from": [
+            {
+                "station_ar": "اسيوط ( الهلالى )",
+                "station_en": "asywt-alhlala",
+                "departure_time": "3:01 AM",
+                "station_id": 146
+            },
+            {
+                "station_ar": "اسيوط ( المعلمين )",
+                "station_en": "asywt-almalmyn",
+                "departure_time": "3:30 AM",
+                "station_id": 5004
+            }
+        ],
+        "scraped_at": "2026-03-21T00:01:53"
+    },
+    {
+        "trip_id": "292675",
+        "from_ar": "اسيوط",
+        "to_ar": "القاهرة",
+        "from_en": "asyut",
+        "to_en": "cairo",
+        "price_egp": "330",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 330
+        },
+        "stations_from": [
+            {
+                "station_ar": "اسيوط ( الهلالى )",
+                "station_en": "asywt-alhlala",
+                "departure_time": "3:01 AM",
+                "station_id": 146
+            },
+            {
+                "station_ar": "اسيوط ( المعلمين )",
+                "station_en": "asywt-almalmyn",
+                "departure_time": "3:30 AM",
+                "station_id": 5004
+            }
+        ],
+        "scraped_at": "2026-03-21T00:02:01",
+        "to_station_id": 5
+    },
+    {
+        "trip_id": "292391",
+        "from_ar": "اسيوط",
+        "to_ar": "القاهرة",
+        "from_en": "asyut",
+        "to_en": "cairo",
+        "price_egp": "330",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 330
+        },
+        "stations_from": [
+            {
+                "station_ar": "اسيوط ( المعلمين )",
+                "station_en": "asywt-almalmyn",
+                "departure_time": "3:00 PM",
+                "station_id": 5004
+            }
+        ],
+        "scraped_at": "2026-03-21T00:02:01",
+        "to_station_id": 5
+    },
+    {
+        "trip_id": "292403",
+        "from_ar": "اسيوط",
+        "to_ar": "القاهرة",
+        "from_en": "asyut",
+        "to_en": "cairo",
+        "price_egp": "330",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 330
+        },
+        "stations_from": [
+            {
+                "station_ar": "اسيوط ( الهلالى )",
+                "station_en": "asywt-alhlala",
+                "departure_time": "11:30 PM",
+                "station_id": 146
+            },
+            {
+                "station_ar": "اسيوط ( المعلمين )",
+                "station_en": "asywt-almalmyn",
+                "departure_time": "12:10 AM",
+                "station_id": 5004
+            }
+        ],
+        "scraped_at": "2026-03-21T00:02:01",
+        "to_station_id": 5
+    },
+    {
+        "trip_id": "292388",
+        "from_ar": "اسيوط",
+        "to_ar": "طما",
+        "from_en": "asyut",
+        "to_en": "tima",
+        "price_egp": "340",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 340
+        },
+        "stations_from": [
+            {
+                "station_ar": "اسيوط ( المعلمين )",
+                "station_en": "asywt-almalmyn",
+                "departure_time": "6:30 AM",
+                "station_id": 5004
+            }
+        ],
+        "scraped_at": "2026-03-21T00:02:11",
+        "to_station_id": 5015
+    },
+    {
+        "trip_id": "292390",
+        "from_ar": "اسيوط",
+        "to_ar": "طما",
+        "from_en": "asyut",
+        "to_en": "tima",
+        "price_egp": "340",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 340
+        },
+        "stations_from": [
+            {
+                "station_ar": "اسيوط ( المعلمين )",
+                "station_en": "asywt-almalmyn",
+                "departure_time": "3:30 PM",
+                "station_id": 5004
+            }
+        ],
+        "scraped_at": "2026-03-21T00:02:11",
+        "to_station_id": 5015
+    },
+    {
+        "trip_id": "292747",
+        "from_ar": "البلينا",
+        "to_ar": "القاهرة",
+        "from_en": "balyana",
+        "to_en": "cairo",
+        "price_egp": "390",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 390
+        },
+        "stations_from": [
+            {
+                "station_ar": "مكتب حجز البلينا",
+                "station_en": "mktb-hjz-alblyna",
+                "departure_time": "11:46 PM",
+                "station_id": 5005
+            },
+            {
+                "station_ar": "برديس",
+                "station_en": "bardis",
+                "departure_time": "11:59 PM",
+                "station_id": 5006
+            }
+        ],
+        "scraped_at": "2026-03-21T00:02:22",
+        "to_station_id": 5
+    },
+    {
+        "trip_id": "292674",
+        "from_ar": "السادس من اكتوبر",
+        "to_ar": "اسيوط",
+        "from_en": "alsads-mn-aktwbr",
+        "to_en": "asyut",
+        "price_egp": "330",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 330
+        },
+        "stations_from": [
+            {
+                "station_ar": "السادس من اكتوبر",
+                "station_en": "alsads-mn-aktwbr",
+                "departure_time": "2:01 PM",
+                "station_id": 98
+            }
+        ],
+        "scraped_at": "2026-03-21T00:02:58"
+    },
+    {
+        "trip_id": "293044",
+        "from_ar": "السادس من اكتوبر",
+        "to_ar": "الغردقة",
+        "to_station_id": 1,
+        "from_en": "alsads-mn-aktwbr",
+        "to_en": "alghrdqa",
+        "price_egp": "425",
+        "bus_type": "Premium",
+        "bus_capacity": 56,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 56,
+            "price_egp": 425
+        },
+        "stations_from": [
+            {
+                "station_ar": "السادس من اكتوبر",
+                "station_en": "alsads-mn-aktwbr",
+                "departure_time": "12:16 AM",
+                "station_id": 98
+            }
+        ],
+        "scraped_at": "2026-03-21T00:03:08"
+    },
+    {
+        "trip_id": "292676",
+        "from_ar": "السادس من اكتوبر",
+        "to_ar": "الغردقة",
+        "to_station_id": 1,
+        "from_en": "alsads-mn-aktwbr",
+        "to_en": "alghrdqa",
+        "price_egp": "425",
+        "bus_type": "Premium",
+        "bus_capacity": 56,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 56,
+            "price_egp": 425
+        },
+        "stations_from": [
+            {
+                "station_ar": "السادس من اكتوبر",
+                "station_en": "alsads-mn-aktwbr",
+                "departure_time": "3:00 PM",
+                "station_id": 98
+            }
+        ],
+        "scraped_at": "2026-03-21T00:03:08"
+    },
+    {
+        "trip_id": "293044",
+        "from_ar": "السادس من اكتوبر",
+        "to_ar": "القاهرة",
+        "from_en": "alsads-mn-aktwbr",
+        "to_en": "cairo",
+        "price_egp": "425",
+        "bus_type": "Premium",
+        "bus_capacity": 56,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 56,
+            "price_egp": 425
+        },
+        "stations_from": [
+            {
+                "station_ar": "السادس من اكتوبر",
+                "station_en": "alsads-mn-aktwbr",
+                "departure_time": "12:16 AM",
+                "station_id": 98
+            }
+        ],
+        "scraped_at": "2026-03-21T00:03:17",
+        "to_station_id": 5
+    },
+    {
+        "trip_id": "292738",
+        "from_ar": "السادس من اكتوبر",
+        "to_ar": "القاهرة",
+        "from_en": "alsads-mn-aktwbr",
+        "to_en": "cairo",
+        "price_egp": "420",
+        "bus_type": "Premium",
+        "bus_capacity": 56,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 56,
+            "price_egp": 420
+        },
+        "stations_from": [
+            {
+                "station_ar": "السادس من اكتوبر",
+                "station_en": "alsads-mn-aktwbr",
+                "departure_time": "7:00 AM",
+                "station_id": 98
+            }
+        ],
+        "scraped_at": "2026-03-21T00:03:17",
+        "to_station_id": 5
+    },
+    {
+        "trip_id": "292674",
+        "from_ar": "السادس من اكتوبر",
+        "to_ar": "القاهرة",
+        "from_en": "alsads-mn-aktwbr",
+        "to_en": "cairo",
+        "price_egp": "330",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 330
+        },
+        "stations_from": [
+            {
+                "station_ar": "السادس من اكتوبر",
+                "station_en": "alsads-mn-aktwbr",
+                "departure_time": "2:01 PM",
+                "station_id": 98
+            }
+        ],
+        "scraped_at": "2026-03-21T00:03:17",
+        "to_station_id": 5
+    },
+    {
+        "trip_id": "292676",
+        "from_ar": "السادس من اكتوبر",
+        "to_ar": "القاهرة",
+        "from_en": "alsads-mn-aktwbr",
+        "to_en": "cairo",
+        "price_egp": "425",
+        "bus_type": "Premium",
+        "bus_capacity": 56,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 56,
+            "price_egp": 425
+        },
+        "stations_from": [
+            {
+                "station_ar": "السادس من اكتوبر",
+                "station_en": "alsads-mn-aktwbr",
+                "departure_time": "3:00 PM",
+                "station_id": 98
+            }
+        ],
+        "scraped_at": "2026-03-21T00:03:17",
+        "to_station_id": 5
+    },
+    {
+        "trip_id": "292736",
+        "from_ar": "السادس من اكتوبر",
+        "to_ar": "سوهاج",
+        "from_en": "alsads-mn-aktwbr",
+        "to_en": "sohag",
+        "price_egp": "375",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 375
+        },
+        "stations_from": [
+            {
+                "station_ar": "السادس من اكتوبر",
+                "station_en": "alsads-mn-aktwbr",
+                "departure_time": "11:00 PM",
+                "station_id": 98
+            }
+        ],
+        "scraped_at": "2026-03-21T00:03:27",
+        "to_station_id": 5017
+    },
+    {
+        "trip_id": "292437",
+        "from_ar": "الغردقة",
+        "to_ar": "السادس من اكتوبر",
+        "to_station_id": 98,
+        "from_en": "alghrdqa",
+        "to_en": "alsads-mn-aktwbr",
+        "price_egp": "425",
+        "bus_type": "Premium",
+        "bus_capacity": 56,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 56,
+            "price_egp": 425
+        },
+        "stations_from": [
+            {
+                "station_ar": "الغردقه ( Hurghada )",
+                "station_en": "alghrdqh",
+                "departure_time": "12:30 AM",
+                "station_id": 1
+            },
+            {
+                "station_ar": "الغردقة ش النصر",
+                "station_en": "alghrdqa-sh-alnsr",
+                "departure_time": "12:45 AM",
+                "station_id": 5007
+            },
+            {
+                "station_ar": "الاحياء",
+                "station_en": "alahyaa",
+                "departure_time": "1:15 AM",
+                "station_id": 606
+            }
+        ],
+        "scraped_at": "2026-03-21T00:03:37"
+    },
+    {
+        "trip_id": "293045",
+        "from_ar": "الغردقة",
+        "to_ar": "السادس من اكتوبر",
+        "to_station_id": 98,
+        "from_en": "alghrdqa",
+        "to_en": "alsads-mn-aktwbr",
+        "price_egp": "425",
+        "bus_type": "Premium",
+        "bus_capacity": 56,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 56,
+            "price_egp": 425
+        },
+        "stations_from": [
+            {
+                "station_ar": "سفاجا",
+                "station_en": "sfaja",
+                "departure_time": "10:00 AM",
+                "station_id": 10
+            },
+            {
+                "station_ar": "الغردقه زهران( Hurghada )",
+                "station_en": "alghrdqh-zhran",
+                "departure_time": "11:00 AM",
+                "station_id": 5008
+            },
+            {
+                "station_ar": "الغردقة ش النصر",
+                "station_en": "alghrdqa-sh-alnsr",
+                "departure_time": "11:15 AM",
+                "station_id": 5007
+            },
+            {
+                "station_ar": "الاحياء",
+                "station_en": "alahyaa",
+                "departure_time": "11:45 AM",
+                "station_id": 606
+            }
+        ],
+        "scraped_at": "2026-03-21T00:03:37"
+    },
+    {
+        "trip_id": "292437",
+        "from_ar": "الغردقة",
+        "to_ar": "القاهرة",
+        "from_en": "alghrdqa",
+        "to_en": "cairo",
+        "price_egp": "425",
+        "bus_type": "Premium",
+        "bus_capacity": 56,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 56,
+            "price_egp": 425
+        },
+        "stations_from": [
+            {
+                "station_ar": "الغردقه ( Hurghada )",
+                "station_en": "alghrdqh",
+                "departure_time": "12:30 AM",
+                "station_id": 1
+            },
+            {
+                "station_ar": "الغردقة ش النصر",
+                "station_en": "alghrdqa-sh-alnsr",
+                "departure_time": "12:45 AM",
+                "station_id": 5007
+            },
+            {
+                "station_ar": "الاحياء",
+                "station_en": "alahyaa",
+                "departure_time": "1:15 AM",
+                "station_id": 606
+            }
+        ],
+        "scraped_at": "2026-03-21T00:03:46",
+        "to_station_id": 5
+    },
+    {
+        "trip_id": "293045",
+        "from_ar": "الغردقة",
+        "to_ar": "القاهرة",
+        "from_en": "alghrdqa",
+        "to_en": "cairo",
+        "price_egp": "425",
+        "bus_type": "Premium",
+        "bus_capacity": 56,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 56,
+            "price_egp": 425
+        },
+        "stations_from": [
+            {
+                "station_ar": "سفاجا",
+                "station_en": "sfaja",
+                "departure_time": "10:00 AM",
+                "station_id": 10
+            },
+            {
+                "station_ar": "الغردقه زهران( Hurghada )",
+                "station_en": "alghrdqh-zhran",
+                "departure_time": "11:00 AM",
+                "station_id": 5008
+            },
+            {
+                "station_ar": "الغردقة ش النصر",
+                "station_en": "alghrdqa-sh-alnsr",
+                "departure_time": "11:15 AM",
+                "station_id": 5007
+            },
+            {
+                "station_ar": "الاحياء",
+                "station_en": "alahyaa",
+                "departure_time": "11:45 AM",
+                "station_id": 606
+            }
+        ],
+        "scraped_at": "2026-03-21T00:03:46",
+        "to_station_id": 5
+    },
+    {
+        "trip_id": "293048",
+        "from_ar": "الغردقة",
+        "to_ar": "المراغة",
+        "from_en": "alghrdqa",
+        "to_en": "maragha",
+        "price_egp": "340",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 340
+        },
+        "stations_from": [
+            {
+                "station_ar": "الغردقه زهران( Hurghada )",
+                "station_en": "alghrdqh-zhran",
+                "departure_time": "11:01 PM",
+                "station_id": 5008
+            },
+            {
+                "station_ar": "الغردقة ش النصر",
+                "station_en": "alghrdqa-sh-alnsr",
+                "departure_time": "11:15 PM",
+                "station_id": 5007
+            },
+            {
+                "station_ar": "سفاجا",
+                "station_en": "sfaja",
+                "departure_time": "11:59 PM",
+                "station_id": 10
+            }
+        ],
+        "scraped_at": "2026-03-21T00:03:54",
+        "to_station_id": 5009
+    },
+    {
+        "trip_id": "293046",
+        "from_ar": "الغردقة",
+        "to_ar": "سوهاج",
+        "from_en": "alghrdqa",
+        "to_en": "sohag",
+        "price_egp": "310",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 310
+        },
+        "stations_from": [
+            {
+                "station_ar": "الغردقه زهران( Hurghada )",
+                "station_en": "alghrdqh-zhran",
+                "departure_time": "1:46 PM",
+                "station_id": 5008
+            },
+            {
+                "station_ar": "الغردقة ش النصر",
+                "station_en": "alghrdqa-sh-alnsr",
+                "departure_time": "2:00 PM",
+                "station_id": 5007
+            },
+            {
+                "station_ar": "سفاجا",
+                "station_en": "sfaja",
+                "departure_time": "3:00 PM",
+                "station_id": 10
+            }
+        ],
+        "scraped_at": "2026-03-21T00:04:04",
+        "to_station_id": 5017
+    },
+    {
+        "trip_id": "293048",
+        "from_ar": "الغردقة",
+        "to_ar": "سوهاج",
+        "from_en": "alghrdqa",
+        "to_en": "sohag",
+        "price_egp": "310",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 310
+        },
+        "stations_from": [
+            {
+                "station_ar": "الغردقه زهران( Hurghada )",
+                "station_en": "alghrdqh-zhran",
+                "departure_time": "11:01 PM",
+                "station_id": 5008
+            },
+            {
+                "station_ar": "الغردقة ش النصر",
+                "station_en": "alghrdqa-sh-alnsr",
+                "departure_time": "11:15 PM",
+                "station_id": 5007
+            },
+            {
+                "station_ar": "سفاجا",
+                "station_en": "sfaja",
+                "departure_time": "11:59 PM",
+                "station_id": 10
+            }
+        ],
+        "scraped_at": "2026-03-21T00:04:04",
+        "to_station_id": 5017
+    },
+    {
+        "trip_id": "293048",
+        "from_ar": "الغردقة",
+        "to_ar": "طما",
+        "from_en": "alghrdqa",
+        "to_en": "tima",
+        "price_egp": "340",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 340
+        },
+        "stations_from": [
+            {
+                "station_ar": "الغردقه زهران( Hurghada )",
+                "station_en": "alghrdqh-zhran",
+                "departure_time": "11:01 PM",
+                "station_id": 5008
+            },
+            {
+                "station_ar": "الغردقة ش النصر",
+                "station_en": "alghrdqa-sh-alnsr",
+                "departure_time": "11:15 PM",
+                "station_id": 5007
+            },
+            {
+                "station_ar": "سفاجا",
+                "station_en": "sfaja",
+                "departure_time": "11:59 PM",
+                "station_id": 10
+            }
+        ],
+        "scraped_at": "2026-03-21T00:04:12",
+        "to_station_id": 5015
+    },
+    {
+        "trip_id": "293048",
+        "from_ar": "الغردقة",
+        "to_ar": "طهطا",
+        "from_en": "alghrdqa",
+        "to_en": "tahta",
+        "price_egp": "340",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 340
+        },
+        "stations_from": [
+            {
+                "station_ar": "الغردقه زهران( Hurghada )",
+                "station_en": "alghrdqh-zhran",
+                "departure_time": "11:01 PM",
+                "station_id": 5008
+            },
+            {
+                "station_ar": "الغردقة ش النصر",
+                "station_en": "alghrdqa-sh-alnsr",
+                "departure_time": "11:15 PM",
+                "station_id": 5007
+            },
+            {
+                "station_ar": "سفاجا",
+                "station_en": "sfaja",
+                "departure_time": "11:59 PM",
+                "station_id": 10
+            }
+        ],
+        "scraped_at": "2026-03-21T00:04:22",
+        "to_station_id": 5016
+    },
+    {
+        "trip_id": "293049",
+        "from_ar": "المراغة",
+        "to_ar": "الغردقة",
+        "to_station_id": 1,
+        "from_en": "maragha",
+        "to_en": "alghrdqa",
+        "price_egp": "340",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 340
+        },
+        "stations_from": [
+            {
+                "station_ar": "مكتب حجز المراغة",
+                "station_en": "mktb-hjz-almragha",
+                "departure_time": "11:15 AM",
+                "station_id": 5009
+            }
+        ],
+        "scraped_at": "2026-03-21T00:04:32"
+    },
+    {
+        "trip_id": "291515",
+        "from_ar": "المراغة",
+        "to_ar": "القاهرة",
+        "from_en": "maragha",
+        "to_en": "cairo",
+        "price_egp": "350",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 350
+        },
+        "stations_from": [
+            {
+                "station_ar": "مكتب حجز المراغة",
+                "station_en": "mktb-hjz-almragha",
+                "departure_time": "10:00 PM",
+                "station_id": 5009
+            }
+        ],
+        "scraped_at": "2026-03-21T00:04:42",
+        "to_station_id": 5
+    },
+    {
+        "trip_id": "293049",
+        "from_ar": "المراغة",
+        "to_ar": "سوهاج",
+        "from_en": "maragha",
+        "to_en": "sohag",
+        "price_egp": "340",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 340
+        },
+        "stations_from": [
+            {
+                "station_ar": "مكتب حجز المراغة",
+                "station_en": "mktb-hjz-almragha",
+                "departure_time": "11:15 AM",
+                "station_id": 5009
+            }
+        ],
+        "scraped_at": "2026-03-21T00:04:52",
+        "to_station_id": 5017
+    },
+    {
+        "trip_id": "291515",
+        "from_ar": "المراغة",
+        "to_ar": "طما",
+        "from_en": "maragha",
+        "to_en": "tima",
+        "price_egp": "350",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 350
+        },
+        "stations_from": [
+            {
+                "station_ar": "مكتب حجز المراغة",
+                "station_en": "mktb-hjz-almragha",
+                "departure_time": "10:00 PM",
+                "station_id": 5009
+            }
+        ],
+        "scraped_at": "2026-03-21T00:05:03",
+        "to_station_id": 5015
+    },
+    {
+        "trip_id": "293048",
+        "from_ar": "المراغة",
+        "to_ar": "طما",
+        "from_en": "maragha",
+        "to_en": "tima",
+        "price_egp": "340",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 340
+        },
+        "stations_from": [
+            {
+                "station_ar": "مكتب حجز المراغة",
+                "station_en": "mktb-hjz-almragha",
+                "departure_time": "5:00 AM",
+                "station_id": 5009
+            }
+        ],
+        "scraped_at": "2026-03-21T00:05:03",
+        "to_station_id": 5015
+    },
+    {
+        "trip_id": "291515",
+        "from_ar": "المراغة",
+        "to_ar": "طهطا",
+        "from_en": "maragha",
+        "to_en": "tahta",
+        "price_egp": "350",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 350
+        },
+        "stations_from": [
+            {
+                "station_ar": "مكتب حجز المراغة",
+                "station_en": "mktb-hjz-almragha",
+                "departure_time": "10:00 PM",
+                "station_id": 5009
+            }
+        ],
+        "scraped_at": "2026-03-21T00:05:15",
+        "to_station_id": 5016
+    },
+    {
+        "trip_id": "293048",
+        "from_ar": "المراغة",
+        "to_ar": "طهطا",
+        "from_en": "maragha",
+        "to_en": "tahta",
+        "price_egp": "340",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 340
+        },
+        "stations_from": [
+            {
+                "station_ar": "مكتب حجز المراغة",
+                "station_en": "mktb-hjz-almragha",
+                "departure_time": "5:00 AM",
+                "station_id": 5009
+            }
+        ],
+        "scraped_at": "2026-03-21T00:05:15",
+        "to_station_id": 5016
+    },
+    {
+        "trip_id": "291997",
+        "from_ar": "جرجا",
+        "to_ar": "القاهرة",
+        "from_en": "girga",
+        "to_en": "cairo",
+        "price_egp": "390",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 390
+        },
+        "stations_from": [
+            {
+                "station_ar": "مكتب حجز جرجا",
+                "station_en": "mktb-hjz-jrja",
+                "departure_time": "11:59 PM",
+                "station_id": 5010
+            }
+        ],
+        "scraped_at": "2026-03-21T00:05:47",
+        "to_station_id": 5
+    },
+    {
+        "trip_id": "292141",
+        "from_ar": "جرجا",
+        "to_ar": "دار السلام",
+        "from_en": "girga",
+        "to_en": "dar-alslam",
+        "price_egp": "390",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 390
+        },
+        "stations_from": [
+            {
+                "station_ar": "مكتب حجز جرجا",
+                "station_en": "mktb-hjz-jrja",
+                "departure_time": "8:30 PM",
+                "station_id": 5010
+            }
+        ],
+        "scraped_at": "2026-03-21T00:05:57",
+        "to_station_id": 5011
+    },
+    {
+        "trip_id": "289842",
+        "from_ar": "جرجا",
+        "to_ar": "دار السلام",
+        "from_en": "girga",
+        "to_en": "dar-alslam",
+        "price_egp": "390",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 390
+        },
+        "stations_from": [
+            {
+                "station_ar": "مكتب حجز جرجا",
+                "station_en": "mktb-hjz-jrja",
+                "departure_time": "7:00 AM",
+                "station_id": 5010
+            }
+        ],
+        "scraped_at": "2026-03-21T00:05:57",
+        "to_station_id": 5011
+    },
+    {
+        "trip_id": "289897",
+        "from_ar": "دار السلام",
+        "to_ar": "القاهرة",
+        "from_en": "dar-alslam",
+        "to_en": "cairo",
+        "price_egp": "390",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 390
+        },
+        "stations_from": [
+            {
+                "station_ar": "مكتب حجز دار السلام",
+                "station_en": "mktb-hjz-dar-alslam",
+                "departure_time": "11:00 PM",
+                "station_id": 5011
+            }
+        ],
+        "scraped_at": "2026-03-21T00:06:07",
+        "to_station_id": 5
+    },
+    {
+        "trip_id": "292738",
+        "from_ar": "سوهاج",
+        "to_ar": "السادس من اكتوبر",
+        "to_station_id": 98,
+        "from_en": "sohag",
+        "to_en": "alsads-mn-aktwbr",
+        "price_egp": "420",
+        "bus_type": "Premium",
+        "bus_capacity": 56,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 56,
+            "price_egp": 420
+        },
+        "stations_from": [
+            {
+                "station_ar": "سوهاج   (الشهيد )",
+                "station_en": "swhaj-alshhyd",
+                "departure_time": "12:01 AM",
+                "station_id": 5012
+            },
+            {
+                "station_ar": "سوهاج اخميم ( الري )",
+                "station_en": "swhaj-akhmym-alry",
+                "departure_time": "12:30 AM",
+                "station_id": 5013
+            },
+            {
+                "station_ar": "سوهاج اخميم ( الخلوة )",
+                "station_en": "swhaj-akhmym-alkhlwa",
+                "departure_time": "12:40 AM",
+                "station_id": 5014
+            }
+        ],
+        "scraped_at": "2026-03-21T00:06:41"
+    },
+    {
+        "trip_id": "293047",
+        "from_ar": "سوهاج",
+        "to_ar": "الغردقة",
+        "to_station_id": 1,
+        "from_en": "sohag",
+        "to_en": "alghrdqa",
+        "price_egp": "310",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 310
+        },
+        "stations_from": [
+            {
+                "station_ar": "سوهاج   (الشهيد )",
+                "station_en": "swhaj-alshhyd",
+                "departure_time": "7:00 AM",
+                "station_id": 5012
+            },
+            {
+                "station_ar": "سوهاج اخميم ( الري )",
+                "station_en": "swhaj-akhmym-alry",
+                "departure_time": "7:20 AM",
+                "station_id": 5013
+            },
+            {
+                "station_ar": "سوهاج اخميم ( الخلوة )",
+                "station_en": "swhaj-akhmym-alkhlwa",
+                "departure_time": "7:30 AM",
+                "station_id": 5014
+            }
+        ],
+        "scraped_at": "2026-03-21T00:06:51"
+    },
+    {
+        "trip_id": "293049",
+        "from_ar": "سوهاج",
+        "to_ar": "الغردقة",
+        "to_station_id": 1,
+        "from_en": "sohag",
+        "to_en": "alghrdqa",
+        "price_egp": "310",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 310
+        },
+        "stations_from": [
+            {
+                "station_ar": "سوهاج   (الشهيد )",
+                "station_en": "swhaj-alshhyd",
+                "departure_time": "12:15 PM",
+                "station_id": 5012
+            },
+            {
+                "station_ar": "سوهاج اخميم ( الري )",
+                "station_en": "swhaj-akhmym-alry",
+                "departure_time": "12:45 PM",
+                "station_id": 5013
+            },
+            {
+                "station_ar": "سوهاج اخميم ( الخلوة )",
+                "station_en": "swhaj-akhmym-alkhlwa",
+                "departure_time": "12:55 PM",
+                "station_id": 5014
+            }
+        ],
+        "scraped_at": "2026-03-21T00:06:51"
+    },
+    {
+        "trip_id": "292738",
+        "from_ar": "سوهاج",
+        "to_ar": "القاهرة",
+        "from_en": "sohag",
+        "to_en": "cairo",
+        "price_egp": "420",
+        "bus_type": "Premium",
+        "bus_capacity": 56,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 56,
+            "price_egp": 420
+        },
+        "stations_from": [
+            {
+                "station_ar": "سوهاج   (الشهيد )",
+                "station_en": "swhaj-alshhyd",
+                "departure_time": "12:01 AM",
+                "station_id": 5012
+            },
+            {
+                "station_ar": "سوهاج اخميم ( الري )",
+                "station_en": "swhaj-akhmym-alry",
+                "departure_time": "12:30 AM",
+                "station_id": 5013
+            },
+            {
+                "station_ar": "سوهاج اخميم ( الخلوة )",
+                "station_en": "swhaj-akhmym-alkhlwa",
+                "departure_time": "12:40 AM",
+                "station_id": 5014
+            }
+        ],
+        "scraped_at": "2026-03-21T00:07:02",
+        "to_station_id": 5
+    },
+    {
+        "trip_id": "289507",
+        "from_ar": "سوهاج",
+        "to_ar": "القاهرة",
+        "from_en": "sohag",
+        "to_en": "cairo",
+        "price_egp": "590",
+        "bus_type": "Prestige",
+        "bus_capacity": 56,
+        "seats_info": {
+            "type": "double_deck",
+            "total": 52,
+            "floor_1": {
+                "seats": 12,
+                "seat_type": "single",
+                "price_egp": 470,
+                "description": "الدور الأول - مقعد منفرد"
+            },
+            "floor_2": {
+                "single": {
+                    "seats": 16,
+                    "seat_type": "single",
+                    "price_egp": 590,
+                    "description": "الدور الثاني - مقعد منفرد"
+                },
+                "double": {
+                    "seats": 24,
+                    "seat_type": "double",
+                    "price_egp": 590,
+                    "description": "الدور الثاني - مقعدان"
+                }
+            }
+        },
+        "stations_from": [
+            {
+                "station_ar": "سوهاج   (الشهيد )",
+                "station_en": "swhaj-alshhyd",
+                "departure_time": "12:45 AM",
+                "station_id": 5012
+            },
+            {
+                "station_ar": "سوهاج اخميم ( الري )",
+                "station_en": "swhaj-akhmym-alry",
+                "departure_time": "1:15 AM",
+                "station_id": 5013
+            },
+            {
+                "station_ar": "سوهاج اخميم ( الخلوة )",
+                "station_en": "swhaj-akhmym-alkhlwa",
+                "departure_time": "1:25 AM",
+                "station_id": 5014
+            }
+        ],
+        "scraped_at": "2026-03-21T00:07:03",
+        "to_station_id": 5
+    },
+    {
+        "trip_id": "293054",
+        "from_ar": "سوهاج",
+        "to_ar": "القاهرة",
+        "from_en": "sohag",
+        "to_en": "cairo",
+        "price_egp": "375",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 375
+        },
+        "stations_from": [
+            {
+                "station_ar": "سوهاج   (الشهيد )",
+                "station_en": "swhaj-alshhyd",
+                "departure_time": "1:30 AM",
+                "station_id": 5012
+            },
+            {
+                "station_ar": "سوهاج اخميم ( الري )",
+                "station_en": "swhaj-akhmym-alry",
+                "departure_time": "2:00 AM",
+                "station_id": 5013
+            },
+            {
+                "station_ar": "سوهاج اخميم ( الخلوة )",
+                "station_en": "swhaj-akhmym-alkhlwa",
+                "departure_time": "2:10 AM",
+                "station_id": 5014
+            }
+        ],
+        "scraped_at": "2026-03-21T00:07:03",
+        "to_station_id": 5
+    },
+    {
+        "trip_id": "289226",
+        "from_ar": "سوهاج",
+        "to_ar": "القاهرة",
+        "from_en": "sohag",
+        "to_en": "cairo",
+        "price_egp": "375",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 375
+        },
+        "stations_from": [
+            {
+                "station_ar": "سوهاج   (الشهيد )",
+                "station_en": "swhaj-alshhyd",
+                "departure_time": "9:30 AM",
+                "station_id": 5012
+            },
+            {
+                "station_ar": "سوهاج اخميم ( الري )",
+                "station_en": "swhaj-akhmym-alry",
+                "departure_time": "10:00 AM",
+                "station_id": 5013
+            },
+            {
+                "station_ar": "سوهاج اخميم ( الخلوة )",
+                "station_en": "swhaj-akhmym-alkhlwa",
+                "departure_time": "10:15 AM",
+                "station_id": 5014
+            }
+        ],
+        "scraped_at": "2026-03-21T00:07:03",
+        "to_station_id": 5
+    },
+    {
+        "trip_id": "292465",
+        "from_ar": "سوهاج",
+        "to_ar": "القاهرة",
+        "from_en": "sohag",
+        "to_en": "cairo",
+        "price_egp": "375",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 375
+        },
+        "stations_from": [
+            {
+                "station_ar": "سوهاج   (الشهيد )",
+                "station_en": "swhaj-alshhyd",
+                "departure_time": "12:00 PM",
+                "station_id": 5012
+            },
+            {
+                "station_ar": "سوهاج اخميم ( الري )",
+                "station_en": "swhaj-akhmym-alry",
+                "departure_time": "12:30 PM",
+                "station_id": 5013
+            },
+            {
+                "station_ar": "سوهاج اخميم ( الخلوة )",
+                "station_en": "swhaj-akhmym-alkhlwa",
+                "departure_time": "12:40 PM",
+                "station_id": 5014
+            }
+        ],
+        "scraped_at": "2026-03-21T00:07:03",
+        "to_station_id": 5
+    },
+    {
+        "trip_id": "292678",
+        "from_ar": "سوهاج",
+        "to_ar": "القاهرة",
+        "from_en": "sohag",
+        "to_en": "cairo",
+        "price_egp": "590",
+        "bus_type": "Prestige",
+        "bus_capacity": 56,
+        "seats_info": {
+            "type": "double_deck",
+            "total": 52,
+            "floor_1": {
+                "seats": 12,
+                "seat_type": "single",
+                "price_egp": 470,
+                "description": "الدور الأول - مقعد منفرد"
+            },
+            "floor_2": {
+                "single": {
+                    "seats": 16,
+                    "seat_type": "single",
+                    "price_egp": 590,
+                    "description": "الدور الثاني - مقعد منفرد"
+                },
+                "double": {
+                    "seats": 24,
+                    "seat_type": "double",
+                    "price_egp": 590,
+                    "description": "الدور الثاني - مقعدان"
+                }
+            }
+        },
+        "stations_from": [
+            {
+                "station_ar": "سوهاج   (الشهيد )",
+                "station_en": "swhaj-alshhyd",
+                "departure_time": "1:31 PM",
+                "station_id": 5012
+            },
+            {
+                "station_ar": "سوهاج اخميم ( الري )",
+                "station_en": "swhaj-akhmym-alry",
+                "departure_time": "2:00 PM",
+                "station_id": 5013
+            },
+            {
+                "station_ar": "سوهاج اخميم ( الخلوة )",
+                "station_en": "swhaj-akhmym-alkhlwa",
+                "departure_time": "2:10 PM",
+                "station_id": 5014
+            }
+        ],
+        "scraped_at": "2026-03-21T00:07:03",
+        "to_station_id": 5
+    },
+    {
+        "trip_id": "292464",
+        "from_ar": "سوهاج",
+        "to_ar": "القاهرة",
+        "from_en": "sohag",
+        "to_en": "cairo",
+        "price_egp": "375",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 375
+        },
+        "stations_from": [
+            {
+                "station_ar": "سوهاج   (الشهيد )",
+                "station_en": "swhaj-alshhyd",
+                "departure_time": "7:00 PM",
+                "station_id": 5012
+            },
+            {
+                "station_ar": "سوهاج اخميم ( الري )",
+                "station_en": "swhaj-akhmym-alry",
+                "departure_time": "7:30 PM",
+                "station_id": 5013
+            },
+            {
+                "station_ar": "سوهاج اخميم ( الخلوة )",
+                "station_en": "swhaj-akhmym-alkhlwa",
+                "departure_time": "7:40 PM",
+                "station_id": 5014
+            }
+        ],
+        "scraped_at": "2026-03-21T00:07:03",
+        "to_station_id": 5
+    },
+    {
+        "trip_id": "291226",
+        "from_ar": "سوهاج",
+        "to_ar": "القاهرة",
+        "from_en": "sohag",
+        "to_en": "cairo",
+        "price_egp": "375",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 375
+        },
+        "stations_from": [
+            {
+                "station_ar": "سوهاج   (الشهيد )",
+                "station_en": "swhaj-alshhyd",
+                "departure_time": "10:30 PM",
+                "station_id": 5012
+            },
+            {
+                "station_ar": "سوهاج اخميم ( الري )",
+                "station_en": "swhaj-akhmym-alry",
+                "departure_time": "11:00 PM",
+                "station_id": 5013
+            },
+            {
+                "station_ar": "سوهاج اخميم ( الخلوة )",
+                "station_en": "swhaj-akhmym-alkhlwa",
+                "departure_time": "11:10 PM",
+                "station_id": 5014
+            }
+        ],
+        "scraped_at": "2026-03-21T00:07:03",
+        "to_station_id": 5
+    },
+    {
+        "trip_id": "293048",
+        "from_ar": "سوهاج",
+        "to_ar": "المراغة",
+        "from_en": "sohag",
+        "to_en": "maragha",
+        "price_egp": "340",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 340
+        },
+        "stations_from": [
+            {
+                "station_ar": "سوهاج اخميم ( الخلوة )",
+                "station_en": "swhaj-akhmym-alkhlwa",
+                "departure_time": "3:30 AM",
+                "station_id": 5014
+            },
+            {
+                "station_ar": "سوهاج اخميم ( الري )",
+                "station_en": "swhaj-akhmym-alry",
+                "departure_time": "3:40 AM",
+                "station_id": 5013
+            },
+            {
+                "station_ar": "سوهاج   (الشهيد )",
+                "station_en": "swhaj-alshhyd",
+                "departure_time": "4:00 AM",
+                "station_id": 5012
+            }
+        ],
+        "scraped_at": "2026-03-21T00:07:12",
+        "to_station_id": 5009
+    },
+    {
+        "trip_id": "293048",
+        "from_ar": "سوهاج",
+        "to_ar": "طما",
+        "from_en": "sohag",
+        "to_en": "tima",
+        "price_egp": "340",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 340
+        },
+        "stations_from": [
+            {
+                "station_ar": "سوهاج اخميم ( الخلوة )",
+                "station_en": "swhaj-akhmym-alkhlwa",
+                "departure_time": "3:30 AM",
+                "station_id": 5014
+            },
+            {
+                "station_ar": "سوهاج اخميم ( الري )",
+                "station_en": "swhaj-akhmym-alry",
+                "departure_time": "3:40 AM",
+                "station_id": 5013
+            },
+            {
+                "station_ar": "سوهاج   (الشهيد )",
+                "station_en": "swhaj-alshhyd",
+                "departure_time": "4:00 AM",
+                "station_id": 5012
+            }
+        ],
+        "scraped_at": "2026-03-21T00:07:20",
+        "to_station_id": 5015
+    },
+    {
+        "trip_id": "293048",
+        "from_ar": "سوهاج",
+        "to_ar": "طهطا",
+        "from_en": "sohag",
+        "to_en": "tahta",
+        "price_egp": "340",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 340
+        },
+        "stations_from": [
+            {
+                "station_ar": "سوهاج اخميم ( الخلوة )",
+                "station_en": "swhaj-akhmym-alkhlwa",
+                "departure_time": "3:30 AM",
+                "station_id": 5014
+            },
+            {
+                "station_ar": "سوهاج اخميم ( الري )",
+                "station_en": "swhaj-akhmym-alry",
+                "departure_time": "3:40 AM",
+                "station_id": 5013
+            },
+            {
+                "station_ar": "سوهاج   (الشهيد )",
+                "station_en": "swhaj-alshhyd",
+                "departure_time": "4:00 AM",
+                "station_id": 5012
+            }
+        ],
+        "scraped_at": "2026-03-21T00:07:28",
+        "to_station_id": 5016
+    },
+    {
+        "trip_id": "292391",
+        "from_ar": "طما",
+        "to_ar": "اسيوط",
+        "to_station_id": 36,
+        "from_en": "tima",
+        "to_en": "asyut",
+        "price_egp": "340",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 340
+        },
+        "stations_from": [
+            {
+                "station_ar": "مكتب حجز طما",
+                "station_en": "mktb-hjz-tma",
+                "departure_time": "1:45 PM",
+                "station_id": 5015
+            }
+        ],
+        "scraped_at": "2026-03-21T00:08:02"
+    },
+    {
+        "trip_id": "292403",
+        "from_ar": "طما",
+        "to_ar": "اسيوط",
+        "to_station_id": 36,
+        "from_en": "tima",
+        "to_en": "asyut",
+        "price_egp": "340",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 340
+        },
+        "stations_from": [
+            {
+                "station_ar": "مكتب حجز طما",
+                "station_en": "mktb-hjz-tma",
+                "departure_time": "10:00 PM",
+                "station_id": 5015
+            }
+        ],
+        "scraped_at": "2026-03-21T00:08:02"
+    },
+    {
+        "trip_id": "293049",
+        "from_ar": "طما",
+        "to_ar": "الغردقة",
+        "to_station_id": 1,
+        "from_en": "tima",
+        "to_en": "alghrdqa",
+        "price_egp": "340",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 340
+        },
+        "stations_from": [
+            {
+                "station_ar": "مكتب حجز طما",
+                "station_en": "mktb-hjz-tma",
+                "departure_time": "10:00 AM",
+                "station_id": 5015
+            }
+        ],
+        "scraped_at": "2026-03-21T00:08:11"
+    },
+    {
+        "trip_id": "292391",
+        "from_ar": "طما",
+        "to_ar": "القاهرة",
+        "from_en": "tima",
+        "to_en": "cairo",
+        "price_egp": "350",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 350
+        },
+        "stations_from": [
+            {
+                "station_ar": "مكتب حجز طما",
+                "station_en": "mktb-hjz-tma",
+                "departure_time": "1:45 PM",
+                "station_id": 5015
+            }
+        ],
+        "scraped_at": "2026-03-21T00:08:21",
+        "to_station_id": 5
+    },
+    {
+        "trip_id": "292403",
+        "from_ar": "طما",
+        "to_ar": "القاهرة",
+        "from_en": "tima",
+        "to_en": "cairo",
+        "price_egp": "350",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 350
+        },
+        "stations_from": [
+            {
+                "station_ar": "مكتب حجز طما",
+                "station_en": "mktb-hjz-tma",
+                "departure_time": "10:00 PM",
+                "station_id": 5015
+            }
+        ],
+        "scraped_at": "2026-03-21T00:08:21",
+        "to_station_id": 5
+    },
+    {
+        "trip_id": "291515",
+        "from_ar": "طما",
+        "to_ar": "القاهرة",
+        "from_en": "tima",
+        "to_en": "cairo",
+        "price_egp": "350",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 350
+        },
+        "stations_from": [
+            {
+                "station_ar": "مكتب حجز طما",
+                "station_en": "mktb-hjz-tma",
+                "departure_time": "11:30 PM",
+                "station_id": 5015
+            }
+        ],
+        "scraped_at": "2026-03-21T00:08:21",
+        "to_station_id": 5
+    },
+    {
+        "trip_id": "293049",
+        "from_ar": "طما",
+        "to_ar": "المراغة",
+        "from_en": "tima",
+        "to_en": "maragha",
+        "price_egp": "340",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 340
+        },
+        "stations_from": [
+            {
+                "station_ar": "مكتب حجز طما",
+                "station_en": "mktb-hjz-tma",
+                "departure_time": "10:00 AM",
+                "station_id": 5015
+            }
+        ],
+        "scraped_at": "2026-03-21T00:08:30",
+        "to_station_id": 5009
+    },
+    {
+        "trip_id": "291752",
+        "from_ar": "طما",
+        "to_ar": "المراغة",
+        "from_en": "tima",
+        "to_en": "maragha",
+        "price_egp": "350",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 350
+        },
+        "stations_from": [
+            {
+                "station_ar": "مكتب حجز طما",
+                "station_en": "mktb-hjz-tma",
+                "departure_time": "6:30 AM",
+                "station_id": 5015
+            }
+        ],
+        "scraped_at": "2026-03-21T00:08:30",
+        "to_station_id": 5009
+    },
+    {
+        "trip_id": "293049",
+        "from_ar": "طما",
+        "to_ar": "سوهاج",
+        "from_en": "tima",
+        "to_en": "sohag",
+        "price_egp": "340",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 340
+        },
+        "stations_from": [
+            {
+                "station_ar": "مكتب حجز طما",
+                "station_en": "mktb-hjz-tma",
+                "departure_time": "10:00 AM",
+                "station_id": 5015
+            }
+        ],
+        "scraped_at": "2026-03-21T00:08:39",
+        "to_station_id": 5017
+    },
+    {
+        "trip_id": "293049",
+        "from_ar": "طما",
+        "to_ar": "طهطا",
+        "from_en": "tima",
+        "to_en": "tahta",
+        "price_egp": "340",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 340
+        },
+        "stations_from": [
+            {
+                "station_ar": "مكتب حجز طما",
+                "station_en": "mktb-hjz-tma",
+                "departure_time": "10:00 AM",
+                "station_id": 5015
+            }
+        ],
+        "scraped_at": "2026-03-21T00:08:47",
+        "to_station_id": 5016
+    },
+    {
+        "trip_id": "291752",
+        "from_ar": "طما",
+        "to_ar": "طهطا",
+        "from_en": "tima",
+        "to_en": "tahta",
+        "price_egp": "350",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 350
+        },
+        "stations_from": [
+            {
+                "station_ar": "مكتب حجز طما",
+                "station_en": "mktb-hjz-tma",
+                "departure_time": "6:30 AM",
+                "station_id": 5015
+            }
+        ],
+        "scraped_at": "2026-03-21T00:08:47",
+        "to_station_id": 5016
+    },
+    {
+        "trip_id": "293049",
+        "from_ar": "طهطا",
+        "to_ar": "الغردقة",
+        "to_station_id": 1,
+        "from_en": "tahta",
+        "to_en": "alghrdqa",
+        "price_egp": "340",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 340
+        },
+        "stations_from": [
+            {
+                "station_ar": "مكتب حجز طهطا",
+                "station_en": "mktb-hjz-thta",
+                "departure_time": "10:45 AM",
+                "station_id": 5016
+            }
+        ],
+        "scraped_at": "2026-03-21T00:08:56"
+    },
+    {
+        "trip_id": "291515",
+        "from_ar": "طهطا",
+        "to_ar": "القاهرة",
+        "from_en": "tahta",
+        "to_en": "cairo",
+        "price_egp": "350",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 350
+        },
+        "stations_from": [
+            {
+                "station_ar": "مكتب حجز طهطا",
+                "station_en": "mktb-hjz-thta",
+                "departure_time": "10:30 PM",
+                "station_id": 5016
+            }
+        ],
+        "scraped_at": "2026-03-21T00:09:05",
+        "to_station_id": 5
+    },
+    {
+        "trip_id": "293049",
+        "from_ar": "طهطا",
+        "to_ar": "المراغة",
+        "from_en": "tahta",
+        "to_en": "maragha",
+        "price_egp": "340",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 340
+        },
+        "stations_from": [
+            {
+                "station_ar": "مكتب حجز طهطا",
+                "station_en": "mktb-hjz-thta",
+                "departure_time": "10:45 AM",
+                "station_id": 5016
+            }
+        ],
+        "scraped_at": "2026-03-21T00:09:13",
+        "to_station_id": 5009
+    },
+    {
+        "trip_id": "291752",
+        "from_ar": "طهطا",
+        "to_ar": "المراغة",
+        "from_en": "tahta",
+        "to_en": "maragha",
+        "price_egp": "350",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 350
+        },
+        "stations_from": [
+            {
+                "station_ar": "مكتب حجز طهطا",
+                "station_en": "mktb-hjz-thta",
+                "departure_time": "7:30 AM",
+                "station_id": 5016
+            }
+        ],
+        "scraped_at": "2026-03-21T00:09:13",
+        "to_station_id": 5009
+    },
+    {
+        "trip_id": "293049",
+        "from_ar": "طهطا",
+        "to_ar": "سوهاج",
+        "from_en": "tahta",
+        "to_en": "sohag",
+        "price_egp": "340",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 340
+        },
+        "stations_from": [
+            {
+                "station_ar": "مكتب حجز طهطا",
+                "station_en": "mktb-hjz-thta",
+                "departure_time": "10:45 AM",
+                "station_id": 5016
+            }
+        ],
+        "scraped_at": "2026-03-21T00:09:24",
+        "to_station_id": 5017
+    },
+    {
+        "trip_id": "291515",
+        "from_ar": "طهطا",
+        "to_ar": "طما",
+        "from_en": "tahta",
+        "to_en": "tima",
+        "price_egp": "350",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 350
+        },
+        "stations_from": [
+            {
+                "station_ar": "مكتب حجز طهطا",
+                "station_en": "mktb-hjz-thta",
+                "departure_time": "10:30 PM",
+                "station_id": 5016
+            }
+        ],
+        "scraped_at": "2026-03-21T00:09:34",
+        "to_station_id": 5015
+    },
+    {
+        "trip_id": "293048",
+        "from_ar": "طهطا",
+        "to_ar": "طما",
+        "from_en": "tahta",
+        "to_en": "tima",
+        "price_egp": "340",
+        "bus_type": "Smart",
+        "bus_capacity": 49,
+        "seats_info": {
+            "type": "single_deck",
+            "total": 49,
+            "price_egp": 340
+        },
+        "stations_from": [
+            {
+                "station_ar": "مكتب حجز طهطا",
+                "station_en": "mktb-hjz-thta",
+                "departure_time": "5:30 AM",
+                "station_id": 5016
+            }
+        ],
+        "scraped_at": "2026-03-21T00:09:34",
+        "to_station_id": 5015
+    }
+]

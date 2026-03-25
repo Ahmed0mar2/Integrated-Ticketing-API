@@ -67,12 +67,18 @@ namespace GP.Infrastructure.Migrations
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETUTCDATE()");
 
+                    b.Property<int>("DestinationStationId")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
 
                     b.Property<int>("OccurrenceId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OriginStationId")
                         .HasColumnType("int");
 
                     b.Property<int>("PaymentStatus")
@@ -88,10 +94,10 @@ namespace GP.Infrastructure.Migrations
                         .HasPrecision(10, 2)
                         .HasColumnType("decimal(10,2)");
 
-                    b.Property<DateOnly>("TravelDate")
-                        .HasColumnType("date");
-
                     b.Property<int>("TripId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("TripOccurrenceId")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
@@ -104,19 +110,21 @@ namespace GP.Infrastructure.Migrations
 
                     b.HasIndex("CoachClassId");
 
+                    b.HasIndex("DestinationStationId");
+
                     b.HasIndex("OccurrenceId");
+
+                    b.HasIndex("OriginStationId");
 
                     b.HasIndex("PaymentStatus");
 
                     b.HasIndex("Status");
 
-                    b.HasIndex("TravelDate");
-
                     b.HasIndex("TripId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("TripOccurrenceId");
 
-                    b.HasIndex("TripId", "OccurrenceId", "CoachClassId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Bookings");
                 });
@@ -133,6 +141,9 @@ namespace GP.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("BookingId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CoachClassId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
@@ -158,6 +169,9 @@ namespace GP.Infrastructure.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<int>("OccurrenceId")
+                        .HasColumnType("int");
+
                     b.Property<string>("SeatNumber")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -171,6 +185,10 @@ namespace GP.Infrastructure.Migrations
                     b.HasIndex("BookingId");
 
                     b.HasIndex("BookingId", "PassengerId");
+
+                    b.HasIndex("OccurrenceId", "CoachClassId", "SeatNumber")
+                        .IsUnique()
+                        .HasDatabaseName("IX_BookingPassenger_UniqueSeat");
 
                     b.ToTable("BookingPassengers", t =>
                         {
@@ -247,6 +265,12 @@ namespace GP.Infrastructure.Migrations
             modelBuilder.Entity("GP.Domain.Entities.CoachClass", b =>
                 {
                     b.Property<int>("CoachClassId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CoachClassId"));
+
+                    b.Property<int>("DefaultCapacity")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
@@ -357,32 +381,6 @@ namespace GP.Infrastructure.Migrations
                     b.ToTable("MarketplaceListings");
                 });
 
-            modelBuilder.Entity("GP.Domain.Entities.Route", b =>
-                {
-                    b.Property<int>("RouteId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("route_id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RouteId"));
-
-                    b.Property<int>("AgencyId")
-                        .HasColumnType("int")
-                        .HasColumnName("agency_id");
-
-                    b.Property<string>("RouteName")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
-                        .HasColumnName("route_name");
-
-                    b.HasKey("RouteId");
-
-                    b.HasIndex("AgencyId");
-
-                    b.ToTable("routes", (string)null);
-                });
-
             modelBuilder.Entity("GP.Domain.Entities.Stop", b =>
                 {
                     b.Property<int>("StopId")
@@ -391,83 +389,69 @@ namespace GP.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StopId"));
 
+                    b.Property<string>("ArabicName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
                     b.Property<string>("City")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<decimal>("Latitude")
+                    b.Property<string>("Governorate")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal?>("Latitude")
                         .HasPrecision(10, 6)
                         .HasColumnType("decimal(10,6)");
 
-                    b.Property<decimal>("Longitude")
+                    b.Property<decimal?>("Longitude")
                         .HasPrecision(10, 6)
                         .HasColumnType("decimal(10,6)");
 
-                    b.Property<string>("StopName")
+                    b.Property<string>("NormalizedSlug")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
 
                     b.HasKey("StopId");
 
                     b.HasIndex("City");
 
-                    b.HasIndex("StopName", "City")
+                    b.HasIndex("NormalizedSlug")
                         .IsUnique();
 
                     b.ToTable("Stops");
                 });
 
-            modelBuilder.Entity("GP.Domain.Entities.TrainType", b =>
+            modelBuilder.Entity("GP.Domain.Entities.StopAgencyMapping", b =>
                 {
-                    b.Property<int>("TrainTypeId")
+                    b.Property<int>("StopAgencyMappingId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TrainTypeId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StopAgencyMappingId"));
 
-                    b.Property<string>("Name")
+                    b.Property<int>("AgencyId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ExternalStationId")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.HasKey("TrainTypeId");
+                    b.Property<int>("StopId")
+                        .HasColumnType("int");
 
-                    b.HasIndex("Name")
+                    b.HasKey("StopAgencyMappingId");
+
+                    b.HasIndex("StopId");
+
+                    b.HasIndex("AgencyId", "ExternalStationId")
                         .IsUnique();
 
-                    b.ToTable("TrainTypes");
-                });
-
-            modelBuilder.Entity("GP.Domain.Entities.TrainTypeCoachConfig", b =>
-                {
-                    b.Property<int>("TrainTypeCoachConfigId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TrainTypeCoachConfigId"));
-
-                    b.Property<int>("CoachClassId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("NumberOfCoaches")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SeatsPerCoach")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TrainTypeId")
-                        .HasColumnType("int");
-
-                    b.HasKey("TrainTypeCoachConfigId");
-
-                    b.HasIndex("CoachClassId");
-
-                    b.HasIndex("TrainTypeId", "CoachClassId")
-                        .IsUnique();
-
-                    b.ToTable("TrainTypeCoachConfigs");
+                    b.ToTable("StopAgencyMappings");
                 });
 
             modelBuilder.Entity("GP.Domain.Entities.Trip", b =>
@@ -481,10 +465,6 @@ namespace GP.Infrastructure.Migrations
                     b.Property<int>("AgencyId")
                         .HasColumnType("int");
 
-                    b.Property<decimal?>("BasePrice")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("decimal(10,2)");
-
                     b.Property<TimeOnly>("DepartureTime")
                         .HasColumnType("time");
 
@@ -494,34 +474,23 @@ namespace GP.Infrastructure.Migrations
                     b.Property<int>("OriginStationId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("RouteId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ServiceClass")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.Property<int>("ServiceId")
                         .HasColumnType("int");
 
-                    b.Property<int>("TotalDurationMinutes")
+                    b.Property<int?>("TotalDurationMinutes")
                         .HasColumnType("int");
 
-                    b.Property<int>("TotalSeats")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("TrainTypeId")
-                        .HasColumnType("int");
+                    b.Property<string>("TripCode")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("TripId");
 
                     b.HasIndex("AgencyId");
 
-                    b.HasIndex("RouteId");
+                    b.HasIndex("DestinationStationId");
 
                     b.HasIndex("ServiceId");
-
-                    b.HasIndex("TrainTypeId");
 
                     b.HasIndex("OriginStationId", "DestinationStationId", "DepartureTime")
                         .HasDatabaseName("IX_Trips_Search_RouteTime");
@@ -529,48 +498,42 @@ namespace GP.Infrastructure.Migrations
                     b.ToTable("Trips");
                 });
 
-            modelBuilder.Entity("GP.Domain.Entities.TripClassPricing", b =>
+            modelBuilder.Entity("GP.Domain.Entities.TripFare", b =>
                 {
-                    b.Property<int>("TripClassPricingId")
+                    b.Property<int>("TripFareId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TripClassPricingId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TripFareId"));
 
                     b.Property<int>("CoachClassId")
                         .HasColumnType("int");
 
-                    b.Property<decimal?>("FullDistanceKm")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("decimal(10,2)");
-
-                    b.Property<decimal>("FullPrice")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("decimal(10,2)");
-
-                    b.Property<decimal?>("MinimumPrice")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("decimal(10,2)");
-
-                    b.Property<int>("PricingType")
+                    b.Property<int>("DestinationStationId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("RoundingStep")
+                    b.Property<int>("OriginStationId")
                         .HasColumnType("int");
+
+                    b.Property<decimal>("Price")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
 
                     b.Property<int>("TripId")
                         .HasColumnType("int");
 
-                    b.HasKey("TripClassPricingId");
+                    b.HasKey("TripFareId");
 
                     b.HasIndex("CoachClassId");
 
-                    b.HasIndex("TripId");
+                    b.HasIndex("DestinationStationId");
 
-                    b.HasIndex("TripId", "CoachClassId")
+                    b.HasIndex("OriginStationId");
+
+                    b.HasIndex("TripId", "OriginStationId", "DestinationStationId", "CoachClassId")
                         .IsUnique();
 
-                    b.ToTable("TripClassPricings");
+                    b.ToTable("TripFares");
                 });
 
             modelBuilder.Entity("GP.Domain.Entities.TripOccurrence", b =>
@@ -618,10 +581,6 @@ namespace GP.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TripOccurrenceClassInventoryId"));
 
-                    b.Property<decimal?>("BasePrice")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("decimal(10,2)");
-
                     b.Property<int>("CoachClassId")
                         .HasColumnType("int");
 
@@ -660,15 +619,11 @@ namespace GP.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TripStopTimeId"));
 
-                    b.Property<int>("ArrivalOffsetMinutes")
-                        .HasColumnType("int");
+                    b.Property<TimeOnly?>("ArrivalTime")
+                        .HasColumnType("time");
 
-                    b.Property<int>("DepartureOffsetMinutes")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("DistanceFromOriginKm")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("decimal(10,2)");
+                    b.Property<TimeOnly?>("DepartureTime")
+                        .HasColumnType("time");
 
                     b.Property<int>("StationId")
                         .HasColumnType("int");
@@ -682,8 +637,6 @@ namespace GP.Infrastructure.Migrations
                     b.HasKey("TripStopTimeId");
 
                     b.HasIndex("StationId");
-
-                    b.HasIndex("TripId", "StationId");
 
                     b.HasIndex("TripId", "StopSequence")
                         .IsUnique();
@@ -1108,17 +1061,33 @@ namespace GP.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("GP.Domain.Entities.Stop", "DestinationStation")
+                        .WithMany()
+                        .HasForeignKey("DestinationStationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("GP.Domain.Entities.TripOccurrence", "Occurrence")
                         .WithMany()
                         .HasForeignKey("OccurrenceId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("GP.Domain.Entities.Stop", "OriginStation")
+                        .WithMany()
+                        .HasForeignKey("OriginStationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("GP.Domain.Entities.Trip", "Trip")
                         .WithMany()
                         .HasForeignKey("TripId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("GP.Domain.Entities.TripOccurrence", null)
+                        .WithMany("Bookings")
+                        .HasForeignKey("TripOccurrenceId");
 
                     b.HasOne("GP.Domain.Entities.User", "User")
                         .WithMany("Bookings")
@@ -1128,7 +1097,11 @@ namespace GP.Infrastructure.Migrations
 
                     b.Navigation("CoachClass");
 
+                    b.Navigation("DestinationStation");
+
                     b.Navigation("Occurrence");
+
+                    b.Navigation("OriginStation");
 
                     b.Navigation("Trip");
 
@@ -1176,34 +1149,23 @@ namespace GP.Infrastructure.Migrations
                     b.Navigation("Seller");
                 });
 
-            modelBuilder.Entity("GP.Domain.Entities.Route", b =>
+            modelBuilder.Entity("GP.Domain.Entities.StopAgencyMapping", b =>
                 {
                     b.HasOne("GP.Domain.Entities.Agency", "Agency")
-                        .WithMany("Routes")
+                        .WithMany()
                         .HasForeignKey("AgencyId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GP.Domain.Entities.Stop", "Stop")
+                        .WithMany("AgencyMappings")
+                        .HasForeignKey("StopId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Agency");
-                });
 
-            modelBuilder.Entity("GP.Domain.Entities.TrainTypeCoachConfig", b =>
-                {
-                    b.HasOne("GP.Domain.Entities.CoachClass", "CoachClass")
-                        .WithMany("TrainTypeConfigs")
-                        .HasForeignKey("CoachClassId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("GP.Domain.Entities.TrainType", "TrainType")
-                        .WithMany("CoachConfigs")
-                        .HasForeignKey("TrainTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CoachClass");
-
-                    b.Navigation("TrainType");
+                    b.Navigation("Stop");
                 });
 
             modelBuilder.Entity("GP.Domain.Entities.Trip", b =>
@@ -1214,9 +1176,17 @@ namespace GP.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("GP.Domain.Entities.Route", null)
-                        .WithMany("Trips")
-                        .HasForeignKey("RouteId");
+                    b.HasOne("GP.Domain.Entities.Stop", "DestinationStation")
+                        .WithMany()
+                        .HasForeignKey("DestinationStationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GP.Domain.Entities.Stop", "OriginStation")
+                        .WithMany()
+                        .HasForeignKey("OriginStationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("GP.Domain.Entities.Calendar", "Calendar")
                         .WithMany("Trips")
@@ -1224,33 +1194,46 @@ namespace GP.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("GP.Domain.Entities.TrainType", "TrainType")
-                        .WithMany()
-                        .HasForeignKey("TrainTypeId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.Navigation("Agency");
 
                     b.Navigation("Calendar");
 
-                    b.Navigation("TrainType");
+                    b.Navigation("DestinationStation");
+
+                    b.Navigation("OriginStation");
                 });
 
-            modelBuilder.Entity("GP.Domain.Entities.TripClassPricing", b =>
+            modelBuilder.Entity("GP.Domain.Entities.TripFare", b =>
                 {
                     b.HasOne("GP.Domain.Entities.CoachClass", "CoachClass")
                         .WithMany("PricingConfigs")
                         .HasForeignKey("CoachClassId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GP.Domain.Entities.Stop", "DestinationStation")
+                        .WithMany()
+                        .HasForeignKey("DestinationStationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GP.Domain.Entities.Stop", "OriginStation")
+                        .WithMany()
+                        .HasForeignKey("OriginStationId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("GP.Domain.Entities.Trip", "Trip")
-                        .WithMany("TripClassPricings")
+                        .WithMany("TripFares")
                         .HasForeignKey("TripId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("CoachClass");
+
+                    b.Navigation("DestinationStation");
+
+                    b.Navigation("OriginStation");
 
                     b.Navigation("Trip");
                 });
@@ -1290,7 +1273,7 @@ namespace GP.Infrastructure.Migrations
                     b.HasOne("GP.Domain.Entities.Stop", "Station")
                         .WithMany("TripStopTimes")
                         .HasForeignKey("StationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("GP.Domain.Entities.Trip", "Trip")
@@ -1379,8 +1362,6 @@ namespace GP.Infrastructure.Migrations
 
             modelBuilder.Entity("GP.Domain.Entities.Agency", b =>
                 {
-                    b.Navigation("Routes");
-
                     b.Navigation("Trips");
                 });
 
@@ -1401,8 +1382,6 @@ namespace GP.Infrastructure.Migrations
                     b.Navigation("Inventories");
 
                     b.Navigation("PricingConfigs");
-
-                    b.Navigation("TrainTypeConfigs");
                 });
 
             modelBuilder.Entity("GP.Domain.Entities.Country", b =>
@@ -1410,24 +1389,16 @@ namespace GP.Infrastructure.Migrations
                     b.Navigation("Users");
                 });
 
-            modelBuilder.Entity("GP.Domain.Entities.Route", b =>
-                {
-                    b.Navigation("Trips");
-                });
-
             modelBuilder.Entity("GP.Domain.Entities.Stop", b =>
                 {
-                    b.Navigation("TripStopTimes");
-                });
+                    b.Navigation("AgencyMappings");
 
-            modelBuilder.Entity("GP.Domain.Entities.TrainType", b =>
-                {
-                    b.Navigation("CoachConfigs");
+                    b.Navigation("TripStopTimes");
                 });
 
             modelBuilder.Entity("GP.Domain.Entities.Trip", b =>
                 {
-                    b.Navigation("TripClassPricings");
+                    b.Navigation("TripFares");
 
                     b.Navigation("TripOccurrences");
 
@@ -1436,6 +1407,8 @@ namespace GP.Infrastructure.Migrations
 
             modelBuilder.Entity("GP.Domain.Entities.TripOccurrence", b =>
                 {
+                    b.Navigation("Bookings");
+
                     b.Navigation("ClassInventories");
                 });
 

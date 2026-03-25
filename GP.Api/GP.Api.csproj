@@ -35,4 +35,9 @@
     <ProjectReference Include="..\GP.Infrastructure\GP.Infrastructure.csproj" />
   </ItemGroup>
 
+
+	<ItemGroup>
+	  <Folder Include="Data\SeedData\" />
+	</ItemGroup>
+
 </Project>

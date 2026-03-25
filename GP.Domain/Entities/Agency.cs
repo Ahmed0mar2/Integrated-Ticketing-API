@@ -14,6 +14,5 @@ namespace GP.Domain.Entities
         public AgencyType AgencyType { get; set; }
 
         public ICollection<Trip> Trips { get; set; } = new List<Trip>();
-        public ICollection<Route> Routes { get; set; } = new List<Route>();
     }
 }

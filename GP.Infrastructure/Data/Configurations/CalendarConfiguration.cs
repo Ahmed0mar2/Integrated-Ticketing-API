@@ -17,7 +17,7 @@ namespace GP.Infrastructure.Data.Configurations
 
             builder.Property(c => c.StartDate).IsRequired();
             builder.Property(c => c.EndDate).IsRequired();
-
+            builder.Property(c => c.ServiceId).ValueGeneratedOnAdd();
             // All day-of-week bools required
             builder.Property(c => c.Monday).IsRequired();
             builder.Property(c => c.Tuesday).IsRequired();

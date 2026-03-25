@@ -12,10 +12,10 @@ namespace GP.Domain.Entities
     {
         public int BookingId { get; set; }
         public int UserId { get; set; }
-        public int TripId { get; set; }
         public int OccurrenceId { get; set; }  
-        public int CoachClassId { get; set; }  
-        public DateOnly TravelDate { get; set; }  
+        public int CoachClassId { get; set; }
+        public int OriginStationId { get; set; }
+        public int DestinationStationId { get; set; }
         public int SeatsBooked { get; set; }  
         public decimal TotalPrice { get; set; }  
         public DateTime BookingTime { get; set; } 
@@ -28,5 +28,7 @@ namespace GP.Domain.Entities
         public TripOccurrence Occurrence { get; set; } = null!;
         public CoachClass CoachClass { get; set; } = null!;
         public ICollection<BookingPassenger> BookingPassengers { get; set; } = new List<BookingPassenger>();
+        public Stop OriginStation { get; set; } = null!;
+        public Stop DestinationStation { get; set; } = null!;
     }
 }

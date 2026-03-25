@@ -13,7 +13,6 @@ using GP.Infrastructure.Data;
 using GP.Infrastructure.Identity;
 using GP.Infrastructure.Interfaces;
 using GP.Infrastructure.Repositories;
-using GP.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -208,9 +207,12 @@ public static class ServiceCollectionExtensions
         services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
         services.AddScoped<IAdminUserService, AdminUserService>();
 
-        // Database Importers
-        services.AddScoped<GoBusDatabaseImporter>();
-        services.AddScoped<TrainDatabaseImporter>();
+        // Register Data Seeders
+        services.AddScoped<GP.Infrastructure.Services.MasterStationSeeder>();
+        services.AddScoped<GP.Infrastructure.Services.GoBusTripSeeder>();
+        services.AddScoped<GP.Infrastructure.Services.HorusTripSeeder>();
+        services.AddScoped<GP.Infrastructure.Services.BlueBusTripSeeder>();
+        services.AddScoped<GP.Infrastructure.Services.EnrTripSeeder>();
 
         // User profile & files 
         services.AddScoped<IFileService, FileService>();

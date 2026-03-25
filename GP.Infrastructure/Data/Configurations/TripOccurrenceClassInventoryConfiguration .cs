@@ -20,8 +20,6 @@ namespace GP.Infrastructure.Data.Configurations
             builder.Property(t => t.CoachClassId).IsRequired();
             builder.Property(t => t.TotalSeats).IsRequired();
             builder.Property(t => t.RemainingSeats).IsRequired();
-            builder.Property(t => t.BasePrice).IsRequired(false).HasPrecision(10, 2);
-
             // Unique: One inventory per occurrence per class
             builder.HasIndex(t => new { t.TripOccurrenceId, t.CoachClassId }).IsUnique();
 

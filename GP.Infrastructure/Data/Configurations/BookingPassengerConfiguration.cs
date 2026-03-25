@@ -31,6 +31,9 @@ namespace GP.Infrastructure.Data.Configurations
             // Indexes
             builder.HasIndex(bp => bp.BookingId);
             builder.HasIndex(bp => new { bp.BookingId, bp.PassengerId });
+            builder.HasIndex(bp => new { bp.OccurrenceId, bp.CoachClassId, bp.SeatNumber })
+                   .IsUnique()
+                   .HasDatabaseName("IX_BookingPassenger_UniqueSeat");
 
             // Relationship
             builder.HasOne(bp => bp.Booking)
