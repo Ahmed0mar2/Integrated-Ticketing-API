@@ -1,8 +1,6 @@
 # Rehla API Specification
 
-Frontend integration guide for the `Rehla` backend API, intended for the Flutter and Angular teams.
-
-This document is derived from the current controller layer, DTOs, FluentValidation rules, service-layer business logic, authentication setup, and response wrappers in the workspace.
+Frontend integration guide for Flutter and Angular teams.
 
 ---
 
@@ -10,11 +8,11 @@ This document is derived from the current controller layer, DTOs, FluentValidati
 
 - **Base Route Prefix:** `/api`
 - **Authentication Scheme:** `JWT Bearer`
-- **Primary Response Wrapper:** `ApiResponse<T>` or `ApiResponse`
-- **Global Validation Behavior:** Request DTO validation is enforced through a custom validation filter using FluentValidation.
-- **Unhandled Exceptions:** Returned as RFC-style `ProblemDetails` from the global exception handler.
+- **Primary Wrapper:** `ApiResponse<T>` / `ApiResponse`
+- **Validation:** FluentValidation + validation filter
+- **Unhandled exceptions:** RFC `ProblemDetails`
 
-### Standard Success Response Shape
+### Standard Success Wrapper
 
 ```json
 {
@@ -26,225 +24,680 @@ This document is derived from the current controller layer, DTOs, FluentValidati
 }
 ```
 
-### Standard Error Response Shape
+### Standard Error Wrapper
 
 ```json
 {
   "success": false,
   "message": "Validation failed",
   "data": null,
-  "errors": [
-    "Email is required",
-    "Password must be at least 8 characters"
-  ],
+  "errors": ["Error message"],
   "timestamp": "2026-03-06T12:00:00Z"
 }
 ```
 
-### Unhandled Server Error Shape
+---
 
+# 1. Authentication API
+
+Base route: `/api/Auth`
+
+## 1.1 Register User
+
+### Endpoint Overview
+- **Method:** `POST`
+- **URL:** `/api/Auth/register`
+- **Business Use Case:** Creates identity + domain user and returns access/refresh tokens.
+
+### Authentication / Authorization
+- **JWT Required:** No
+- **Role Required:** None
+
+### Request Payload
 ```json
 {
-  "type": "[https://tools.ietf.org/html/rfc7231#section-6.6.1](https://tools.ietf.org/html/rfc7231#section-6.6.1)",
-  "title": "Server Error",
-  "status": 500,
-  "detail": "Unexpected error message"
+  "email": "user@example.com",
+  "password": "Password123",
+  "confirmPassword": "Password123",
+  "phoneNumber": "+201234567890",
+  "firstName": "Ahmed",
+  "lastName": "Hassan",
+  "familyName": "Mohamed",
+  "gender": 1,
+  "dateOfBirth": "1995-05-15",
+  "nationalIdNumber": "29805151234567",
+  "countryCode": "EG"
+}
+```
+
+### Request Field Reference
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| email | string | Yes | Valid email, max 255 |
+| password | string | Yes | Min 8, upper/lower/digit |
+| confirmPassword | string | Yes | Must match password |
+| phoneNumber | string | Yes | E.164 format |
+| firstName | string | Yes | Max 100 |
+| lastName | string | Yes | Max 100 |
+| familyName | string | Yes | Max 100 |
+| gender | int | Yes | 1=Male,2=Female,3=Other |
+| dateOfBirth | date | Yes | At least 16 years old |
+| nationalIdNumber | string | No | 14 digits if provided |
+| countryCode | string | Yes | 2 chars, must exist |
+
+### Response Example (200 OK)
+```json
+{
+  "success": true,
+  "message": "Registration successful",
+  "data": {
+    "accessToken": "eyJ...",
+    "refreshToken": "base64-refresh-token",
+    "expiresAt": "2026-03-06T13:00:00Z",
+    "user": {
+      "userId": 15,
+      "email": "user@example.com",
+      "fullName": "Ahmed Mohamed Hassan",
+      "phoneNumber": "+201234567890",
+      "gender": "Male",
+      "countryCode": "EG",
+      "countryName": "Egyptian",
+      "profilePictureUrl": null,
+      "roles": ["User"]
+    }
+  },
+  "errors": null,
+  "timestamp": "2026-03-06T12:00:00Z"
+}
+```
+
+## 1.2 Login
+
+### Endpoint Overview
+- **Method:** `POST`
+- **URL:** `/api/Auth/login`
+- **Business Use Case:** Authenticates user and issues tokens.
+
+### Authentication / Authorization
+- **JWT Required:** No
+- **Role Required:** None
+
+### Request Payload
+```json
+{
+  "email": "user@example.com",
+  "password": "Password123",
+  "deviceInfo": "Android"
+}
+```
+
+### Request Field Reference
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| email | string | Yes | Valid email |
+| password | string | Yes | Non-empty |
+| deviceInfo | string | No | Optional device metadata |
+
+### Response Example (200 OK)
+```json
+{
+  "success": true,
+  "message": "Login successful",
+  "data": {
+    "accessToken": "eyJ...",
+    "refreshToken": "base64-refresh-token",
+    "expiresAt": "2026-03-06T13:00:00Z",
+    "user": {
+      "userId": 15,
+      "email": "user@example.com",
+      "fullName": "Ahmed Mohamed Hassan",
+      "phoneNumber": "+201234567890",
+      "gender": "Male",
+      "countryCode": "EG",
+      "countryName": "Egyptian",
+      "profilePictureUrl": null,
+      "roles": ["User"]
+    }
+  },
+  "errors": null,
+  "timestamp": "2026-03-06T12:00:00Z"
+}
+```
+
+## 1.3 Refresh Access Token
+
+### Endpoint Overview
+- **Method:** `POST`
+- **URL:** `/api/Auth/refresh`
+- **Business Use Case:** Rotates refresh token and returns new access token.
+
+### Authentication / Authorization
+- **JWT Required:** No
+- **Role Required:** None
+
+### Request Payload
+```json
+{ "refreshToken": "<token>" }
+```
+
+### Request Field Reference
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| refreshToken | string | Yes | Must be active token |
+
+### Response Example (200 OK)
+```json
+{
+  "success": true,
+  "message": "Token refreshed successfully",
+  "data": {
+    "accessToken": "eyJ...",
+    "refreshToken": "new-refresh-token",
+    "expiresAt": "2026-03-06T13:00:00Z",
+    "user": { "userId": 15, "email": "user@example.com", "fullName": "Ahmed Mohamed Hassan", "phoneNumber": "+201234567890", "gender": "Male", "countryCode": "EG", "countryName": "Egyptian", "profilePictureUrl": null, "roles": ["User"] }
+  },
+  "errors": null,
+  "timestamp": "2026-03-06T12:00:00Z"
+}
+```
+
+## 1.4 Revoke Specific Refresh Token
+
+### Endpoint Overview
+- **Method:** `POST`
+- **URL:** `/api/Auth/revoke`
+- **Business Use Case:** Logs out one session/device by revoking refresh token.
+
+### Authentication / Authorization
+- **JWT Required:** No
+- **Role Required:** None
+
+### Request Payload
+```json
+{ "refreshToken": "<token>" }
+```
+
+### Request Field Reference
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| refreshToken | string | Yes | Required |
+
+### Response Example (200 OK)
+```json
+{ "success": true, "message": "Token revoked successfully", "data": null, "errors": null, "timestamp": "2026-03-06T12:00:00Z" }
+```
+
+## 1.5 Revoke All User Tokens
+
+### Endpoint Overview
+- **Method:** `POST`
+- **URL:** `/api/Auth/revoke-all`
+- **Business Use Case:** Logs out user from all devices.
+
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** User/Admin/Partner (authenticated)
+
+### Request Payload
+No request body.
+
+### Response Example (200 OK)
+```json
+{ "success": true, "message": "Revoked 3 token(s)", "data": null, "errors": null, "timestamp": "2026-03-06T12:00:00Z" }
+```
+
+## 1.6 Get Current Authenticated User
+
+### Endpoint Overview
+- **Method:** `GET`
+- **URL:** `/api/Auth/me`
+- **Business Use Case:** Returns authenticated claim snapshot.
+
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** Authenticated user
+
+### Request Payload
+No request body.
+
+### Response Example (200 OK)
+```json
+{
+  "success": true,
+  "message": "Operation successful",
+  "data": {
+    "userId": "15",
+    "email": "user@example.com",
+    "name": "Ahmed Hassan",
+    "claims": [{ "type": "domain_user_id", "value": "15" }]
+  },
+  "errors": null,
+  "timestamp": "2026-03-06T12:00:00Z"
+}
+```
+
+## 1.7 Send Verification Email
+
+### Endpoint Overview
+- **Method:** `POST`
+- **URL:** `/api/Auth/send-verification-email`
+- **Business Use Case:** Sends email verification link.
+
+### Authentication / Authorization
+- **JWT Required:** No
+- **Role Required:** None
+
+### Request Payload
+```json
+{ "email": "user@example.com" }
+```
+
+### Request Field Reference
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| email | string | Yes | Valid email format |
+
+### Response Example (200 OK)
+```json
+{ "success": true, "message": "Verification email sent successfully", "data": null, "errors": null, "timestamp": "2026-03-06T12:00:00Z" }
+```
+
+## 1.8 Verify Email
+
+### Endpoint Overview
+- **Method:** `POST`
+- **URL:** `/api/Auth/verify-email`
+- **Business Use Case:** Confirms account email with token.
+
+### Authentication / Authorization
+- **JWT Required:** No
+- **Role Required:** None
+
+### Request Payload
+```json
+{ "userId": "7", "token": "<token>" }
+```
+
+### Request Field Reference
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| userId | string | Yes | Identity user id (string form) |
+| token | string | Yes | Email confirmation token |
+
+### Response Example (200 OK)
+```json
+{ "success": true, "message": "Email verified successfully", "data": null, "errors": null, "timestamp": "2026-03-06T12:00:00Z" }
+```
+
+## 1.9 Forgot Password
+
+### Endpoint Overview
+- **Method:** `POST`
+- **URL:** `/api/Auth/forgot-password`
+- **Business Use Case:** Sends reset link (anti-enumeration friendly response).
+
+### Authentication / Authorization
+- **JWT Required:** No
+- **Role Required:** None
+
+### Request Payload
+```json
+{ "email": "user@example.com" }
+```
+
+### Request Field Reference
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| email | string | Yes | Valid email |
+
+### Response Example (200 OK)
+```json
+{ "success": true, "message": "If your email is registered, you will receive a password reset link", "data": null, "errors": null, "timestamp": "2026-03-06T12:00:00Z" }
+```
+
+## 1.10 Reset Password
+
+### Endpoint Overview
+- **Method:** `POST`
+- **URL:** `/api/Auth/reset-password`
+- **Business Use Case:** Resets password by email+token.
+
+### Authentication / Authorization
+- **JWT Required:** No
+- **Role Required:** None
+
+### Request Payload
+```json
+{
+  "email": "user@example.com",
+  "token": "<token>",
+  "newPassword": "NewPassword123",
+  "confirmPassword": "NewPassword123"
+}
+```
+
+### Request Field Reference
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| email | string | Yes | Valid email |
+| token | string | Yes | Password reset token |
+| newPassword | string | Yes | Min 8, upper/lower/digit |
+| confirmPassword | string | Yes | Must match newPassword |
+
+### Response Example (200 OK)
+```json
+{ "success": true, "message": "Password reset successfully", "data": null, "errors": null, "timestamp": "2026-03-06T12:00:00Z" }
+```
+
+## 1.11 Change Password
+
+### Endpoint Overview
+- **Method:** `POST`
+- **URL:** `/api/Auth/change-password`
+- **Business Use Case:** Changes current authenticated user's password.
+
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** Authenticated user
+
+### Request Payload
+```json
+{
+  "currentPassword": "OldPassword123",
+  "newPassword": "NewPassword123",
+  "confirmPassword": "NewPassword123"
+}
+```
+
+### Request Field Reference
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| currentPassword | string | Yes | Current user password |
+| newPassword | string | Yes | Min 8, upper/lower/digit |
+| confirmPassword | string | Yes | Must match newPassword |
+
+### Response Example (200 OK)
+```json
+{ "success": true, "message": "Password changed successfully", "data": null, "errors": null, "timestamp": "2026-03-06T12:00:00Z" }
+```
+
+---
+
+# 2. Countries API
+
+Base route: `/api/Countries`
+
+## 2.1 Get Countries
+
+### Endpoint Overview
+- **Method:** `GET`
+- **URL:** `/api/Countries`
+- **Business Use Case:** Returns countries for registration and dropdowns.
+
+### Authentication / Authorization
+- **JWT Required:** No
+- **Role Required:** None
+
+### Request Payload
+No request body.
+
+### Response Example (200 OK)
+```json
+{
+  "success": true,
+  "message": "Operation successful",
+  "data": [
+    { "countryCode": "EG", "countryName": "Egypt", "nationalityName": "Egyptian", "phoneCode": "+20", "allowsTrainBooking": true }
+  ],
+  "errors": null,
+  "timestamp": "2026-03-06T12:00:00Z"
 }
 ```
 
 ---
 
-## Authentication Notes
-
-### JWT Behavior
-The API uses JWT Bearer authentication. Send the token in the header:
-```http
-Authorization: Bearer <access_token>
-```
-
-### JWT Claims Issued on Login/Register/Refresh
-The access token includes these important claims:
-- `nameidentifier`: Identity user id
-- `email`: user email
-- `name`: user display name (`FirstName LastName`)
-- `domain_user_id`: domain user id
-- `jti`: token unique identifier
-- one or more role claims
-
-### Role Requirements
-- Authentication endpoints use anonymous access or authenticated access depending on the route.
-- Admin user management endpoints require the `RequireAdminRole` policy (Admin role).
-
----
-
-# API Endpoints
-
----
-
-# 1. Authentication API
-Base route: `/api/Auth`
-
-## 1.1 Register User
-- **Method:** `POST`
-- **URL:** `/api/Auth/register`
-- **Auth:** None
-- **Payload:** User registration details (email, password, name, phone, gender, dob, national ID, country code).
-- **Response:** 200 OK with `accessToken`, `refreshToken`, and user object.
-
-## 1.2 Login
-- **Method:** `POST`
-- **URL:** `/api/Auth/login`
-- **Auth:** None
-- **Payload:** `{ "email": "...", "password": "...", "deviceInfo": "..." }`
-- **Response:** 200 OK with tokens and user object.
-
-## 1.3 Refresh Access Token
-- **Method:** `POST`
-- **URL:** `/api/Auth/refresh`
-- **Auth:** None
-- **Payload:** `{ "refreshToken": "..." }`
-- **Response:** 200 OK with fresh tokens.
-
-## 1.4 Revoke Specific Refresh Token
-- **Method:** `POST`
-- **URL:** `/api/Auth/revoke`
-- **Auth:** None
-- **Payload:** `{ "refreshToken": "..." }`
-
-## 1.5 Revoke All User Tokens
-- **Method:** `POST`
-- **URL:** `/api/Auth/revoke-all`
-- **Auth:** Yes (Bearer)
-
-## 1.6 Get Current Authenticated User (Claims)
-- **Method:** `GET`
-- **URL:** `/api/Auth/me`
-- **Auth:** Yes (Bearer)
-- **Response:** 200 OK returning raw JWT claims.
-
-## 1.7 Send Verification Email
-- **Method:** `POST`
-- **URL:** `/api/Auth/send-verification-email`
-- **Auth:** None
-
-## 1.8 Verify Email
-- **Method:** `POST`
-- **URL:** `/api/Auth/verify-email`
-- **Auth:** None
-- **Payload:** `{ "userId": "...", "token": "..." }`
-
-## 1.9 Forgot Password
-- **Method:** `POST`
-- **URL:** `/api/Auth/forgot-password`
-- **Auth:** None
-
-## 1.10 Reset Password
-- **Method:** `POST`
-- **URL:** `/api/Auth/reset-password`
-- **Auth:** None
-- **Payload:** `{ "email": "...", "token": "...", "newPassword": "...", "confirmPassword": "..." }`
-
-## 1.11 Change Password
-- **Method:** `POST`
-- **URL:** `/api/Auth/change-password`
-- **Auth:** Yes (Bearer)
-- **Payload:** `{ "currentPassword": "...", "newPassword": "...", "confirmPassword": "..." }`
-
----
-
-# 2. Countries API
-Base route: `/api/Countries`
-
-## 2.1 Get Countries
-- **Method:** `GET`
-- **URL:** `/api/Countries`
-- **Auth:** None
-- **Response:** 200 OK. Returns complete list of countries including `phoneCode` and `allowsTrainBooking` flags.
-
----
-
 # 3. Data Seeder API
-Base route: `/api/Seed`
-*(Requires JWT Bearer token and `RequireAdminRole` policy)*
 
-> Note: seed endpoints. Recommended sequence:
->1. `POST /api/Seed/init-identity` (creates roles + admin) — run once before any other secure operations.
->2. `POST /api/Seed/import-master-stations` (loads master stations & mappings) — run before agency trip imports.
->3. Agency-specific imports: `import-horus`, `import-bluebus`, `import-gobus`, `import-trains` (order between agency imports is flexible, but master stations must exist first).
+Base route: `/api/Seed`
+
+All endpoints require Admin policy.
 
 ## 3.1 Initialize Identity
+### Endpoint Overview
 - **Method:** `POST`
 - **URL:** `/api/Seed/init-identity`
-- **Description:** Seeds default roles (`Admin`, `User`, `Partner`) and the default admin credentials.
+- **Business Use Case:** Seeds default roles + admin user.
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** Admin
+### Request Payload
+No request body.
+### Response Example (200 OK)
+```json
+{ "success": true, "message": "Roles and Admin credentials seeded successfully!", "data": null, "errors": null, "timestamp": "2026-03-06T12:00:00Z" }
+```
 
 ## 3.2 Import Master Stations
+### Endpoint Overview
 - **Method:** `POST`
 - **URL:** `/api/Seed/import-master-stations`
-- **Description:** Imports the unified master station spatial database and agency mapping (JSON file). Must run before importing agency trips.
+- **Business Use Case:** Imports spatial master stations + agency mappings.
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** Admin
+### Request Payload
+No request body.
+### Response Example (200 OK)
+```json
+{ "success": true, "message": "Master Stations imported successfully!", "data": null, "errors": null, "timestamp": "2026-03-06T12:00:00Z" }
+```
 
-## 3.3 Import Horus Trips
+## 3.3 Import Horus
+### Endpoint Overview
 - **Method:** `POST`
 - **URL:** `/api/Seed/import-horus`
-- **Description:** Imports Horus bus trips, schedules, and flat pricing matrices from JSON.
+- **Business Use Case:** Imports Horus schedules and fares.
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** Admin
+### Request Payload
+No request body.
+### Response Example (200 OK)
+```json
+{ "success": true, "message": "Horus Trips imported successfully!", "data": null, "errors": null, "timestamp": "2026-03-06T12:00:00Z" }
+```
 
-## 3.4 Import GoBus Data
-- **Method:** `POST`
-- **URL:** `/api/Seed/import-gobus`
-- **Description:** Imports GoBus trips and generates synthetic Trip blueprints (CSV or JSON input supported).
-
-## 3.5 Import Blue Bus Trips
+## 3.4 Import BlueBus
+### Endpoint Overview
 - **Method:** `POST`
 - **URL:** `/api/Seed/import-bluebus`
-- **Description:** Imports premium Blue Bus trips including destination-based pricing matrices.
+- **Business Use Case:** Imports BlueBus trip blueprints and destination fare matrices.
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** Admin
+### Request Payload
+No request body.
+### Response Example (200 OK)
+```json
+{ "success": true, "message": "Blue Bus Trips imported successfully!", "data": null, "errors": null, "timestamp": "2026-03-06T12:00:00Z" }
+```
 
-## 3.6 Import Train Data
+## 3.5 Import GoBus
+### Endpoint Overview
+- **Method:** `POST`
+- **URL:** `/api/Seed/import-gobus`
+- **Business Use Case:** Imports GoBus trips and synthetic route blueprints.
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** Admin
+### Request Payload
+No request body.
+### Response Example (200 OK)
+```json
+{ "success": true, "message": "GoBus Trips imported successfully!", "data": null, "errors": null, "timestamp": "2026-03-06T12:00:00Z" }
+```
+
+## 3.6 Import Trains
+### Endpoint Overview
 - **Method:** `POST`
 - **URL:** `/api/Seed/import-trains`
-- **Auth:** None
-- **Description:** Imports ENR train blueprints, multi-stop sequences, and tiered pricing matrices (JSON/CSV input supported).
+- **Business Use Case:** Imports ENR schedules, stop sequence, and fare matrix.
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** Admin
+### Request Payload
+No request body.
+### Response Example (200 OK)
+```json
+{ "success": true, "message": "ENR Trains imported successfully!", "data": null, "errors": null, "timestamp": "2026-03-06T12:00:00Z" }
+```
+
+## 3.7 Generate Occurrences
+### Endpoint Overview
+- **Method:** `POST`
+- **URL:** `/api/Seed/generate-occurrences`
+- **Business Use Case:** Generates next 60-day occurrences and class inventories.
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** Admin
+### Request Payload
+No request body.
+### Response Example (200 OK)
+```json
+{ "success": true, "message": "60-Day Calendar generated successfully!", "data": null, "errors": null, "timestamp": "2026-03-06T12:00:00Z" }
+```
 
 ---
 
 # 4. Admin Users API
+
 Base route: `/api/admin/users`
-*(Requires JWT Bearer token and `RequireAdminRole` policy)*
+
+All endpoints require Admin policy.
 
 ## 4.1 Get All Users
+### Endpoint Overview
 - **Method:** `GET`
 - **URL:** `/api/admin/users`
-- **Response:** 200 OK with alphabetically sorted array of all domain users.
+- **Business Use Case:** Lists users for admin management.
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** Admin
+### Request Payload
+No request body.
+### Response Example (200 OK)
+```json
+{
+  "success": true,
+  "message": "Users retrieved successfully.",
+  "data": [
+    { "userId": 15, "email": "user@example.com", "fullName": "Ahmed Mohamed Hassan", "phoneNumber": "+201234567890", "gender": "Male", "countryCode": "EG", "countryName": "Egypt", "profilePictureUrl": null, "roles": ["User"] }
+  ],
+  "errors": null,
+  "timestamp": "2026-03-06T12:00:00Z"
+}
+```
 
 ## 4.2 Get User by ID
+### Endpoint Overview
 - **Method:** `GET`
 - **URL:** `/api/admin/users/{id}`
-- **Response:** 200 OK returning `AdminUserDetailDto` (merged domain + identity data).
+- **Business Use Case:** Fetches detailed domain + identity user profile.
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** Admin
+### Request Payload
+No request body.
+### Response Example (200 OK)
+```json
+{
+  "success": true,
+  "message": "User retrieved successfully.",
+  "data": {
+    "userId": 15,
+    "fullName": "Ahmed Mohamed Hassan",
+    "email": "user@example.com",
+    "phone": "+201234567890",
+    "nationalIdNumber": "29805151234567",
+    "totalTripsCount": 5,
+    "totalDistanceTraveled": 1200.5,
+    "createdAt": "2026-03-01T10:00:00Z",
+    "lastLoginAt": "2026-03-05T09:00:00Z",
+    "isActive": true
+  },
+  "errors": null,
+  "timestamp": "2026-03-06T12:00:00Z"
+}
+```
 
 ## 4.3 Toggle User Status
+### Endpoint Overview
 - **Method:** `PATCH`
 - **URL:** `/api/admin/users/{id}/toggle-status`
-- **Business Rule:** Rejects deactivating the last active Admin.
+- **Business Use Case:** Enables/disables account access.
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** Admin
+### Request Payload
+No request body.
+### Response Example (200 OK)
+```json
+{ "success": true, "message": "User disabled successfully.", "data": null, "errors": null, "timestamp": "2026-03-06T12:00:00Z" }
+```
 
 ## 4.4 Assign Role
+### Endpoint Overview
 - **Method:** `POST`
 - **URL:** `/api/admin/users/{id}/roles`
-- **Payload:** `{ "role": "Admin" }`
+- **Business Use Case:** Assigns an existing system role to target user.
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** Admin
+### Request Payload
+```json
+{ "role": "Partner" }
+```
+### Request Field Reference
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| role | string | Yes | Must exist in Identity roles |
+### Response Example (200 OK)
+```json
+{ "success": true, "message": "Role assigned successfully.", "data": null, "errors": null, "timestamp": "2026-03-06T12:00:00Z" }
+```
 
 ## 4.5 Delete User
+### Endpoint Overview
 - **Method:** `DELETE`
 - **URL:** `/api/admin/users/{id}`
-- **Business Rule:** Fails (409 Conflict) if user has existing Bookings.
+- **Business Use Case:** Deletes user from Identity and domain safely.
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** Admin
+### Request Payload
+No request body.
+### Response Example (200 OK)
+```json
+{ "success": true, "message": "User deleted successfully.", "data": null, "errors": null, "timestamp": "2026-03-06T12:00:00Z" }
+```
 
 ---
 
 # 5. User Profile API
-Base route: `/api/users`
-*(Requires JWT Bearer token)*
+
+Base route: `/api/Users`
 
 ## 5.1 Get My Profile
+### Endpoint Overview
 - **Method:** `GET`
 - **URL:** `/api/Users/me`
-- **Business Use Case:** Retrieve the authenticated user's profile, including gamification stats and digital wallet balance.
-- **Response (200):**
+- **Business Use Case:** Returns authenticated user's profile, stats, and wallet.
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** Authenticated user
+### Request Payload
+No request body.
+### Response Example (200 OK)
 ```json
 {
   "success": true,
@@ -258,9 +711,11 @@ Base route: `/api/users`
     "phoneNumber": "+201234567890",
     "gender": "Male",
     "profilePictureUrl": "images/profiles/abcd.jpg",
+    "countryCode": "EG",
+    "countryName": "Egypt",
     "totalTripsCount": 12,
     "totalDistanceTraveled": 345.5,
-    "walletBalance": 50.00
+    "walletBalance": 50.0
   },
   "errors": null,
   "timestamp": "2026-03-10T00:00:00Z"
@@ -268,10 +723,14 @@ Base route: `/api/users`
 ```
 
 ## 5.2 Update My Profile
+### Endpoint Overview
 - **Method:** `PUT`
 - **URL:** `/api/Users/me`
-- **Business Use Case:** Updates the current user's personal details.
-- **Payload (`application/json`):**
+- **Business Use Case:** Updates basic profile fields.
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** Authenticated user
+### Request Payload
 ```json
 {
   "firstName": "Ahmed",
@@ -281,23 +740,35 @@ Base route: `/api/users`
   "phoneNumber": "+201234567891"
 }
 ```
-- **Business Rules:** - Domain and Identity stores are updated transactionally.
-  - If `email` is updated, uniqueness is verified across the system, and `EmailConfirmed` is revoked.
+### Request Field Reference
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| firstName | string | Yes | Max 50 |
+| familyName | string | No | Max 50 |
+| lastName | string | Yes | Max 50 |
+| email | string | No | Unique + valid email |
+| phoneNumber | string | No | Unique + valid phone |
+### Response Example (200 OK)
+```json
+{ "success": true, "message": "Profile updated successfully.", "data": null, "errors": null, "timestamp": "2026-03-10T00:00:00Z" }
+```
 
 ## 5.3 Upload Profile Picture
+### Endpoint Overview
 - **Method:** `POST`
 - **URL:** `/api/Users/me/profile-picture`
-- **Business Use Case:** Uploads or replaces the user's profile picture.
-- **Payload (`multipart/form-data`):** Requires a single file attached to the key `file`.
-- **Allowed Extensions:** `.jpg`, `.jpeg`, `.png`
-- **Response (200):**
+- **Business Use Case:** Uploads/replaces profile image.
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** Authenticated user
+### Request Payload
+`multipart/form-data` with key `file`.
+### Response Example (200 OK)
 ```json
 {
   "success": true,
   "message": "Profile picture uploaded successfully.",
-  "data": {
-    "profilePictureUrl": "images/profiles/abcd.jpg"
-  },
+  "data": { "profilePictureUrl": "images/profiles/abcd.jpg" },
   "errors": null,
   "timestamp": "2026-03-10T00:00:00Z"
 }
@@ -305,23 +776,118 @@ Base route: `/api/users`
 
 ---
 
-# Additional Frontend Notes
+# 6. Stations API
 
-## 1. Token Expiration Handling
-JWT middleware appends the response header below when authentication fails due to expired token:
-```http
-Token-Expired: true
+Base route: `/api/Stations`
+
+## 6.1 Get Grouped Stations
+### Endpoint Overview
+- **Method:** `GET`
+- **URL:** `/api/Stations`
+- **Business Use Case:** Provides bilingual station dropdown data grouped by governorate.
+### Authentication / Authorization
+- **JWT Required:** No
+- **Role Required:** None
+### Request Payload
+No request body.
+### Response Example (200 OK)
+```json
+{
+  "success": true,
+  "message": "Stations retrieved successfully.",
+  "data": [
+    {
+      "governorate": "Cairo",
+      "stations": [
+        { "id": 101, "arabicName": "?????", "englishName": "ramses", "slug": "ramses", "city": "Cairo" }
+      ]
+    },
+    {
+      "governorate": "Alexandria",
+      "stations": [
+        { "id": 201, "arabicName": "???? ????", "englishName": "sidi-gaber", "slug": "sidi-gaber", "city": "Alexandria" }
+      ]
+    }
+  ],
+  "errors": null,
+  "timestamp": "2026-03-06T12:00:00Z"
+}
 ```
-Useful for Flutter/Angular interceptors.
 
-## 2. Email Verification Requirement
-Identity is configured with `RequireConfirmedEmail = false`. Users can log in even if email is not verified.
+---
 
-## 3. Rate Limiting
-A fixed window limiter is registered with:
-- Window: `1 minute`
-- Permit limit: `10`
-Frontend should be prepared for possible `429 Too Many Requests` responses.
+# 7. Search API
+
+Base route: `/api/Search`
+
+## 7.1 Search Trips
+
+### Endpoint Overview
+- **Method:** `GET`
+- **URL:** `/api/Search`
+- **Business Use Case:** Performs flexible governorate/station-based intercity trip search with dynamic seat inventory filtering.
+
+### Authentication / Authorization
+- **JWT Required:** No
+- **Role Required:** None
+
+### Request Payload
+Query string parameters:
+
+```json
+{
+  "travelDate": "2026-03-20",
+  "fromGovernorate": "Cairo",
+  "fromStationId": null,
+  "toGovernorate": "Alexandria",
+  "toStationId": null,
+  "passengers": 2,
+  "transport": 0
+}
+```
+
+### Request Field Reference
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| travelDate | date | Yes | Must be today..+60 days |
+| fromGovernorate | string | Conditional | Required if fromStationId missing |
+| fromStationId | int | Conditional | Required if fromGovernorate missing |
+| toGovernorate | string | Conditional | Required if toStationId missing |
+| toStationId | int | Conditional | Required if toGovernorate missing |
+| passengers | int | Yes | Must be > 0 |
+| transport | int | No | 0=All, 1=Bus, 2=Train |
+
+### Response Example (200 OK)
+```json
+{
+  "success": true,
+  "message": "Successfully found 2 available trips.",
+  "data": [
+    {
+      "tripOccurrenceId": 1001,
+      "tripId": 200,
+      "agencyName": "GoBus",
+      "departureTime": "2026-03-20T07:00:00Z",
+      "arrivalTime": "2026-03-20T10:00:00Z",
+      "totalDurationMinutes": 180,
+      "originStationName": "?????",
+      "originGovernorate": "Cairo",
+      "destinationStationName": "???? ????",
+      "destinationGovernorate": "Alexandria",
+      "availableClasses": [
+        {
+          "coachClassId": 1,
+          "className": "Business",
+          "remainingSeats": 14,
+          "price": 180.00
+        }
+      ]
+    }
+  ],
+  "errors": null,
+  "timestamp": "2026-03-20T00:00:00Z"
+}
+```
 
 ---
 
@@ -341,17 +907,20 @@ Frontend should be prepared for possible `429 Too Many Requests` responses.
 | `POST` | `/api/Auth/reset-password` | No | Reset password |
 | `POST` | `/api/Auth/change-password` | Yes | Change password |
 | `GET` | `/api/Countries` | No | List countries |
-| `POST` | `/api/Seed/init-identity` | Yes | Initialize identity data (runs once) |
-| `POST` | `/api/Seed/import-master-stations` | Yes | Import master stations data |
-| `POST` | `/api/Seed/import-horus` | Yes | Import Horus agency trips |
-| `POST` | `/api/Seed/import-gobus` | Yes | Import GoBus trip data |
-| `POST` | `/api/Seed/import-bluebus` | Yes | Import Blue Bus trip data |
-| `POST` | `/api/Seed/import-trains` | Yes | Import train schedule data |
-| `GET` | `/api/admin/users` | Yes | List all domain users alongside country metadata |
-| `GET` | `/api/admin/users/{id}` | Yes | View complete details of a specific user |
-| `PATCH`| `/api/admin/users/{id}/toggle-status` | Yes | Suspend or activate a user account |
-| `POST` | `/api/admin/users/{id}/roles` | Yes | Assign a system role to a user |
-| `DELETE`| `/api/admin/users/{id}` | Yes | Permanently delete a user |
-| `GET` | `/api/users/me` | Yes | Get the logged-in user's profile |
-| `PUT` | `/api/users/me` | Yes | Update the logged-in user's profile |
-| `POST` | `/api/users/me/profile-picture` | Yes | Upload user profile picture |
+| `POST` | `/api/Seed/init-identity` | Yes (Admin) | Initialize identity roles/admin |
+| `POST` | `/api/Seed/import-master-stations` | Yes (Admin) | Import master stations |
+| `POST` | `/api/Seed/import-horus` | Yes (Admin) | Import Horus trips |
+| `POST` | `/api/Seed/import-gobus` | Yes (Admin) | Import GoBus trips |
+| `POST` | `/api/Seed/import-bluebus` | Yes (Admin) | Import BlueBus trips |
+| `POST` | `/api/Seed/import-trains` | Yes (Admin) | Import train trips |
+| `POST` | `/api/Seed/generate-occurrences` | Yes (Admin) | Generate future occurrences |
+| `GET` | `/api/admin/users` | Yes (Admin) | List all users |
+| `GET` | `/api/admin/users/{id}` | Yes (Admin) | Get user detail |
+| `PATCH` | `/api/admin/users/{id}/toggle-status` | Yes (Admin) | Toggle user active status |
+| `POST` | `/api/admin/users/{id}/roles` | Yes (Admin) | Assign role |
+| `DELETE` | `/api/admin/users/{id}` | Yes (Admin) | Delete user |
+| `GET` | `/api/Users/me` | Yes | Get profile |
+| `PUT` | `/api/Users/me` | Yes | Update profile |
+| `POST` | `/api/Users/me/profile-picture` | Yes | Upload profile picture |
+| `GET` | `/api/Stations` | No | Get grouped stations |
+| `GET` | `/api/Search` | No | Flexible governorate/station trip search with inventory filtering |

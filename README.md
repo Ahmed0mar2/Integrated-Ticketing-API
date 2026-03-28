@@ -15,7 +15,9 @@
 **Rehla** (رحلة - Arabic for "Journey") is a comprehensive ticketing platform designed to simplify inter-governorate travel booking in Egypt. This ASP.NET Core Web API serves as the backend, providing:
 
 - **Unified Booking System** - Book train and bus tickets through a single platform
-- **Real-time Trip Search** - Search available trips with filtering by date, origin, destination, and class
+- **Flexible Search Engine** - Governorate-to-governorate OR station-to-station search with date/transport filters
+- **Dynamic Seat Availability Filtering** - Returns only classes with enough remaining seats for requested passenger count
+- **Bilingual Station Directory** - Grouped stations by governorate for Arabic/English dropdown experiences
 - **User Authentication** - Secure JWT-based authentication with email verification
 - **Role-based Access Control** - Admin, User, and Partner roles
 - **Booking Management** - Complete booking lifecycle with passenger management
@@ -243,6 +245,18 @@ After running migrations, you can log in with the seeded admin account:
 |--------|-------------------|------------------------------------------|---------------|
 | `GET`  | `/api/Countries`  | Get all countries (for registration dropdown) | ❌       |
 
+### 🔎 Search (`/api/Search`)
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| `GET` | `/api/Search` | Flexible governorate/station trip search with dynamic seat inventory filtering | ❌ |
+
+### 🚉 Stations (`/api/Stations`)
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| `GET` | `/api/Stations` | Get bilingual station dropdown data grouped by governorate | ❌ |
+
 ### 🌱 Data Seeding (`/api/Seed`)
 
 | Method | Endpoint      | Description      | Auth Required |
@@ -275,7 +289,6 @@ These endpoints were added as part of the User Profile epic. They allow authenti
 | `GET` | `/api/users/me` | ✅ | Get current user's profile, gamification stats and wallet balance |
 | `PUT` | `/api/users/me` | ✅ | Update current user's basic profile info (first/family/last name, email, phone). Email & phone uniqueness validated at domain and identity levels |
 | `POST` | `/api/users/me/profile-picture` | ✅ | Upload or replace user's profile picture (multipart file). Allowed extensions: `.jpg`, `.jpeg`, `.png` |
-
 
 > 📖 For complete API documentation with request/response schemas, visit `/scalar/v1` when the application is running.
 

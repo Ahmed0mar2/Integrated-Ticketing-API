@@ -1,0 +1,28 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace GP.Application.DTOs.Search
+{
+    public class TripSearchResponseDto
+    {
+        public int TripOccurrenceId { get; set; }
+        public int TripId { get; set; }
+        public string AgencyName { get; set; } = string.Empty;
+
+        public DateTime DepartureTime { get; set; }
+        public DateTime? ArrivalTime { get; set; }
+
+        public int? TotalDurationMinutes { get; set; }
+
+        public string OriginStationName { get; set; } = string.Empty;
+        public string OriginGovernorate { get; set; } = string.Empty;
+
+        public string DestinationStationName { get; set; } = string.Empty;
+        public string DestinationGovernorate { get; set; } = string.Empty;
+
+        public List<TripClassOptionDto> AvailableClasses { get; set; } = new();
+    }
+}

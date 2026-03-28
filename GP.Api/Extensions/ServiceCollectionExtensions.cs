@@ -220,6 +220,15 @@ public static class ServiceCollectionExtensions
 
         services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
 
+        // Trip Occurrence Generator
+        services.AddScoped<ITripOccurrenceService, TripOccurrenceService>();
+
+        // Station Service
+        services.AddScoped<IStationService, StationService>();
+
+        // Search Service
+        services.AddScoped<ISearchService, SearchService>();
+
         return services;
     }
 
