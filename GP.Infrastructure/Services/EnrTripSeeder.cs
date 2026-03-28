@@ -30,7 +30,9 @@ namespace GP.Infrastructure.Services
                 .Where(m => m.AgencyId == agency.AgencyId)
                 .ToDictionaryAsync(m => m.ExternalStationId, m => m.StopId);
 
+            // ==========================================
             // PHASE 1: BUILD THE TRAINS (From train_stops.json)
+            // ==========================================
             Console.WriteLine("Phase 1: Building Train Blueprints...");
             string stopsJson = await File.ReadAllTextAsync(stopsFilePath);
             var schedules = JsonSerializer.Deserialize<Dictionary<string, EnrScheduleDto>>(stopsJson);
@@ -56,9 +58,8 @@ namespace GP.Infrastructure.Services
                         TripCode = schedule.TrainNumber,
                         OriginStationId = originId,
                         DestinationStationId = destId,
-                        DepartureTime = ParseTime(firstStop.Departure!).Value, 
+                        DepartureTime = ParseTime(firstStop.Departure) ?? default,
                         TotalDurationMinutes = CalculateDurationMinutes(firstStop.Departure, lastStop.Arrival),
-
                         ServiceId = defaultCalendar.ServiceId
                     };
 
@@ -83,7 +84,9 @@ namespace GP.Infrastructure.Services
                 Console.WriteLine($"✅ Built {builtTrains} Train Blueprints.");
             }
 
+            // ==========================================
             // PHASE 2: APPLY THE FARES (From trips_with_prices.json)
+            // ==========================================
             Console.WriteLine("Phase 2: Building Pricing Matrix...");
             string pricesJson = await File.ReadAllTextAsync(pricesFilePath);
 
@@ -108,6 +111,7 @@ namespace GP.Infrastructure.Services
                 foreach (JsonProperty classPrice in pricesObj.EnumerateObject())
                 {
                     string className = classPrice.Name;
+
                     if (!decimal.TryParse(classPrice.Value.GetString(), out decimal priceValue)) continue;
 
                     string fullClassName = $"{trainTypeAr} - {className}";
@@ -138,15 +142,34 @@ namespace GP.Infrastructure.Services
 
             await _context.SaveChangesAsync();
             Console.WriteLine($"✅ Successfully added {addedFares} fare rules to the Train matrix!");
+
+            // ==========================================
+            // PHASE 3: (Cleanup)
+            // ==========================================
+            Console.WriteLine("Phase 3: Cleaning up ghost trips (trains with no valid prices)...");
+
+            var ghostTrips = await _context.Trips
+                .Include(t => t.TripStopTimes)
+                .Where(t => t.AgencyId == agency.AgencyId && !t.TripFares.Any())
+                .ToListAsync();
+
+            if (ghostTrips.Any())
+            {
+                _context.Trips.RemoveRange(ghostTrips);
+                await _context.SaveChangesAsync();
+                Console.WriteLine($"🗑️ Cleaned up {ghostTrips.Count} ghost trips that had missing pricing data!");
+            }
+            else
+            {
+                Console.WriteLine("✅ No ghost trips found. All imported trains have valid prices.");
+            }
         }
 
         // --- Helper Methods ---
 
         private async Task<Calendar> GetOrCreateDefaultCalendarAsync()
         {
-            // Check if ANY calendar exists yet
             var calendar = await _context.Set<Calendar>().FirstOrDefaultAsync();
-
             if (calendar == null)
             {
                 Console.WriteLine("Creating default 'Runs Every Day' Calendar...");
@@ -159,16 +182,15 @@ namespace GP.Infrastructure.Services
                     Friday = true,
                     Saturday = true,
                     Sunday = true,
-                    StartDate = new DateOnly(DateTime.UtcNow.Year, 1, 1),      // Start of this year
-                    EndDate = new DateOnly(DateTime.UtcNow.Year + 2, 12, 31)   // Valid for the next 2 years
+                    StartDate = new DateOnly(DateTime.UtcNow.Year, 1, 1),
+                    EndDate = new DateOnly(DateTime.UtcNow.Year + 2, 12, 31)
                 };
-
                 _context.Set<Calendar>().Add(calendar);
-                await _context.SaveChangesAsync(); 
+                await _context.SaveChangesAsync();
             }
-
             return calendar;
         }
+
         private async Task<CoachClass> GetOrCreateCoachClassAsync(string name, int capacity)
         {
             var cc = await _context.Set<CoachClass>().FirstOrDefaultAsync(c => c.Name == name);
@@ -189,7 +211,6 @@ namespace GP.Infrastructure.Services
             return null;
         }
 
-        // Duration Calculator
         private int? CalculateDurationMinutes(string? departureStr, string? arrivalStr)
         {
             if (string.IsNullOrWhiteSpace(departureStr) || string.IsNullOrWhiteSpace(arrivalStr))
@@ -198,16 +219,9 @@ namespace GP.Infrastructure.Services
             if (DateTime.TryParseExact(departureStr.Trim(), ["h:mm tt", "hh:mm tt"], CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dep) &&
                 DateTime.TryParseExact(arrivalStr.Trim(), ["h:mm tt", "hh:mm tt"], CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime arr))
             {
-                // Handle the "Midnight Crossing" logic
-                if (arr < dep)
-                {
-                    arr = arr.AddDays(1);
-                }
-
-                // Calculate the total minutes difference
+                if (arr < dep) arr = arr.AddDays(1);
                 return (int)(arr - dep).TotalMinutes;
             }
-
             return null;
         }
     }

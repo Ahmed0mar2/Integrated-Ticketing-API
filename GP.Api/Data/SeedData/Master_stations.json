@@ -19,7 +19,7 @@
         "mappings": {
             "train_slug": "23-july"
         },
-        "governorate": "Cairo"
+        "governorate": "Qalyubia"
     },
     {
         "arabic": "25 يناير",
@@ -163,7 +163,7 @@
         "mappings": {
             "train_slug": "abo-gresh"
         },
-        "governorate": "Ismailia"
+        "governorate": "Sharqia"
     },
     {
         "arabic": "ابو حلب",
@@ -251,7 +251,7 @@
         "mappings": {
             "train_slug": "abo-ghaleb"
         },
-        "governorate": "Menoufia"
+        "governorate": "Giza"
     },
     {
         "arabic": "ابو غنيمه",
@@ -418,7 +418,7 @@
             "train_slug": "esna",
             "bluebus_slug": "Luxor - Esna"
         },
-        "governorate": "Qena"
+        "governorate": "Luxor"
     },
     {
         "arabic": "اسوان",
@@ -508,7 +508,7 @@
         "mappings": {
             "train_slug": "atwab"
         },
-        "governorate": "Faiyum"
+        "governorate": "Beni Suef"
     },
     {
         "arabic": "اكياد",
@@ -685,7 +685,7 @@
         "mappings": {
             "train_slug": "badrshein"
         },
-        "governorate": "Cairo"
+        "governorate": "Giza"
     },
     {
         "arabic": "البراهمة",
@@ -707,7 +707,7 @@
         "mappings": {
             "train_slug": "birijat"
         },
-        "governorate": "Menoufia"
+        "governorate": "Beheira"
     },
     {
         "arabic": "البصيلي",
@@ -856,24 +856,24 @@
     {
         "arabic": "التوفيقية",
         "normalized_slug": "el tawfiqiah",
-        "city": "Cairo",
-        "latitude": 30.05,
-        "longitude": 31.25,
+        "city": "Itay El Baroud",
+        "latitude": 30.8247,
+        "longitude": 30.7135,
         "mappings": {
             "train_slug": "tawfiqiah"
         },
-        "governorate": "Cairo"
+        "governorate": "Beheira"
     },
     {
         "arabic": "التوفيقية البلد",
         "normalized_slug": "el tawfiqiah balad",
-        "city": "Cairo",
-        "latitude": 30.05,
-        "longitude": 31.25,
+        "city": "Itay El Baroud",
+        "latitude": 30.8247,
+        "longitude": 30.7135,
         "mappings": {
             "train_slug": "tawfiqiah-b"
         },
-        "governorate": "Cairo"
+        "governorate": "Beheira"
     },
     {
         "arabic": "التينة",
@@ -1217,7 +1217,7 @@
         "mappings": {
             "train_slug": "khatatbah"
         },
-        "governorate": "Beheira"
+        "governorate": "Menoufia"
     },
     {
         "arabic": "الخوي ج",
@@ -1316,7 +1316,7 @@
         "mappings": {
             "train_slug": "deir"
         },
-        "governorate": "Qena"
+        "governorate": "Luxor"
     },
     {
         "arabic": "الراهبين",
@@ -1338,7 +1338,7 @@
         "mappings": {
             "train_slug": "robaikey"
         },
-        "governorate": "Sharqia"
+        "governorate": "Cairo"
     },
     {
         "arabic": "الرتاج",
@@ -1349,7 +1349,7 @@
         "mappings": {
             "train_slug": "retaj"
         },
-        "governorate": "Gharbia"
+        "governorate": "Dakahlia"
     },
     {
         "arabic": "الرجدية",
@@ -1459,7 +1459,7 @@
         "mappings": {
             "train_slug": "rous"
         },
-        "governorate": "Beheira"
+        "governorate": "Kafr El Sheikh"
     },
     {
         "arabic": "الروضة",
@@ -1470,7 +1470,7 @@
         "mappings": {
             "train_slug": "rawda"
         },
-        "governorate": "Giza"
+        "governorate": "Cairo"
     },
     {
         "arabic": "الرويسات",
@@ -1604,7 +1604,7 @@
         "mappings": {
             "train_slug": "al-sadat"
         },
-        "governorate": "Beheira"
+        "governorate": "Menoufia"
     },
     {
         "arabic": "السايح",
@@ -1703,7 +1703,7 @@
         "mappings": {
             "train_slug": "salam"
         },
-        "governorate": "Qalyubia"
+        "governorate": "Cairo"
     },
     {
         "arabic": "السلام – شمال سيناء",
@@ -1791,7 +1791,7 @@
         "mappings": {
             "train_slug": "senbellawein"
         },
-        "governorate": "Sharqia"
+        "governorate": "Dakahlia"
     },
     {
         "arabic": "السنطة",
@@ -1879,7 +1879,7 @@
         "mappings": {
             "train_slug": "shorouk"
         },
-        "governorate": "Qalyubia"
+        "governorate": "Cairo"
     },
     {
         "arabic": "الشطب البلد",
@@ -1901,7 +1901,7 @@
         "mappings": {
             "train_slug": "shaghab"
         },
-        "governorate": "Qena"
+        "governorate": "Luxor"
     },
     {
         "arabic": "الشنهورية",
@@ -1945,7 +1945,7 @@
         "mappings": {
             "train_slug": "el-shobak"
         },
-        "governorate": "Cairo"
+        "governorate": "Giza"
     },
     {
         "arabic": "الشيخ زايد",
@@ -2508,7 +2508,7 @@
             "train_slug": "cairo",
             "horus_id": 5
         },
-        "governorate": "Giza"
+        "governorate": "Cairo"
     },
     {
         "arabic": "القراقرة",
@@ -2519,7 +2519,7 @@
         "mappings": {
             "train_slug": "qaraqrah"
         },
-        "governorate": "Qalyubia"
+        "governorate": "Sharqia"
     },
     {
         "arabic": "القرشيه",
@@ -2563,7 +2563,7 @@
         "mappings": {
             "train_slug": "qata"
         },
-        "governorate": "Menoufia"
+        "governorate": "Giza"
     },
     {
         "arabic": "القطا البلد",
@@ -2574,7 +2574,7 @@
         "mappings": {
             "train_slug": "qata-b"
         },
-        "governorate": "Qalyubia"
+        "governorate": "Giza"
     },
     {
         "arabic": "القطورى",
@@ -2728,7 +2728,7 @@
         "mappings": {
             "train_slug": "karykat"
         },
-        "governorate": "Dakahlia"
+        "governorate": "Kafr El Sheikh"
     },
     {
         "arabic": "الكرنك",
@@ -2750,7 +2750,7 @@
         "mappings": {
             "train_slug": "kelabeyah"
         },
-        "governorate": "Qena"
+        "governorate": "Luxor"
     },
     {
         "arabic": "الكلح",
@@ -2905,7 +2905,7 @@
         "mappings": {
             "train_slug": "madinah"
         },
-        "governorate": "Beheira"
+        "governorate": "Menoufia"
     },
     {
         "arabic": "المرابعين",
@@ -2927,7 +2927,7 @@
         "mappings": {
             "train_slug": "maraziq"
         },
-        "governorate": "Cairo"
+        "governorate": "Giza"
     },
     {
         "arabic": "المراشدة",
@@ -2961,7 +2961,7 @@
         "mappings": {
             "train_slug": "mazghounah"
         },
-        "governorate": "Cairo"
+        "governorate": "Giza"
     },
     {
         "arabic": "المشتل",
@@ -2983,7 +2983,7 @@
         "mappings": {
             "train_slug": "mataenah"
         },
-        "governorate": "Qena"
+        "governorate": "Luxor"
     },
     {
         "arabic": "المطرية",
@@ -3027,7 +3027,7 @@
         "mappings": {
             "train_slug": "maelah"
         },
-        "governorate": "Qena"
+        "governorate": "Luxor"
     },
     {
         "arabic": "المعمورة",
@@ -3049,7 +3049,7 @@
         "mappings": {
             "train_slug": "manashi"
         },
-        "governorate": "Menoufia"
+        "governorate": "Giza"
     },
     {
         "arabic": "المنزلة",
@@ -3128,7 +3128,7 @@
         "mappings": {
             "train_slug": "maymun"
         },
-        "governorate": "Faiyum"
+        "governorate": "Beni Suef"
     },
     {
         "arabic": "الناصرية",
@@ -3205,7 +3205,7 @@
         "mappings": {
             "train_slug": "wasta"
         },
-        "governorate": "Faiyum"
+        "governorate": "Beni Suef"
     },
     {
         "arabic": "الواصفية",
@@ -3370,7 +3370,7 @@
         "mappings": {
             "train_slug": "baloza"
         },
-        "governorate": "Port Said"
+        "governorate": "North Sinai"
     },
     {
         "arabic": "ببا",
@@ -3492,7 +3492,7 @@
         "mappings": {
             "train_slug": "birqash"
         },
-        "governorate": "Qalyubia"
+        "governorate": "Giza"
     },
     {
         "arabic": "برقين",
@@ -3503,7 +3503,7 @@
         "mappings": {
             "train_slug": "barqin"
         },
-        "governorate": "Sharqia"
+        "governorate": "Dakahlia"
     },
     {
         "arabic": "بركة السبع",
@@ -3701,7 +3701,7 @@
         "mappings": {
             "train_slug": "beni-hidayr"
         },
-        "governorate": "Faiyum"
+        "governorate": "Beni Suef"
     },
     {
         "arabic": "بني حسين",
@@ -3734,7 +3734,7 @@
         "mappings": {
             "train_slug": "beni-salamah"
         },
-        "governorate": "Menoufia"
+        "governorate": "Giza"
     },
     {
         "arabic": "بني سويف",
@@ -3834,7 +3834,7 @@
         "mappings": {
             "train_slug": "bir-imarah"
         },
-        "governorate": "Ismailia"
+        "governorate": "Sharqia"
     },
     {
         "arabic": "بيلا",
@@ -3845,7 +3845,7 @@
         "mappings": {
             "train_slug": "biyala"
         },
-        "governorate": "Dakahlia"
+        "governorate": "Kafr El Sheikh"
     },
     {
         "arabic": "تزمنت",
@@ -3867,7 +3867,7 @@
         "mappings": {
             "train_slug": "tafhna-ashraf"
         },
-        "governorate": "Gharbia"
+        "governorate": "Dakahlia"
     },
     {
         "arabic": "تفهنا العزب",
@@ -3889,7 +3889,7 @@
         "mappings": {
             "train_slug": "taqato-edfeena"
         },
-        "governorate": "Kafr El Sheikh"
+        "governorate": "Beheira"
     },
     {
         "arabic": "تل العمارنة",
@@ -4044,7 +4044,7 @@
         "mappings": {
             "train_slug": "gazirat-rageh"
         },
-        "governorate": "Qena"
+        "governorate": "Luxor"
     },
     {
         "arabic": "جزيرة شندويل",
@@ -4088,7 +4088,7 @@
         "mappings": {
             "train_slug": "gelbana"
         },
-        "governorate": "Port Said"
+        "governorate": "Ismailia"
     },
     {
         "arabic": "جماجمون",
@@ -4110,7 +4110,7 @@
         "mappings": {
             "train_slug": "gamasa"
         },
-        "governorate": "Damietta"
+        "governorate": "Dakahlia"
     },
     {
         "arabic": "جنيفة",
@@ -4331,7 +4331,7 @@
         "mappings": {
             "train_slug": "dandit"
         },
-        "governorate": "Gharbia"
+        "governorate": "Dakahlia"
     },
     {
         "arabic": "دنشواى",
@@ -4573,7 +4573,7 @@
         "mappings": {
             "train_slug": "saad-zaghloul"
         },
-        "governorate": "Giza"
+        "governorate": "Cairo"
     },
     {
         "arabic": "سلامون",
@@ -4683,7 +4683,7 @@
         "mappings": {
             "train_slug": "samhud"
         },
-        "governorate": "Sohag"
+        "governorate": "Qena"
     },
     {
         "arabic": "سنجرج",
@@ -4790,13 +4790,13 @@
     {
         "arabic": "سيدي غازي",
         "normalized_slug": "sidi ghazy",
-        "city": "Alexandria",
+        "city": "Kafr El Dawwar",
         "latitude": 31.1014,
         "longitude": 29.9432,
         "mappings": {
             "train_slug": "sidi-ghazy"
         },
-        "governorate": "Alexandria"
+        "governorate": "Beheira"
     },
     {
         "arabic": "سيدي مرغب",
@@ -4884,7 +4884,7 @@
         "mappings": {
             "train_slug": "shobra-qubala"
         },
-        "governorate": "Qalyubia"
+        "governorate": "Sharqia"
     },
     {
         "arabic": "شبراقاص",
@@ -5148,7 +5148,7 @@
         "mappings": {
             "train_slug": "upper-egypt"
         },
-        "governorate": "Qena"
+        "governorate": "New Valley"
     },
     {
         "arabic": "صفط الحنة",
@@ -5225,7 +5225,7 @@
         "mappings": {
             "train_slug": "taranis-arab"
         },
-        "governorate": "Sharqia"
+        "governorate": "Dakahlia"
     },
     {
         "arabic": "طلخا",
@@ -5248,7 +5248,7 @@
             "train_slug": "tima",
             "horus_id": 5015
         },
-        "governorate": "Asyut"
+        "governorate": "Sohag"
     },
     {
         "arabic": "طنبدي",
@@ -5370,7 +5370,7 @@
         "mappings": {
             "train_slug": "adly-mansour"
         },
-        "governorate": "Qalyubia"
+        "governorate": "Cairo"
     },
     {
         "arabic": "عرب الرمل",
@@ -5403,7 +5403,7 @@
         "mappings": {
             "train_slug": "ezbet-godah"
         },
-        "governorate": "Sharqia"
+        "governorate": "Dakahlia"
     },
     {
         "arabic": "عشما",
@@ -5711,7 +5711,7 @@
         "mappings": {
             "train_slug": "qamn-arous"
         },
-        "governorate": "Faiyum"
+        "governorate": "Beni Suef"
     },
     {
         "arabic": "قنا",
@@ -5780,7 +5780,7 @@
         "mappings": {
             "train_slug": "kasfareet"
         },
-        "governorate": "Suez"
+        "governorate": "Ismailia"
     },
     {
         "arabic": "كفر الاشراف",
@@ -5824,7 +5824,7 @@
         "mappings": {
             "train_slug": "kafr-garaydah"
         },
-        "governorate": "Dakahlia"
+        "governorate": "Kafr El Sheikh"
     },
     {
         "arabic": "كفر الجزار",
@@ -5978,7 +5978,7 @@
         "mappings": {
             "train_slug": "kafr-wazir"
         },
-        "governorate": "Gharbia"
+        "governorate": "Dakahlia"
     },
     {
         "arabic": "كفر بطا",
@@ -6143,7 +6143,7 @@
         "mappings": {
             "train_slug": "kafr-allam"
         },
-        "governorate": "Qalyubia"
+        "governorate": "Sharqia"
     },
     {
         "arabic": "كفر عمار",
@@ -6198,7 +6198,7 @@
         "mappings": {
             "train_slug": "kom-abo-rady"
         },
-        "governorate": "Faiyum"
+        "governorate": "Beni Suef"
     },
     {
         "arabic": "كوم الحجنة",
@@ -6209,7 +6209,7 @@
         "mappings": {
             "train_slug": "kom-hajnah"
         },
-        "governorate": "Dakahlia"
+        "governorate": "Kafr El Sheikh"
     },
     {
         "arabic": "كوم النور",
@@ -6220,7 +6220,7 @@
         "mappings": {
             "train_slug": "kom-nour"
         },
-        "governorate": "Gharbia"
+        "governorate": "Dakahlia"
     },
     {
         "arabic": "كوم امبو",
@@ -6242,7 +6242,7 @@
         "mappings": {
             "train_slug": "kom-halin"
         },
-        "governorate": "Qalyubia"
+        "governorate": "Sharqia"
     },
     {
         "arabic": "كوم حمادة",
@@ -6297,7 +6297,7 @@
         "mappings": {
             "train_slug": "kilo-9.973-abu-rady"
         },
-        "governorate": "Faiyum"
+        "governorate": "Beni Suef"
     },
     {
         "arabic": "كيما",
@@ -6341,7 +6341,7 @@
         "mappings": {
             "train_slug": "mahjar-abo-hammad"
         },
-        "governorate": "Ismailia"
+        "governorate": "Sharqia"
     },
     {
         "arabic": "محرم بك",
@@ -6498,7 +6498,7 @@
         "mappings": {
             "train_slug": "mashtul"
         },
-        "governorate": "Qalyubia"
+        "governorate": "Sharqia"
     },
     {
         "arabic": "مشطا",
@@ -6509,7 +6509,7 @@
         "mappings": {
             "train_slug": "mishta"
         },
-        "governorate": "Asyut"
+        "governorate": "Sohag"
     },
     {
         "arabic": "مشلة",
@@ -6564,7 +6564,7 @@
         "mappings": {
             "train_slug": "matobas"
         },
-        "governorate": "Beheira"
+        "governorate": "Kafr El Sheikh"
     },
     {
         "arabic": "معسكر الجلاء",
@@ -6774,7 +6774,7 @@
         "mappings": {
             "train_slug": "menyet-qamh"
         },
-        "governorate": "Qalyubia"
+        "governorate": "Sharqia"
     },
     {
         "arabic": "منية شنتا عياش",
@@ -6906,7 +6906,7 @@
         "mappings": {
             "train_slug": "mit-qershi"
         },
-        "governorate": "Gharbia"
+        "governorate": "Dakahlia"
     },
     {
         "arabic": "ميت الكرما",
@@ -6928,7 +6928,7 @@
         "mappings": {
             "train_slug": "mit-wusta"
         },
-        "governorate": "Faiyum"
+        "governorate": "Beni Suef"
     },
     {
         "arabic": "ميت بره",
@@ -7071,7 +7071,7 @@
         "mappings": {
             "train_slug": "mit-ghamer"
         },
-        "governorate": "Gharbia"
+        "governorate": "Dakahlia"
     },
     {
         "arabic": "ميت مرجا سلسيل",
@@ -7082,7 +7082,7 @@
         "mappings": {
             "train_slug": "mit-marga-selsil"
         },
-        "governorate": "Damietta"
+        "governorate": "Dakahlia"
     },
     {
         "arabic": "ميت يزيد",
@@ -7214,7 +7214,7 @@
         "mappings": {
             "train_slug": "niklah"
         },
-        "governorate": "Qalyubia"
+        "governorate": "Giza"
     },
     {
         "arabic": "نهطاي",
@@ -7280,7 +7280,7 @@
         "mappings": {
             "train_slug": "wadi-sail"
         },
-        "governorate": "South Sinai"
+        "governorate": "Red Sea"
     },
     {
         "arabic": "واقد",
@@ -7302,7 +7302,7 @@
         "mappings": {
             "train_slug": "werdan"
         },
-        "governorate": "Menoufia"
+        "governorate": "Giza"
     },
     {
         "arabic": "ورورة",
@@ -7346,7 +7346,7 @@
         "mappings": {
             "gobus_id": 87
         },
-        "governorate": "Qalyubia"
+        "governorate": "Cairo"
     },
     {
         "arabic": "مدينة نصر",
@@ -7381,7 +7381,7 @@
         "mappings": {
             "gobus_id": 42
         },
-        "governorate": "Qalyubia"
+        "governorate": "Cairo"
     },
     {
         "arabic": "مدينتي",
@@ -7392,7 +7392,7 @@
         "mappings": {
             "gobus_id": 43
         },
-        "governorate": "Qalyubia"
+        "governorate": "Cairo"
     },
     {
         "arabic": "القللي",
@@ -7403,7 +7403,7 @@
         "mappings": {
             "gobus_id": 76
         },
-        "governorate": "Giza"
+        "governorate": "Cairo"
     },
     {
         "arabic": "السادس من أكتوبر",
@@ -7436,14 +7436,14 @@
         "latitude": 30.056,
         "longitude": 30.987,
         "mappings": {
-            "bluebus_slug": "Giza/Cairo - Chillout – Cairo Alex road"
+            "bluebus_slug": "Giza/Cairo - Chillout ΓÇô Cairo Alex road"
         }
     },
     {
         "arabic": "المعادي إمارات مصر",
         "normalized_slug": "maadi emarat misr",
         "city": "Cairo",
-        "governorate": "Giza",
+        "governorate": "Cairo",
         "latitude": 29.96,
         "longitude": 31.26,
         "mappings": {
@@ -7454,7 +7454,7 @@
         "arabic": "المعادي الدائري وطنية",
         "normalized_slug": "maadi ring rd watanya",
         "city": "Cairo",
-        "governorate": "Giza",
+        "governorate": "Cairo",
         "latitude": 29.98,
         "longitude": 31.31,
         "mappings": {
@@ -7545,7 +7545,7 @@
         "arabic": "رأس غارب",
         "normalized_slug": "ras ghareb",
         "city": "Ras Ghareb",
-        "governorate": "South Sinai",
+        "governorate": "Red Sea",
         "latitude": 28.36,
         "longitude": 33.078,
         "mappings": {
@@ -7817,7 +7817,7 @@
         "mappings": {
             "gobus_id": 196
         },
-        "governorate": "Suez"
+        "governorate": "South Sinai"
     },
     {
         "arabic": "خليج مطارمة",
@@ -7828,7 +7828,7 @@
         "mappings": {
             "gobus_id": 197
         },
-        "governorate": "Suez"
+        "governorate": "South Sinai"
     },
     {
         "arabic": "تافيرا",
@@ -7839,7 +7839,7 @@
         "mappings": {
             "gobus_id": 366
         },
-        "governorate": "Suez"
+        "governorate": "South Sinai"
     },
     {
         "arabic": "لاسيندا",
@@ -7850,7 +7850,7 @@
         "mappings": {
             "gobus_id": 367
         },
-        "governorate": "Suez"
+        "governorate": "South Sinai"
     },
     {
         "arabic": "نزهة بيتش",
@@ -7861,7 +7861,7 @@
         "mappings": {
             "gobus_id": 611
         },
-        "governorate": "Suez"
+        "governorate": "South Sinai"
     },
     {
         "arabic": "دهب",
@@ -7984,7 +7984,7 @@
         "mappings": {
             "horus_id": 5002
         },
-        "governorate": "Giza"
+        "governorate": "Cairo"
     },
     {
         "arabic": "اسيوط المعلمين",

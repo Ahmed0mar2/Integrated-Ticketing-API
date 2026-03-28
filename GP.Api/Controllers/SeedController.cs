@@ -1,4 +1,5 @@
 ﻿using GP.Application.Common;
+using GP.Application.Interfaces;
 using GP.Application.Services;
 using GP.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -212,6 +213,17 @@ namespace GP.Api.Controllers
             {
                 return StatusCode(500, ApiResponse.Fail("Import failed", [ex.Message]));
             }
+        }
+
+        /// <summary>
+        /// Generates the physical dates and seat inventories for all active trips for the next 60 days.
+        /// </summary>
+        [HttpPost("generate-occurrences")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GenerateOccurrences([FromServices] ITripOccurrenceService service)
+        {
+            await service.GenerateOccurrencesAsync(60);
+            return Ok(ApiResponse.Ok("60-Day Calendar generated successfully!"));
         }
     }
 }
