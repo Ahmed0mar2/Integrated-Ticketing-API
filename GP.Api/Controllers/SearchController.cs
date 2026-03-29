@@ -49,5 +49,17 @@ namespace GP.Api.Controllers
                 $"Successfully found {results.Count} available trips."
             ));
         }
+
+        [HttpGet("indirect")]
+        [ProducesResponseType(typeof(ApiResponse<List<IndirectTripResponseDto>>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> SearchIndirectTrips([FromQuery] TripSearchRequestDto request, CancellationToken cancellationToken)
+        {
+            var results = await _searchService.SearchIndirectTripsAsync(request, cancellationToken);
+
+            if (results.Count == 0)
+                return Ok(ApiResponse<List<IndirectTripResponseDto>>.SuccessResponse(results, "No indirect routes found."));
+
+            return Ok(ApiResponse<List<IndirectTripResponseDto>>.SuccessResponse(results, $"Found {results.Count} indirect routes."));
+        }
     }
 }

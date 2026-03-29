@@ -10,5 +10,6 @@ namespace GP.Application.Interfaces
     public interface ISearchService
     {
         Task<List<TripSearchResponseDto>> SearchTripsAsync(TripSearchRequestDto request, CancellationToken cancellationToken = default);
+        Task<List<IndirectTripResponseDto>> SearchIndirectTripsAsync(TripSearchRequestDto request, CancellationToken cancellationToken = default);
     }
 }
