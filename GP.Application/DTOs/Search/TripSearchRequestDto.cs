@@ -18,7 +18,12 @@ namespace GP.Application.DTOs.Search
         public string? ToGovernorate { get; set; }
         public int? ToStationId { get; set; }
 
-        public int Passengers { get; set; } = 1; // Default to 1
-        public TransportMode Transport { get; set; } = TransportMode.All; // Default to All
+        public int Passengers { get; set; } = 1; 
+        public TransportMode Transport { get; set; } = TransportMode.All; 
+        public SearchSortOption SortBy { get; set; } = SearchSortOption.DepartureTime;
+
+        public decimal? MaxPrice { get; set; }
+
+        public List<string>? PreferredAgencies { get; set; }
     }
 }

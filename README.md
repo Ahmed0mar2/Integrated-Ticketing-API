@@ -16,6 +16,8 @@
 
 - **Unified Booking System** - Book train and bus tickets through a single platform
 - **Flexible Search Engine** - Governorate-to-governorate OR station-to-station search with date/transport filters
+- **Advanced 1-Stop Indirect Routing Algorithm via Spatial Bounding Boxes** - Finds transfer hubs efficiently and builds valid connecting itineraries
+- **Dynamic SQL-level Filtering & Sorting** - Supports transport mode, preferred agencies, max price, and sort strategies without client-side filtering
 - **Dynamic Seat Availability Filtering** - Returns only classes with enough remaining seats for requested passenger count
 - **Bilingual Station Directory** - Grouped stations by governorate for Arabic/English dropdown experiences
 - **User Authentication** - Secure JWT-based authentication with email verification
@@ -250,6 +252,7 @@ After running migrations, you can log in with the seeded admin account:
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|---------------|
 | `GET` | `/api/Search` | Flexible governorate/station trip search with dynamic seat inventory filtering | ❌ |
+| `GET` | `/api/Search/indirect` | Advanced 1-stop indirect routing with spatial transfer-hub pruning and layover validation | ❌ |
 
 ### 🚉 Stations (`/api/Stations`)
 

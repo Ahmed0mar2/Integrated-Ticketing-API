@@ -16,7 +16,8 @@ namespace GP.Application.DTOs.Search
         public DateTime? ArrivalTime { get; set; }
 
         public int? TotalDurationMinutes { get; set; }
-
+        public int OriginStationId { get; set; }
+        public int DestinationStationId { get; set; }
         public string OriginStationName { get; set; } = string.Empty;
         public string OriginGovernorate { get; set; } = string.Empty;
 

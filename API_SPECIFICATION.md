@@ -1,4 +1,4 @@
-# Rehla API Specification
+﻿# Rehla API Specification
 
 Frontend integration guide for Flutter and Angular teams.
 
@@ -842,7 +842,10 @@ Query string parameters:
   "toGovernorate": "Alexandria",
   "toStationId": null,
   "passengers": 2,
-  "transport": 0
+  "transport": 0,
+  "sortBy": 1,
+  "maxPrice": 250.0,
+  "preferredAgencies": ["GoBus", "Blue Bus"]
 }
 ```
 
@@ -856,6 +859,9 @@ Query string parameters:
 | toStationId | int | Conditional | Required if toGovernorate missing |
 | passengers | int | Yes | Must be > 0 |
 | transport | int | No | 0=All, 1=Bus, 2=Train |
+| sortBy | int | No | 0=DepartureTime, 1=LowestPrice, 2=ShortestDuration |
+| maxPrice | decimal | No | Excludes trips where cheapest available class exceeds this value |
+| preferredAgencies | string[] | No | Optional exact-match allowlist for agency names |
 
 ### Response Example (200 OK)
 ```json
@@ -870,16 +876,112 @@ Query string parameters:
       "departureTime": "2026-03-20T07:00:00Z",
       "arrivalTime": "2026-03-20T10:00:00Z",
       "totalDurationMinutes": 180,
-      "originStationName": "?????",
+      "originStationId": 101,
+      "originStationName": "رمسيس",
       "originGovernorate": "Cairo",
-      "destinationStationName": "???? ????",
+      "destinationStationId": 201,
+      "destinationStationName": "سيدي جابر",
       "destinationGovernorate": "Alexandria",
       "availableClasses": [
         {
           "coachClassId": 1,
           "className": "Business",
           "remainingSeats": 14,
-          "price": 180.00
+          "price": 180.0
+        }
+      ]
+    }
+  ],
+  "errors": null,
+  "timestamp": "2026-03-20T00:00:00Z"
+}
+```
+
+## 7.2 Search Indirect Trips (1-Stop)
+
+### Endpoint Overview
+- **Method:** `GET`
+- **URL:** `/api/Search/indirect`
+- **Business Use Case:** Finds valid 1-stop routes via spatial transfer-hub pruning, layover validation, and seat-aware class filtering.
+
+### Authentication / Authorization
+- **JWT Required:** No
+- **Role Required:** None
+
+### Request Payload
+Query string parameters:
+
+```json
+{
+  "travelDate": "2026-03-20",
+  "fromGovernorate": "Cairo",
+  "toGovernorate": "Aswan",
+  "passengers": 1,
+  "transport": 0,
+  "sortBy": 2,
+  "maxPrice": 600.0,
+  "preferredAgencies": ["Egyptian National Railways", "GoBus"]
+}
+```
+
+### Request Field Reference
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| travelDate | date | Yes | Must be today..+60 days |
+| fromGovernorate | string | Conditional | Required if fromStationId missing |
+| fromStationId | int | Conditional | Required if fromGovernorate missing |
+| toGovernorate | string | Conditional | Required if toStationId missing |
+| toStationId | int | Conditional | Required if toGovernorate missing |
+| passengers | int | Yes | Must be > 0 |
+| transport | int | No | 0=All, 1=Bus, 2=Train |
+| sortBy | int | No | 0=DepartureTime, 1=LowestPrice, 2=ShortestDuration |
+| maxPrice | decimal | No | Applied through class price filtering |
+| preferredAgencies | string[] | No | Optional exact-match allowlist for agency names |
+
+### Response Example (200 OK)
+```json
+{
+  "success": true,
+  "message": "Found 1 indirect routes.",
+  "data": [
+    {
+      "totalDurationMinutes": 505,
+      "layoverDurationMinutes": 95,
+      "totalStartingPrice": 420.0,
+      "legs": [
+        {
+          "tripOccurrenceId": 5011,
+          "tripId": 310,
+          "agencyName": "GoBus",
+          "departureTime": "2026-03-20T06:30:00Z",
+          "arrivalTime": "2026-03-20T09:30:00Z",
+          "totalDurationMinutes": 180,
+          "originStationId": 101,
+          "originStationName": "رمسيس",
+          "originGovernorate": "Cairo",
+          "destinationStationId": 220,
+          "destinationStationName": "المنيا",
+          "destinationGovernorate": "Minya",
+          "availableClasses": [
+            { "coachClassId": 1, "className": "Business", "remainingSeats": 9, "price": 180.0 }
+          ]
+        },
+        {
+          "tripOccurrenceId": 9912,
+          "tripId": 777,
+          "agencyName": "Egyptian National Railways",
+          "departureTime": "2026-03-20T11:05:00Z",
+          "arrivalTime": "2026-03-20T16:30:00Z",
+          "totalDurationMinutes": 325,
+          "originStationId": 220,
+          "originStationName": "المنيا",
+          "originGovernorate": "Minya",
+          "destinationStationId": 880,
+          "destinationStationName": "أسوان",
+          "destinationGovernorate": "Aswan",
+          "availableClasses": [
+            { "coachClassId": 2, "className": "Second Class", "remainingSeats": 22, "price": 240.0 }
+          ]
         }
       ]
     }
@@ -924,3 +1026,4 @@ Query string parameters:
 | `POST` | `/api/Users/me/profile-picture` | Yes | Upload profile picture |
 | `GET` | `/api/Stations` | No | Get grouped stations |
 | `GET` | `/api/Search` | No | Flexible governorate/station trip search with inventory filtering |
+| `GET` | `/api/Search/indirect` | No | Advanced 1-stop indirect routing with spatial transfer-hub pruning |
