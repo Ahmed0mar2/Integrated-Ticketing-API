@@ -20,7 +20,8 @@ namespace GP.Infrastructure.Data.Configurations
             // Unique Matrix Index
             builder.HasIndex(tf => new { tf.TripId, tf.OriginStationId, tf.DestinationStationId, tf.CoachClassId })
                    .IsUnique();
-    
+            builder.HasIndex(f => new { f.TripId, f.OriginStationId, f.DestinationStationId, f.CoachClassId });
+
             builder.HasOne(tf => tf.Trip).WithMany(t => t.TripFares).HasForeignKey(tf => tf.TripId).OnDelete(DeleteBehavior.Cascade);
             builder.HasOne(tf => tf.CoachClass).WithMany(c => c.PricingConfigs).HasForeignKey(tf => tf.CoachClassId).OnDelete(DeleteBehavior.Restrict);
             

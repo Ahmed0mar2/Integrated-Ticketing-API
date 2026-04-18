@@ -5,6 +5,7 @@ using FluentValidation.AspNetCore;
 using GP.API.Filters;
 using GP.API.Middleware;
 using GP.Application.Common;
+using GP.Application.DTOs.Bookings;
 using GP.Application.Interfaces;
 using GP.Application.Services;
 using GP.Application.Settings;
@@ -61,7 +62,7 @@ public static class ServiceCollectionExtensions
     private static IServiceCollection AddValidationServices(this IServiceCollection services)
     {
         services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
-        
+
         services.Configure<ApiBehaviorOptions>(options =>
         {
             options.SuppressModelStateInvalidFilter = true;
@@ -226,8 +227,17 @@ public static class ServiceCollectionExtensions
         // Station Service
         services.AddScoped<IStationService, StationService>();
 
+        // Occurrence Seat Map Service
+        services.AddScoped<IOccurrenceSeatService, OccurrenceSeatService>();
+
         // Search Service
         services.AddScoped<ISearchService, SearchService>();
+
+        // Booking Service
+        services.AddScoped<IBookingService, BookingService>();
+
+        // Wallet Service
+        services.AddScoped<IWalletService, WalletService>();
 
         return services;
     }

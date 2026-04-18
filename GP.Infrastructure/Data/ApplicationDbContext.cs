@@ -39,6 +39,7 @@ namespace GP.Infrastructure.Data
         public DbSet<MarketplaceListing> MarketplaceListings { get; set; }
         public DbSet<TripFare> TripFares { get; set; }
         public DbSet<StopAgencyMapping> StopAgencyMappings { get; set; }
+        public DbSet<WalletTransaction> WalletTransactions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

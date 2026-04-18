@@ -1,4 +1,5 @@
 ﻿using GP.Domain.Entities;
+using GP.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
@@ -23,10 +24,16 @@ namespace GP.Infrastructure.Data.Configurations
             builder.Property(bp => bp.IdType).IsRequired();
             builder.Property(bp => bp.IdNumber).IsRequired().HasMaxLength(50);
 
+                 // Shadow copy of parent booking status used by filtered unique index enforcement.
+                 builder.Property<int>("BookingStatus")
+                     .IsRequired()
+                     .HasDefaultValue((int)BookingStatus.Pending);
+
             // Audit fields 
             builder.Property(bp => bp.CreatedAt).IsRequired().HasDefaultValueSql("GETUTCDATE()");
             builder.Property(bp => bp.UpdatedAt).IsRequired(false);
             builder.Property(bp => bp.IsDeleted).IsRequired().HasDefaultValue(false);
+            builder.Property(bp => bp.IsOfferedForResale).IsRequired().HasDefaultValue(false);
 
             // Indexes
             builder.HasIndex(bp => bp.BookingId);
@@ -34,6 +41,10 @@ namespace GP.Infrastructure.Data.Configurations
             builder.HasIndex(bp => new { bp.OccurrenceId, bp.CoachClassId, bp.SeatNumber })
                    .IsUnique()
                    .HasDatabaseName("IX_BookingPassenger_UniqueSeat");
+                 builder.HasIndex("OccurrenceId", "IdNumber")
+                     .IsUnique()
+                     .HasDatabaseName("IX_BookingPassenger_UniquePassengerPerOccurrence_Active")
+                     .HasFilter($"[BookingStatus] IN ({(int)BookingStatus.Pending}, {(int)BookingStatus.Confirmed})");
 
             // Relationship
             builder.HasOne(bp => bp.Booking)

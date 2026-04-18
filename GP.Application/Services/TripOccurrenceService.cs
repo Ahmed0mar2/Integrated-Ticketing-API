@@ -32,7 +32,6 @@ namespace GP.Application.Services
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
             var targetEndDate = today.AddDays(targetDaysAhead);
 
-            // Load readonly data with short-lived context
             List<Trip> trips;
             List<(int TripId, int CoachClassId, int DefaultCapacity)> tripClassesRaw;
             HashSet<long> existingSet;
@@ -41,13 +40,11 @@ namespace GP.Application.Services
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-                // 1. Fetch all Trips and their Calendars (AsNoTracking to avoid tracking large graph)
                 trips = await dbContext.Trips
                     .Include(t => t.Calendar)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken);
 
-                // 2. Fetch all required Coach Classes and their Capacities for each Trip
                 var tripClassesAnon = await dbContext.TripFares
                     .Include(f => f.CoachClass)
                     .Select(f => new { f.TripId, f.CoachClassId, DefaultCapacity = f.CoachClass.DefaultCapacity })
@@ -57,7 +54,6 @@ namespace GP.Application.Services
 
                 tripClassesRaw = tripClassesAnon.Select(x => (x.TripId, x.CoachClassId, x.DefaultCapacity)).ToList();
 
-                // 3. Fetch existing occurrences in target window and pack into HashSet<long>
                 var existingDates = await dbContext.TripOccurrences
                     .Where(o => o.OccurrenceDate >= today && o.OccurrenceDate <= targetEndDate)
                     .Select(o => new { o.TripId, o.OccurrenceDate })
@@ -67,7 +63,6 @@ namespace GP.Application.Services
                 existingSet = new HashSet<long>(existingDates.Select(e => PackKey(e.TripId, DateToInt(e.OccurrenceDate))));
             }
 
-            // Group classes by TripId for instant lookup
             var classesByTrip = tripClassesRaw
                 .GroupBy(tc => tc.TripId)
                 .ToDictionary(g => g.Key, g => g.Select(x => (x.CoachClassId, x.DefaultCapacity)).ToList());
@@ -75,16 +70,14 @@ namespace GP.Application.Services
             int batchCount = 0;
             int totalAdded = 0;
 
-            // Buffers to hold entities until we flush in a short-lived DbContext
             var occurrencesBuffer = new List<TripOccurrence>(capacity: 512);
             var inventoriesBuffer = new List<TripOccurrenceClassInventory>(capacity: 2048);
 
-            // 4. The Generation Loop
             foreach (var trip in trips)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                if (trip.Calendar == null) continue; // Skip if no calendar assigned
+                if (trip.Calendar == null) continue; 
 
                 for (var date = today; date <= targetEndDate; date = date.AddDays(1))
                 {
@@ -124,7 +117,7 @@ namespace GP.Application.Services
                         {
                             inventoriesBuffer.Add(new TripOccurrenceClassInventory
                             {
-                                TripOccurrence = newOccurrence, // keep relationship in-memory; will be persisted together
+                                TripOccurrence = newOccurrence, 
                                 CoachClassId = coachClass.CoachClassId,
                                 RemainingSeats = coachClass.DefaultCapacity,
                                 TotalSeats = coachClass.DefaultCapacity
@@ -138,7 +131,6 @@ namespace GP.Application.Services
                     batchCount++;
                     totalAdded++;
 
-                    // 5. Batch Saver: flush when buffer reaches threshold
                     if (batchCount >= 500)
                     {
                         await FlushBuffersAsync(occurrencesBuffer, inventoriesBuffer, cancellationToken);
@@ -149,7 +141,6 @@ namespace GP.Application.Services
                 }
             }
 
-            // Save any remaining occurrences
             if (batchCount > 0 || occurrencesBuffer.Count > 0)
             {
                 await FlushBuffersAsync(occurrencesBuffer, inventoriesBuffer, cancellationToken);
@@ -202,11 +193,11 @@ namespace GP.Application.Services
             }
             finally
             {
-                // Ensure ChangeTracker setting is reverted - disposing context would remove it anyway
+               
                 dbContext.ChangeTracker.AutoDetectChangesEnabled = true;
             }
 
-            // Clearing ChangeTracker is not strictly necessary because context will be disposed when scope ends.
+            
         }
 
         private bool RunsOnDayOfWeek(Calendar calendar, DayOfWeek day)

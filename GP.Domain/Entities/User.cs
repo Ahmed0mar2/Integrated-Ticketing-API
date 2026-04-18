@@ -1,10 +1,4 @@
 ﻿using GP.Domain.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GP.Domain.Entities
 {
@@ -23,7 +17,7 @@ namespace GP.Domain.Entities
         public Gender Gender { get; set; }
         public DateOnly DateOfBirth { get; set; }
         public string? NationalIdNumber { get; set; }
-        public bool IsNationalIdVerified { get; set; }  
+        public bool IsNationalIdVerified { get; set; }
         public string Nationality { get; set; } = null!;
 
         // Location & Stats
@@ -41,7 +35,8 @@ namespace GP.Domain.Entities
         public DateTime? UpdatedAt { get; set; }
 
         // Navigation properties
-        public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
+        public ICollection<Booking> Bookings { get; set; } = [];
         public Country Country { get; set; } = null!;
+        public ICollection<WalletTransaction> WalletTransactions { get; set; } = [];
     }
 }

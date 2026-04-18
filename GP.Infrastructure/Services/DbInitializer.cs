@@ -5,16 +5,15 @@ using GP.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GP.Infrastructure.Services
 {
     public static class DbInitializer
     {
+        private const string AdminRole = "Admin";
+        private const string UserRole = "User";
+        private const string PartnerRole = "Partner";
+
         public static async Task InitializeAsync(IServiceProvider serviceProvider)
         {
             using var scope = serviceProvider.CreateScope();
@@ -24,18 +23,19 @@ namespace GP.Infrastructure.Services
 
             await context.Database.MigrateAsync();
 
-            //Seed countries
+            // Seed countries
             await CountrySeeder.SeedCountriesAsync(context);
 
-            //seed roles
+            // Seed roles
             await SeedRolesAsync(roleManager);
 
-            //seed admin user
+            // Seed admin user
             await SeedAdminUserAsync(userManager, context);
         }
+
         private static async Task SeedRolesAsync(RoleManager<IdentityRole<int>> roleManager)
         {
-            string[] roles = { "Admin", "User", "Partner" };
+            string[] roles = { AdminRole, UserRole, PartnerRole };
 
             foreach (var role in roles)
             {
@@ -79,7 +79,7 @@ namespace GP.Infrastructure.Services
 
             if (!result.Succeeded)
             {
-                Console.WriteLine($"❌ Failed to create admin user");
+                Console.WriteLine("❌ Failed to create admin user");
                 return;
             }
 
@@ -95,7 +95,7 @@ namespace GP.Infrastructure.Services
                 NationalIdNumber = "00000000000000",
                 IsNationalIdVerified = true,
                 CountryId = egyptCountry.CountryId,
-                Nationality = "Egyptian", 
+                Nationality = "Egyptian",
                 TotalTripsCount = 0,
                 TotalDistanceTraveled = 0,
                 CreatedAt = DateTime.UtcNow
@@ -106,10 +106,9 @@ namespace GP.Infrastructure.Services
 
             applicationUser.DomainUserId = domainUser.UserId;
             await userManager.UpdateAsync(applicationUser);
-            await userManager.AddToRoleAsync(applicationUser, "Admin");
+            await userManager.AddToRoleAsync(applicationUser, AdminRole);
 
             Console.WriteLine("✅ Admin user created successfully!");
         }
-
     }
 }

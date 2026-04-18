@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 
 namespace GP.Domain.Enums
 {
-    public enum PricingType
+    public enum TransactionType
     {
-        FIXED = 0,      // Flat price (GoBus)
-        DISTANCE = 1    // Distance-based (Trains)
+        Deposit = 1,
+        TicketPurchase = 2,
+        Refund = 3
     }
 }

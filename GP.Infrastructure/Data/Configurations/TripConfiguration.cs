@@ -29,6 +29,7 @@ namespace GP.Infrastructure.Data.Configurations
             // Indexes
             builder.HasIndex(t => new { t.OriginStationId, t.DestinationStationId, t.DepartureTime })
                 .HasDatabaseName("IX_Trips_Search_RouteTime");
+            builder.HasIndex(t => new { t.OriginStationId, t.DestinationStationId });
 
             // Relationships (RESTRICT to prevent cascade crashes)
             builder.HasOne(t => t.OriginStation)

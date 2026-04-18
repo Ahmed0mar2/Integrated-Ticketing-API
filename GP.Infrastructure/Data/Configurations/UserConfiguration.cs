@@ -123,6 +123,10 @@ namespace GP.Infrastructure.Data.Configurations
 
             builder.HasIndex(u => u.CountryId);
 
+            builder.HasMany(u => u.WalletTransactions)
+                .WithOne(w => w.User)
+                .HasForeignKey(w => w.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

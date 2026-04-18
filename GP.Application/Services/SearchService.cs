@@ -1,4 +1,5 @@
-﻿using GP.Application.DTOs.Search;
+﻿using GP.Application.Common;
+using GP.Application.DTOs.Search;
 using GP.Application.Interfaces;
 using GP.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -14,42 +15,77 @@ namespace GP.Application.Services
             _dbContext = dbContext;
         }
 
-        // ==========================================
-        // 1. DIRECT SEARCH
-        // ==========================================
-        public async Task<List<TripSearchResponseDto>> SearchTripsAsync(TripSearchRequestDto request, CancellationToken cancellationToken = default)
+        public async Task<PagedResult<TripSearchResponseDto>> SearchTripsAsync(TripSearchRequestDto request, CancellationToken cancellationToken = default)
         {
-            // Resolve exact Station IDs if they passed Governorates
             var originIds = await ResolveStationIdsAsync(request.FromStationId, request.FromGovernorate, cancellationToken);
             var destIds = await ResolveStationIdsAsync(request.ToStationId, request.ToGovernorate, cancellationToken);
 
-            if (!originIds.Any() || !destIds.Any()) return new List<TripSearchResponseDto>();
+            if (!originIds.Any() || !destIds.Any())
+            {
+                var pageNumber = Math.Max(1, request.PageNumber);
+                var pageSize = Math.Max(1, request.PageSize);
 
-            // Let the database do all the filtering and sorting!
-            return await BuildSearchQuery(originIds, destIds, request)
-                .ToListAsync(cancellationToken);
+                return new PagedResult<TripSearchResponseDto>
+                {
+                    Items = [],
+                    TotalCount = 0,
+                    CurrentPage = pageNumber,
+                    PageSize = pageSize
+                };
+            }
+
+            return await SearchDirectCoreAsync(originIds, destIds, request, cancellationToken);
         }
 
-        // ==========================================
-        // 2. INDIRECT SEARCH (DIJKSTRA 1-STOP)
-        // ==========================================
-        public async Task<List<IndirectTripResponseDto>> SearchIndirectTripsAsync(TripSearchRequestDto request, CancellationToken cancellationToken = default)
+        public async Task<PagedResult<IndirectTripResponseDto>> SearchIndirectTripsAsync(TripSearchRequestDto request, CancellationToken cancellationToken = default)
         {
+            var pageNumber = Math.Max(1, request.PageNumber);
+            var pageSize = Math.Max(1, request.PageSize);
+
             var originIds = await ResolveStationIdsAsync(request.FromStationId, request.FromGovernorate, cancellationToken);
             var destIds = await ResolveStationIdsAsync(request.ToStationId, request.ToGovernorate, cancellationToken);
 
-            if (!originIds.Any() || !destIds.Any()) return new List<IndirectTripResponseDto>();
+            if (!originIds.Any() || !destIds.Any())
+            {
+                return new PagedResult<IndirectTripResponseDto>
+                {
+                    Items = [],
+                    TotalCount = 0,
+                    CurrentPage = pageNumber,
+                    PageSize = pageSize
+                };
+            }
 
-            // Get valid coordinates for the bounding box
+            // Product rule: indirect routes are only returned when no direct routes exist.
+            var directMatches = await SearchDirectCoreAsync(originIds, destIds, request, cancellationToken, applyPagination: false);
+            if (directMatches.TotalCount > 0)
+            {
+                return new PagedResult<IndirectTripResponseDto>
+                {
+                    Items = [],
+                    TotalCount = 0,
+                    CurrentPage = pageNumber,
+                    PageSize = pageSize
+                };
+            }
+
             var bounds = await _dbContext.Stops
                 .AsNoTracking()
                 .Where(s => originIds.Contains(s.StopId) || destIds.Contains(s.StopId))
                 .Where(s => s.Latitude.HasValue && s.Longitude.HasValue)
                 .ToListAsync(cancellationToken);
 
-            if (bounds.Count < 2) return new List<IndirectTripResponseDto>();
+            if (bounds.Count < 2)
+            {
+                return new PagedResult<IndirectTripResponseDto>
+                {
+                    Items = [],
+                    TotalCount = 0,
+                    CurrentPage = pageNumber,
+                    PageSize = pageSize
+                };
+            }
 
-            // Calculate Spatial Pruning Box
             decimal minLat = bounds.Min(s => s.Latitude!.Value) - 0.5m;
             decimal maxLat = bounds.Max(s => s.Latitude!.Value) + 0.5m;
             decimal minLng = bounds.Min(s => s.Longitude!.Value) - 0.5m;
@@ -62,131 +98,284 @@ namespace GP.Application.Services
                 .Select(s => s.StopId)
                 .ToListAsync(cancellationToken);
 
-            if (!validTransferStationIds.Any()) return new List<IndirectTripResponseDto>();
-
-            // Fetch Legs using the shared Query Builder 
-            var requestLeg2Tomorrow = new TripSearchRequestDto { TravelDate = request.TravelDate.AddDays(1), Passengers = request.Passengers, Transport = request.Transport };
-
-            var potentialLeg1s = await BuildSearchQuery(originIds, validTransferStationIds, request).ToListAsync(cancellationToken);
-            var potentialLeg2sToday = await BuildSearchQuery(validTransferStationIds, destIds, request).ToListAsync(cancellationToken);
-            var potentialLeg2sTomorrow = await BuildSearchQuery(validTransferStationIds, destIds, requestLeg2Tomorrow).ToListAsync(cancellationToken);
-
-            var allPotentialLeg2s = potentialLeg2sToday.Concat(potentialLeg2sTomorrow).ToList();
-            var indirectTrips = new List<IndirectTripResponseDto>();
-
-            foreach (var leg1 in potentialLeg1s)
+            if (!validTransferStationIds.Any())
             {
-                if (!leg1.ArrivalTime.HasValue) continue;
+                return new PagedResult<IndirectTripResponseDto>
+                {
+                    Items = [],
+                    TotalCount = 0,
+                    CurrentPage = pageNumber,
+                    PageSize = pageSize
+                };
+            }
+
+            var requestLeg2Tomorrow = new TripSearchRequestDto
+            {
+                TravelDate = request.TravelDate.AddDays(1),
+                Passengers = request.Passengers,
+                Transport = request.Transport,
+                SortBy = request.SortBy,
+                MaxPrice = request.MaxPrice,
+                PreferredAgencies = request.PreferredAgencies
+            };
+
+            var potentialLeg1s = await SearchDirectCoreAsync(originIds, validTransferStationIds, request, cancellationToken, applyPagination: false);
+            var potentialLeg2sToday = await SearchDirectCoreAsync(validTransferStationIds, destIds, request, cancellationToken, applyPagination: false);
+            var potentialLeg2sTomorrow = await SearchDirectCoreAsync(validTransferStationIds, destIds, requestLeg2Tomorrow, cancellationToken, applyPagination: false);
+
+            var allPotentialLeg2s = potentialLeg2sToday.Items.Concat(potentialLeg2sTomorrow.Items).ToList();
+            var validIndirectRoutes = new List<IndirectTripResponseDto>();
+
+            foreach (var leg1 in potentialLeg1s.Items)
+            {
+                if (leg1.DropoffTime == default)
+                    continue;
 
                 var validConnections = allPotentialLeg2s.Where(leg2 =>
                     leg2.OriginStationId == leg1.DestinationStationId &&
-                    leg2.DepartureTime >= leg1.ArrivalTime.Value.AddHours(1) &&
-                    leg2.DepartureTime <= leg1.ArrivalTime.Value.AddHours(6)
+                    leg2.BoardingTime >= leg1.DropoffTime.AddHours(1) &&
+                    leg2.BoardingTime <= leg1.DropoffTime.AddHours(6)
                 ).ToList();
 
                 foreach (var leg2 in validConnections)
                 {
-                    if (!leg2.TotalDurationMinutes.HasValue && !leg2.ArrivalTime.HasValue) continue;
+                    if (leg2.DropoffTime == default)
+                        continue;
 
-                    var layover = (int)(leg2.DepartureTime - leg1.ArrivalTime.Value).TotalMinutes;
-                    var leg1Duration = leg1.TotalDurationMinutes ?? (int)(leg1.ArrivalTime.Value - leg1.DepartureTime).TotalMinutes;
-                    var leg2Duration = leg2.TotalDurationMinutes ?? (int)(leg2.ArrivalTime!.Value - leg2.DepartureTime).TotalMinutes;
+                    var layover = (int)(leg2.BoardingTime - leg1.DropoffTime).TotalMinutes;
+                    var leg1Duration = leg1.TotalDurationMinutes ?? (int)(leg1.DropoffTime - leg1.BoardingTime).TotalMinutes;
+                    var leg2Duration = leg2.TotalDurationMinutes ?? (int)(leg2.DropoffTime - leg2.BoardingTime).TotalMinutes;
 
-                    indirectTrips.Add(new IndirectTripResponseDto
+                    validIndirectRoutes.Add(new IndirectTripResponseDto
                     {
                         TotalDurationMinutes = leg1Duration + layover + leg2Duration,
                         LayoverDurationMinutes = layover,
-                        TotalStartingPrice = leg1.AvailableClasses.Min(c => c.Price) + leg2.AvailableClasses.Min(c => c.Price),
-                        Legs = new List<TripSearchResponseDto> { leg1, leg2 }
+                        TotalStartingPrice = leg1.StartingPrice + leg2.StartingPrice,
+                        Legs = [leg1, leg2]
                     });
                 }
             }
 
-            // Memory sort for indirect routes since they are constructed in C#
-            return request.SortBy switch
+            var sortedIndirectRoutes = request.SortBy switch
             {
-                SearchSortOption.LowestPrice => indirectTrips.OrderBy(t => t.TotalStartingPrice).ToList(),
-                SearchSortOption.ShortestDuration => indirectTrips.OrderBy(t => t.TotalDurationMinutes).ToList(),
-                _ => indirectTrips.OrderBy(t => t.TotalStartingPrice).ToList()
+                SearchSortOption.LowestPrice => validIndirectRoutes.OrderBy(t => t.TotalStartingPrice).ToList(),
+                SearchSortOption.ShortestDuration => validIndirectRoutes.OrderBy(t => t.TotalDurationMinutes).ToList(),
+                _ => validIndirectRoutes.OrderBy(t => t.TotalStartingPrice).ToList()
+            };
+
+            var totalCount = sortedIndirectRoutes.Count;
+            var pagedItems = sortedIndirectRoutes
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return new PagedResult<IndirectTripResponseDto>
+            {
+                Items = pagedItems,
+                TotalCount = totalCount,
+                CurrentPage = pageNumber,
+                PageSize = pageSize
             };
         }
 
-        // ==========================================
-        // HELPER: THE IQUERYABLE BUILDER
-        // ==========================================
-        private IQueryable<TripSearchResponseDto> BuildSearchQuery(List<int> originIds, List<int> destIds, TripSearchRequestDto request)
+        private async Task<PagedResult<TripSearchResponseDto>> SearchDirectCoreAsync(
+            List<int> originIds,
+            List<int> destIds,
+            TripSearchRequestDto request,
+            CancellationToken cancellationToken,
+            bool applyPagination = true)
         {
-            // 1. Base Query
+            var now = DateTime.UtcNow;
+
             var query = _dbContext.TripOccurrences
                 .AsNoTracking()
+                .AsSplitQuery()
+                .Include(o => o.Trip)
+                    .ThenInclude(t => t.Agency)
+                .Include(o => o.Trip)
+                    .ThenInclude(t => t.TripStopTimes)
+                        .ThenInclude(ts => ts.Station)
+                .Include(o => o.Trip)
+                    .ThenInclude(t => t.TripFares)
+                .Include(o => o.ClassInventories)
+                    .ThenInclude(i => i.CoachClass)
                 .Where(o => o.IsActive && o.OccurrenceDate == request.TravelDate)
-                .Where(o => originIds.Contains(o.Trip.OriginStationId))
-                .Where(o => destIds.Contains(o.Trip.DestinationStationId));
+                .Where(o => o.Trip.TripFares.Any(f => originIds.Contains(f.OriginStationId) && destIds.Contains(f.DestinationStationId)));
 
-            // 2. Transport Filters
             if (request.Transport == TransportMode.Bus)
                 query = query.Where(o => !o.Trip.Agency.AgencyName.Contains("Railways"));
             else if (request.Transport == TransportMode.Train)
                 query = query.Where(o => o.Trip.Agency.AgencyName.Contains("Railways"));
 
-            // 3. Agency Filters
-            if (request.PreferredAgencies != null && request.PreferredAgencies.Any())
+            if (request.PreferredAgencies is { Count: > 0 })
                 query = query.Where(o => request.PreferredAgencies.Contains(o.Trip.Agency.AgencyName));
 
-            var projectedQuery = query.Select(o => new TripSearchResponseDto
+            var occurrences = await query.ToListAsync(cancellationToken);
+            var results = new List<TripSearchResponseDto>();
+
+            foreach (var occurrence in occurrences)
             {
-                TripOccurrenceId = o.TripOccurrenceId,
-                TripId = o.TripId,
-                AgencyName = o.Trip.Agency.AgencyName,
-                DepartureTime = o.DepartureDateTime,
-                ArrivalTime = o.Trip.TotalDurationMinutes.HasValue ? o.ArrivalDateTime : null,
-                TotalDurationMinutes = o.Trip.TotalDurationMinutes,
-                OriginStationId = o.Trip.OriginStationId,
-                OriginStationName = o.Trip.OriginStation.ArabicName,
-                OriginGovernorate = o.Trip.OriginStation.Governorate ?? "Unknown",
-                DestinationStationId = o.Trip.DestinationStationId,
-                DestinationStationName = o.Trip.DestinationStation.ArabicName,
-                DestinationGovernorate = o.Trip.DestinationStation.Governorate ?? "Unknown",
-                AvailableClasses = o.ClassInventories
-                    .Where(i => i.RemainingSeats >= request.Passengers)
-                    .Where(i => o.Trip.TripFares.Any(f => f.CoachClassId == i.CoachClassId
-                                                       && f.OriginStationId == o.Trip.OriginStationId
-                                                       && f.DestinationStationId == o.Trip.DestinationStationId))
-                    .Select(i => new TripClassOptionDto
+                var trip = occurrence.Trip;
+                var stopsByStation = trip.TripStopTimes
+                    .GroupBy(ts => ts.StationId)
+                    .ToDictionary(g => g.Key, g => g.OrderBy(x => x.StopSequence).First());
+
+                var matchingSegments = trip.TripFares
+                    .Where(f => originIds.Contains(f.OriginStationId) && destIds.Contains(f.DestinationStationId))
+                    .GroupBy(f => new { f.OriginStationId, f.DestinationStationId })
+                    .Select(g => g.Key)
+                    .ToList();
+
+                foreach (var segment in matchingSegments)
+                {
+                    if (!stopsByStation.TryGetValue(segment.OriginStationId, out var fromStop) ||
+                        !stopsByStation.TryGetValue(segment.DestinationStationId, out var toStop))
+                        continue;
+
+                    if (fromStop.StopSequence >= toStop.StopSequence)
+                        continue;
+
+                    var boardingTimeOnly = fromStop.DepartureTime ?? fromStop.ArrivalTime;
+                    var dropoffTimeOnly = toStop.ArrivalTime ?? toStop.DepartureTime;
+                    if (!boardingTimeOnly.HasValue || !dropoffTimeOnly.HasValue)
+                        continue;
+
+                    var boardingTime = BuildSegmentDateTime(occurrence.DepartureDateTime, trip.DepartureTime, boardingTimeOnly.Value);
+                    var dropoffTime = BuildSegmentDateTime(occurrence.DepartureDateTime, trip.DepartureTime, dropoffTimeOnly.Value);
+
+                    if (boardingTime < now)
+                        continue;
+
+                    var classOptions = occurrence.ClassInventories
+                        .Where(i => i.RemainingSeats >= request.Passengers)
+                        .Select(i =>
+                        {
+                            var segmentFare = trip.TripFares
+                                .Where(f => f.OriginStationId == segment.OriginStationId
+                                         && f.DestinationStationId == segment.DestinationStationId
+                                         && f.CoachClassId == i.CoachClassId)
+                                .Select(f => (decimal?)f.Price)
+                                .FirstOrDefault();
+
+                            if (!segmentFare.HasValue)
+                                return null;
+
+                            return new TripClassOptionDto
+                            {
+                                CoachClassId = i.CoachClassId,
+                                ClassName = i.CoachClass.Name,
+                                RemainingSeats = i.RemainingSeats,
+                                Price = segmentFare.Value
+                            };
+                        })
+                        .Where(x => x != null)
+                        .Select(x => x!)
+                        .ToList();
+
+                    if (!classOptions.Any())
+                        continue;
+
+                    var startingPrice = classOptions.Min(c => c.Price);
+                    if (request.MaxPrice.HasValue && startingPrice > request.MaxPrice.Value)
+                        continue;
+
+                    var routeStops = trip.TripStopTimes
+                        .Where(ts => ts.StopSequence >= fromStop.StopSequence && ts.StopSequence <= toStop.StopSequence)
+                        .OrderBy(ts => ts.StopSequence)
+                        .Select(ts => new IntermediateStopDto
+                        {
+                            StationName = ts.Station.ArabicName,
+                            ArrivalTime = ts.ArrivalTime,
+                            DepartureTime = ts.DepartureTime,
+                            StopSequence = ts.StopSequence
+                        })
+                        .ToList();
+
+                    var duration = (int)Math.Max(0, (dropoffTime - boardingTime).TotalMinutes);
+
+                    results.Add(new TripSearchResponseDto
                     {
-                        CoachClassId = i.CoachClassId,
-                        ClassName = i.CoachClass.Name,
-                        RemainingSeats = i.RemainingSeats,
-                        Price = o.Trip.TripFares
-                            .Where(f => f.CoachClassId == i.CoachClassId
-                                     && f.OriginStationId == o.Trip.OriginStationId
-                                     && f.DestinationStationId == o.Trip.DestinationStationId)
-                            .Select(f => f.Price)
-                            .FirstOrDefault()
-                    }).ToList()
-            }).Where(dto => dto.AvailableClasses.Any());
+                        TripOccurrenceId = occurrence.TripOccurrenceId,
+                        TripId = occurrence.TripId,
+                        AgencyName = trip.Agency.AgencyName,
+                        BoardingTime = boardingTime,
+                        DropoffTime = dropoffTime,
+                        DepartureTime = occurrence.DepartureDateTime,
+                        ArrivalTime = occurrence.ArrivalDateTime,
+                        TotalDurationMinutes = duration,
+                        OriginStationId = fromStop.StationId,
+                        OriginStationName = fromStop.Station.ArabicName,
+                        OriginGovernorate = fromStop.Station.Governorate ?? "Unknown",
+                        DestinationStationId = toStop.StationId,
+                        DestinationStationName = toStop.Station.ArabicName,
+                        DestinationGovernorate = toStop.Station.Governorate ?? "Unknown",
+                        StartingPrice = startingPrice,
+                        RouteStops = routeStops,
+                        AvailableClasses = classOptions
+                    });
+                }
+            }
 
-            // 4. Price Filter 
-            if (request.MaxPrice.HasValue)
-                projectedQuery = projectedQuery.Where(dto => dto.AvailableClasses.Min(c => c.Price) <= request.MaxPrice.Value);
-
-            projectedQuery = request.SortBy switch
+            var sortedResults = request.SortBy switch
             {
-                SearchSortOption.LowestPrice => projectedQuery.OrderBy(dto => dto.AvailableClasses.Min(c => c.Price)).ThenBy(dto => dto.DepartureTime),
-                SearchSortOption.ShortestDuration => projectedQuery.OrderBy(dto => dto.TotalDurationMinutes ?? 9999).ThenBy(dto => dto.DepartureTime),
-                _ => projectedQuery.OrderBy(dto => dto.DepartureTime)
+                SearchSortOption.LowestPrice => results.OrderBy(dto => dto.StartingPrice).ThenBy(dto => dto.BoardingTime).ToList(),
+                SearchSortOption.ShortestDuration => results.OrderBy(dto => dto.TotalDurationMinutes ?? int.MaxValue).ThenBy(dto => dto.BoardingTime).ToList(),
+                _ => results.OrderBy(dto => dto.BoardingTime).ToList()
             };
 
-            return projectedQuery;
+            if (!applyPagination)
+            {
+                return new PagedResult<TripSearchResponseDto>
+                {
+                    Items = sortedResults,
+                    TotalCount = sortedResults.Count,
+                    CurrentPage = 1,
+                    PageSize = sortedResults.Count == 0 ? 1 : sortedResults.Count
+                };
+            }
+
+            var pageNumber = Math.Max(1, request.PageNumber);
+            var pageSize = Math.Max(1, request.PageSize);
+
+            int totalItems = sortedResults.Count;
+            var paginatedItems = sortedResults
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return new PagedResult<TripSearchResponseDto>
+            {
+                Items = paginatedItems,
+                TotalCount = totalItems,
+                CurrentPage = pageNumber,
+                PageSize = pageSize
+            };
         }
 
-        // HELPER: Resolve Strings to IDs
+        private static DateTime BuildSegmentDateTime(DateTime occurrenceStart, TimeOnly tripOriginDeparture, TimeOnly segmentTime)
+        {
+            var offset = segmentTime.ToTimeSpan() - tripOriginDeparture.ToTimeSpan();
+            if (offset < TimeSpan.Zero)
+                offset = offset.Add(TimeSpan.FromDays(1));
+
+            return occurrenceStart.Add(offset);
+        }
+
         private async Task<List<int>> ResolveStationIdsAsync(int? stationId, string? governorate, CancellationToken ct)
         {
-            if (stationId.HasValue) return new List<int> { stationId.Value };
+            if (stationId.HasValue)
+                return [stationId.Value];
+
             if (!string.IsNullOrWhiteSpace(governorate))
-                return await _dbContext.Stops.AsNoTracking().Where(s => s.Governorate == governorate).Select(s => s.StopId).ToListAsync(ct);
-            return new List<int>();
+            {
+                return await _dbContext.Stops
+                    .AsNoTracking()
+                    .Where(s => s.Governorate == governorate)
+                    .Select(s => s.StopId)
+                    .ToListAsync(ct);
+            }
+
+            return [];
         }
     }
 }

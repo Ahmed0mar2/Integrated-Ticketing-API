@@ -247,12 +247,20 @@ After running migrations, you can log in with the seeded admin account:
 |--------|-------------------|------------------------------------------|---------------|
 | `GET`  | `/api/Countries`  | Get all countries (for registration dropdown) | ❌       |
 
-### 🔎 Search (`/api/Search`)
+### 🔎 Search (`/api/trips` preferred, `/api/Search` alias)
 
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|---------------|
-| `GET` | `/api/Search` | Flexible governorate/station trip search with dynamic seat inventory filtering | ❌ |
-| `GET` | `/api/Search/indirect` | Advanced 1-stop indirect routing with spatial transfer-hub pruning and layover validation | ❌ |
+| `GET` | `/api/trips/search` | Preferred paginated direct-trip search endpoint (`pageNumber`, `pageSize`) | ❌ |
+| `GET` | `/api/Search` | Backward-compatible direct-trip search alias | ❌ |
+| `GET` | `/api/trips/search/indirect` | Preferred 1-stop indirect search route | ❌ |
+| `GET` | `/api/Search/indirect` | Backward-compatible indirect search alias | ❌ |
+
+### 🪑 Occurrence Seat Map (`/api/occurrences`)
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| `GET` | `/api/occurrences/{id}/seats` | Real-time seat states (Available/Pending/Booked) plus layout metadata (`layoutType`, `deckCount`, `seatMapJson`) | ❌ |
 
 ### 🚉 Stations (`/api/Stations`)
 
@@ -281,7 +289,7 @@ After running migrations, you can log in with the seeded admin account:
 | `POST` | `/api/admin/users/{id}/roles` | ✅ | Assign a system role to a user |
 | `DELETE` | `/api/admin/users/{id}` | ✅ | Permanently delete a user | 
 
-### 🧑‍💻 User Profile (New)
+### 🧑‍💻 User Profile 
 
 These endpoints were added as part of the User Profile epic. They allow authenticated users to view and manage their profile and upload a profile picture. All endpoints require a valid JWT (Bearer) token.
 
@@ -292,6 +300,24 @@ These endpoints were added as part of the User Profile epic. They allow authenti
 | `GET` | `/api/users/me` | ✅ | Get current user's profile, gamification stats and wallet balance |
 | `PUT` | `/api/users/me` | ✅ | Update current user's basic profile info (first/family/last name, email, phone). Email & phone uniqueness validated at domain and identity levels |
 | `POST` | `/api/users/me/profile-picture` | ✅ | Upload or replace user's profile picture (multipart file). Allowed extensions: `.jpg`, `.jpeg`, `.png` |
+
+### 🛒 Bookings (`/api/Bookings`)
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| `POST` | `/api/Bookings/cart` | Add trip to cart with 10-minute seat soft-lock (one passenger ↔ one required seat number) | ✅ |
+| `POST` | `/api/Bookings/cart/add` | Backward-compatible add-to-cart alias | ✅ |
+| `GET` | `/api/Bookings/cart` | Get current active cart (pending + not expired) | ✅ |
+| `POST` | `/api/Bookings/checkout` | Confirm booking via wallet deduction and auto-seat assignment | ✅ |
+| `GET` | `/api/Bookings/my-tickets` | Get user's ticket history (non-pending bookings) | ✅ |
+
+### 💳 Wallet (`/api/Wallet`)
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| `POST` | `/api/Wallet/deposit` | Deposit funds into user wallet using simulated card gateway | ✅ |
+| `GET` | `/api/Wallet/history` | Retrieve wallet transaction ledger history (latest first) | ✅ |
+
 
 > 📖 For complete API documentation with request/response schemas, visit `/scalar/v1` when the application is running.
 

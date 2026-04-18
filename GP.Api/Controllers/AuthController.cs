@@ -1,5 +1,6 @@
 ﻿namespace GP.API.Controllers;
 
+using GP.API.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -97,19 +98,20 @@ public class AuthController : ControllerBase
     /// <summary>
     /// Revoke all refresh tokens for current user (logout all devices)
     /// </summary>
+    [Authorize]
     [HttpPost("revoke-all")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> RevokeAllTokens()
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var userId = User.GetApplicationUserId();
 
-        if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+        if (userId == null)
         {
             return Unauthorized(ApiResponse.ErrorResponse("Invalid token"));
         }
 
-        var result = await _authService.RevokeAllUserTokensAsync(userId);
+        var result = await _authService.RevokeAllUserTokensAsync(userId.Value);
 
         if (!result.Success)
         {
@@ -128,13 +130,13 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
     public IActionResult GetCurrentUser()
     {
-        var userId = User.FindFirst("domain_user_id")?.Value;
+        var domainUserId = User.GetDomainUserId();
         var email = User.FindFirst(ClaimTypes.Email)?.Value;
         var name = User.FindFirst(ClaimTypes.Name)?.Value;
 
         var userData = new
         {
-            userId,
+            userId = domainUserId?.ToString(),
             email,
             name,
             claims = User.Claims.Select(c => new { c.Type, c.Value })
@@ -227,9 +229,9 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var userId = User.GetApplicationUserId();
 
-        if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+        if (userId == null)
         {
             return Unauthorized(ApiResponse.ErrorResponse("Invalid token"));
         }
@@ -240,7 +242,7 @@ public class AuthController : ControllerBase
         }
 
         var result = await _authService.ChangePasswordAsync(
-            userId,
+            userId.Value,
             request.CurrentPassword,
             request.NewPassword);
 
