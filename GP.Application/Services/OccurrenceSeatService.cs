@@ -1,5 +1,6 @@
 using GP.Application.DTOs.Occurrences;
 using GP.Application.Interfaces;
+using GP.Application.Common;
 using GP.Domain.Enums;
 using GP.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -83,7 +84,9 @@ public class OccurrenceSeatService : IOccurrenceSeatService
                     SeatNumber = seatNumber,
                     Status = status,
                     BookingId = seatLock.BookingId,
-                    HoldExpiresAt = status == "Pending" ? seatLock.HoldExpiresAt : null
+                    HoldExpiresAt = status == "Pending" && seatLock.HoldExpiresAt.HasValue
+                        ? AppTime.AsUtc(seatLock.HoldExpiresAt.Value)
+                        : null
                 };
             }
 

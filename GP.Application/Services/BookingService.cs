@@ -317,7 +317,7 @@ namespace GP.Application.Services
                     BookingId = b.BookingId,
                     TotalPrice = b.TotalPrice,
                     SeatsBooked = b.SeatsBooked,
-                    HoldExpiresAt = DateTime.SpecifyKind(b.HoldExpiresAt!.Value, DateTimeKind.Utc),
+                    HoldExpiresAt = AppTime.AsUtc(b.HoldExpiresAt!.Value),
                     AgencyName = b.Occurrence.Trip.Agency.AgencyName,
                     ClassName = b.CoachClass.Name,
                     Origin = b.OriginStation.ArabicName,
@@ -371,7 +371,7 @@ namespace GP.Application.Services
                         PaymentStatus = b.PaymentStatus.ToString(),
                         TotalPrice = b.TotalPrice,
                         SeatsBooked = b.SeatsBooked,
-                        BookingDate = DateTime.SpecifyKind(b.BookingTime, DateTimeKind.Utc),
+                        BookingDate = AppTime.AsUtc(b.BookingTime),
                         AgencyName = b.Occurrence.Trip.Agency.AgencyName,
                         ClassName = b.CoachClass.Name,
                         OriginStation = b.OriginStation.ArabicName,
@@ -475,7 +475,7 @@ namespace GP.Application.Services
 
         public async Task ProcessCompletedTripsAsync(CancellationToken cancellationToken = default)
         {
-            var now = DateTime.UtcNow;
+            var now = AppTime.GetScheduleNow();
 
             var completedCandidates = await _dbContext.Bookings
                 .Include(b => b.User)
@@ -532,8 +532,8 @@ namespace GP.Application.Services
 
         private static (DateTime BoardingTime, DateTime DropoffTime) ResolvePassengerLocalTimes(Booking booking)
         {
-            var fallbackBoarding = DateTime.SpecifyKind(booking.Occurrence.DepartureDateTime, DateTimeKind.Utc);
-            var fallbackDropoff = DateTime.SpecifyKind(booking.Occurrence.ArrivalDateTime, DateTimeKind.Utc);
+            var fallbackBoarding = AppTime.AsSchedule(booking.Occurrence.DepartureDateTime);
+            var fallbackDropoff = AppTime.AsSchedule(booking.Occurrence.ArrivalDateTime);
 
             var trip = booking.Occurrence.Trip;
             if (trip?.TripStopTimes == null || trip.TripStopTimes.Count == 0)
@@ -569,8 +569,8 @@ namespace GP.Application.Services
                 dropoffTimeOnly.Value);
 
             return (
-                DateTime.SpecifyKind(boardingTime, DateTimeKind.Utc),
-                DateTime.SpecifyKind(dropoffTime, DateTimeKind.Utc));
+                AppTime.AsSchedule(boardingTime),
+                AppTime.AsSchedule(dropoffTime));
         }
 
         private static DateTime BuildSegmentDateTime(DateTime occurrenceStart, TimeOnly tripOriginDeparture, TimeOnly segmentTime)

@@ -185,8 +185,10 @@ public class AdminUserService : IAdminUserService
             NationalIdNumber = domainUser.NationalIdNumber,
             TotalTripsCount = domainUser.TotalTripsCount,
             TotalDistanceTraveled = domainUser.TotalDistanceTraveled,
-            CreatedAt = domainUser.CreatedAt,
-            LastLoginAt = identityUser.LastLoginAt,
+            CreatedAt = AppTime.AsUtc(domainUser.CreatedAt),
+            LastLoginAt = identityUser.LastLoginAt.HasValue
+                ? AppTime.AsUtc(identityUser.LastLoginAt.Value)
+                : null,
             IsActive = identityUser.IsActive,
             CountryCode = domainUser.Country?.CountryCode ?? string.Empty,
             CountryName = domainUser.Country?.CountryName ?? string.Empty,

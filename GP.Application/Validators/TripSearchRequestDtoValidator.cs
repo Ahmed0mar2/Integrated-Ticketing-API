@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using GP.Application.Common;
 using GP.Application.DTOs.Search;
 using System;
 
@@ -11,9 +12,9 @@ namespace GP.Application.Validators
             // 1. Validate the Date
             RuleFor(x => x.TravelDate)
                 .NotEmpty().WithMessage("Travel date is required.")
-                .Must(date => date >= DateOnly.FromDateTime(DateTime.UtcNow))
+                .Must(date => date >= DateOnly.FromDateTime(AppTime.GetScheduleNow()))
                 .WithMessage("Travel date cannot be in the past.")
-                .Must(date => date <= DateOnly.FromDateTime(DateTime.UtcNow).AddDays(60))
+                .Must(date => date <= DateOnly.FromDateTime(AppTime.GetScheduleNow()).AddDays(60))
                 .WithMessage("You can only search for trips up to 60 days in advance.");
 
             // 2. Validate Origin
