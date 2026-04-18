@@ -2,11 +2,6 @@
 using GP.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GP.Infrastructure.Data.Configurations
 {
@@ -18,8 +13,8 @@ namespace GP.Infrastructure.Data.Configurations
 
             // Required fields
             builder.Property(b => b.UserId).IsRequired();
-            builder.Property(b => b.OccurrenceId).IsRequired();  
-            builder.Property(b => b.CoachClassId).IsRequired();  
+            builder.Property(b => b.OccurrenceId).IsRequired();
+            builder.Property(b => b.CoachClassId).IsRequired();
             builder.Property(b => b.SeatsBooked).IsRequired();
             builder.Property(b => b.TotalPrice).IsRequired().HasPrecision(10, 2);
             builder.Property(b => b.BookingTime).IsRequired().HasDefaultValueSql("GETUTCDATE()");
@@ -44,7 +39,7 @@ namespace GP.Infrastructure.Data.Configurations
             builder.HasOne(b => b.User)
                 .WithMany(u => u.Bookings)
                 .HasForeignKey(b => b.UserId)
-                .OnDelete(DeleteBehavior.Restrict);  
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(b => b.Occurrence)
                 .WithMany()
@@ -60,20 +55,24 @@ namespace GP.Infrastructure.Data.Configurations
                 .WithOne(bp => bp.Booking)
                 .HasForeignKey(bp => bp.BookingId)
                 .OnDelete(DeleteBehavior.Cascade);
+
             builder.HasOne(b => b.OriginStation)
-                    .WithMany()
-                    .HasForeignKey(b => b.OriginStationId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                .WithMany()
+                .HasForeignKey(b => b.OriginStationId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(b => b.DestinationStation)
-                   .WithMany()
-                   .HasForeignKey(b => b.DestinationStationId)
-                   .OnDelete(DeleteBehavior.Restrict);
+                .WithMany()
+                .HasForeignKey(b => b.DestinationStationId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasMany(b => b.WalletTransactions)
                 .WithOne(w => w.Booking)
                 .HasForeignKey(w => w.BookingId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            // SQL trigger registration (created in AddActivePassengerDuplicateGuard migration)
+            builder.ToTable(tb => tb.HasTrigger("TR_Bookings_PropagateStatusToPassengers"));
         }
     }
 }
