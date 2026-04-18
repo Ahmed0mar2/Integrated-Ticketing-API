@@ -9,8 +9,7 @@ using System.Threading.Tasks;
 
 namespace GP.Infrastructure.Data.Configurations
 {
-    public class TripOccurrenceClassInventoryConfiguration
-    : IEntityTypeConfiguration<TripOccurrenceClassInventory>
+    public class TripOccurrenceClassInventoryConfiguration: IEntityTypeConfiguration<TripOccurrenceClassInventory>
     {
         public void Configure(EntityTypeBuilder<TripOccurrenceClassInventory> builder)
         {
@@ -20,13 +19,14 @@ namespace GP.Infrastructure.Data.Configurations
             builder.Property(t => t.CoachClassId).IsRequired();
             builder.Property(t => t.TotalSeats).IsRequired();
             builder.Property(t => t.RemainingSeats).IsRequired();
-            // Unique: One inventory per occurrence per class
-            builder.HasIndex(t => new { t.TripOccurrenceId, t.CoachClassId }).IsUnique();
+            builder.Property(t => t.RowVersion).IsRowVersion();
 
             // Indexes
             builder.HasIndex(t => t.TripOccurrenceId);
             builder.HasIndex(t => t.CoachClassId);
             builder.HasIndex(t => new { t.RemainingSeats }).IsDescending();
+            builder.HasIndex(i => new { i.TripOccurrenceId, i.CoachClassId, i.RemainingSeats });
+            builder.HasIndex(t => new { t.TripOccurrenceId, t.CoachClassId }).IsUnique();
 
             // Constraints
             builder.ToTable(tb =>

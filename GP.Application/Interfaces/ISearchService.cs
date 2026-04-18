@@ -1,4 +1,5 @@
-﻿using GP.Application.DTOs.Search;
+﻿using GP.Application.Common;
+using GP.Application.DTOs.Search;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace GP.Application.Interfaces
 {
     public interface ISearchService
     {
-        Task<List<TripSearchResponseDto>> SearchTripsAsync(TripSearchRequestDto request, CancellationToken cancellationToken = default);
-        Task<List<IndirectTripResponseDto>> SearchIndirectTripsAsync(TripSearchRequestDto request, CancellationToken cancellationToken = default);
+        Task<PagedResult<TripSearchResponseDto>> SearchTripsAsync(TripSearchRequestDto request, CancellationToken cancellationToken = default);
+        Task<PagedResult<IndirectTripResponseDto>> SearchIndirectTripsAsync(TripSearchRequestDto request, CancellationToken cancellationToken = default);
     }
 }

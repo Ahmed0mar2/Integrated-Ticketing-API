@@ -28,7 +28,7 @@ namespace GP.Infrastructure.Data.Configurations
                    .HasForeignKey(x => x.BookingId)
                    .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasQueryFilter(x => x.Booking.IsDeleted == false);
+            builder.HasQueryFilter(x => !x.IsDeleted && !x.Booking.IsDeleted);
         }
     }
 }

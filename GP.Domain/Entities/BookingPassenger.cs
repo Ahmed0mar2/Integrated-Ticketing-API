@@ -18,7 +18,8 @@ namespace GP.Domain.Entities
         public int CoachClassId { get; set; }
         public string SeatNumber { get; set; } = null!;  
         public IdType IdType { get; set; }  
-        public string IdNumber { get; set; } = null!;  
+        public string IdNumber { get; set; } = null!;
+        public bool IsOfferedForResale { get; set; } = false;
 
         // Navigation properties
         public Booking Booking { get; set; } = null!;

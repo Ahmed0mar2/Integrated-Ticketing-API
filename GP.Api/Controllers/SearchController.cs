@@ -31,35 +31,37 @@ namespace GP.Api.Controllers
         /// The response automatically filters out buses that do not have enough remaining seats for the requested passenger count.
         /// </remarks>
         [HttpGet]
-        [ProducesResponseType(typeof(ApiResponse<List<TripSearchResponseDto>>), StatusCodes.Status200OK)]
+        [HttpGet("/api/trips/search")]
+        [ProducesResponseType(typeof(ApiResponse<PagedResult<TripSearchResponseDto>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> SearchTrips([FromQuery] TripSearchRequestDto request, CancellationToken cancellationToken)
         {
             var results = await _searchService.SearchTripsAsync(request, cancellationToken);
 
-            if (results.Count == 0)
+            if (results.TotalCount == 0)
             {
-                return Ok(ApiResponse<List<TripSearchResponseDto>>.SuccessResponse(
+                return Ok(ApiResponse<PagedResult<TripSearchResponseDto>>.SuccessResponse(
                     results,
                     "No trips found matching your criteria. Try a different date or route."));
             }
 
-            return Ok(ApiResponse<List<TripSearchResponseDto>>.SuccessResponse(
+            return Ok(ApiResponse<PagedResult<TripSearchResponseDto>>.SuccessResponse(
                 results,
-                $"Successfully found {results.Count} available trips."
+                $"Successfully found {results.TotalCount} available trips."
             ));
         }
 
         [HttpGet("indirect")]
-        [ProducesResponseType(typeof(ApiResponse<List<IndirectTripResponseDto>>), StatusCodes.Status200OK)]
+        [HttpGet("/api/trips/search/indirect")]
+        [ProducesResponseType(typeof(ApiResponse<PagedResult<IndirectTripResponseDto>>), StatusCodes.Status200OK)]
         public async Task<IActionResult> SearchIndirectTrips([FromQuery] TripSearchRequestDto request, CancellationToken cancellationToken)
         {
             var results = await _searchService.SearchIndirectTripsAsync(request, cancellationToken);
 
-            if (results.Count == 0)
-                return Ok(ApiResponse<List<IndirectTripResponseDto>>.SuccessResponse(results, "No indirect routes found."));
+            if (results.TotalCount == 0)
+                return Ok(ApiResponse<PagedResult<IndirectTripResponseDto>>.SuccessResponse(results, "No indirect routes found."));
 
-            return Ok(ApiResponse<List<IndirectTripResponseDto>>.SuccessResponse(results, $"Found {results.Count} indirect routes."));
+            return Ok(ApiResponse<PagedResult<IndirectTripResponseDto>>.SuccessResponse(results, $"Found {results.TotalCount} indirect routes."));
         }
     }
 }

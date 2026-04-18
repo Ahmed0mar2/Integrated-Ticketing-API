@@ -21,10 +21,12 @@ namespace GP.Infrastructure.Data.Configurations
             builder.Property(t => t.ArrivalDateTime).IsRequired();
             builder.Property(t => t.IsActive).IsRequired().HasDefaultValue(true);
 
-            // Indexes - Critical for 30-day window queries
+            // Indexes
             builder.HasIndex(t => new { t.TripId, t.OccurrenceDate }).IsUnique();
             builder.HasIndex(t => t.OccurrenceDate);
             builder.HasIndex(t => new { t.OccurrenceDate, t.IsActive });
+            builder.HasIndex(o => new { o.IsActive, o.OccurrenceDate, o.TripId });
+
 
             // Relationships
             builder.HasOne(t => t.Trip)

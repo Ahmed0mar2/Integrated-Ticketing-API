@@ -38,12 +38,23 @@ namespace GP.Infrastructure.Services
             var schedules = JsonSerializer.Deserialize<Dictionary<string, EnrScheduleDto>>(stopsJson);
 
             int builtTrains = 0;
+            int pendingTrips = 0;
+
+            var existingTripKeys = await _context.Trips
+                .AsNoTracking()
+                .Where(t => t.AgencyId == agency.AgencyId)
+                .Select(t => new { t.TripCode, t.OriginStationId, t.DestinationStationId, t.DepartureTime })
+                .ToListAsync();
+
+            var existingTrips = new HashSet<string>(
+                existingTripKeys.Select(t => $"{t.TripCode ?? string.Empty}_{t.OriginStationId}_{t.DestinationStationId}_{t.DepartureTime.ToString("HH:mm:ss", CultureInfo.InvariantCulture)}"),
+                StringComparer.OrdinalIgnoreCase);
+
             if (schedules != null)
             {
                 foreach (var kvp in schedules)
                 {
                     var schedule = kvp.Value;
-                    if (await _context.Trips.AnyAsync(t => t.TripCode == schedule.TrainNumber && t.AgencyId == agency.AgencyId)) continue;
 
                     var firstStop = schedule.Stops.OrderBy(s => s.StopOrder).First();
                     var lastStop = schedule.Stops.OrderBy(s => s.StopOrder).Last();
@@ -52,13 +63,18 @@ namespace GP.Infrastructure.Services
                         !stationMappings.TryGetValue(lastStop.StationSlug, out int destId))
                         continue;
 
+                    var parsedDeparture = ParseTime(firstStop.Departure) ?? default;
+                    var tripKey = $"{schedule.TrainNumber}_{originId}_{destId}_{parsedDeparture.ToString("HH:mm:ss", CultureInfo.InvariantCulture)}";
+                    if (existingTrips.Contains(tripKey))
+                        continue;
+
                     var trip = new Trip
                     {
                         AgencyId = agency.AgencyId,
                         TripCode = schedule.TrainNumber,
                         OriginStationId = originId,
                         DestinationStationId = destId,
-                        DepartureTime = ParseTime(firstStop.Departure) ?? default,
+                        DepartureTime = parsedDeparture,
                         TotalDurationMinutes = CalculateDurationMinutes(firstStop.Departure, lastStop.Arrival),
                         ServiceId = defaultCalendar.ServiceId
                     };
@@ -78,9 +94,24 @@ namespace GP.Infrastructure.Services
                     }
 
                     _context.Trips.Add(trip);
+                    existingTrips.Add(tripKey);
                     builtTrains++;
+                    pendingTrips++;
+
+                    if (pendingTrips >= 500)
+                    {
+                        await _context.SaveChangesAsync();
+                        _context.ChangeTracker.Clear();
+                        pendingTrips = 0;
+                    }
                 }
-                await _context.SaveChangesAsync();
+
+                if (pendingTrips > 0)
+                {
+                    await _context.SaveChangesAsync();
+                    _context.ChangeTracker.Clear();
+                }
+
                 Console.WriteLine($"✅ Built {builtTrains} Train Blueprints.");
             }
 
@@ -92,6 +123,7 @@ namespace GP.Infrastructure.Services
 
             using JsonDocument doc = JsonDocument.Parse(pricesJson);
             int addedFares = 0;
+            int pendingFares = 0;
 
             foreach (JsonElement fareElement in doc.RootElement.EnumerateArray())
             {
@@ -136,11 +168,23 @@ namespace GP.Infrastructure.Services
                             Price = priceValue
                         });
                         addedFares++;
+                        pendingFares++;
+
+                        if (pendingFares >= 500)
+                        {
+                            await _context.SaveChangesAsync();
+                            _context.ChangeTracker.Clear();
+                            pendingFares = 0;
+                        }
                     }
                 }
             }
 
-            await _context.SaveChangesAsync();
+            if (pendingFares > 0)
+            {
+                await _context.SaveChangesAsync();
+                _context.ChangeTracker.Clear();
+            }
             Console.WriteLine($"✅ Successfully added {addedFares} fare rules to the Train matrix!");
 
             // ==========================================

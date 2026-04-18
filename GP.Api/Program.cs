@@ -1,9 +1,4 @@
 using GP.API.Extensions;
-using GP.Application.Interfaces;
-using GP.Application.Services;
-using GP.Infrastructure.Data;
-using GP.Infrastructure.Services;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
@@ -58,7 +53,7 @@ builder.Services.AddOpenApi(options =>
 
 //builder.Services.AddHttpsRedirection(options =>
 //{
-    
+//
 //    options.HttpsPort = 44399;
 //});
 
@@ -67,21 +62,21 @@ var app = builder.Build();
 // Configure the HTTP request pipeline
 //if (app.Environment.IsDevelopment())
 //{
-    app.MapOpenApi();
+app.MapOpenApi();
 
-    // Use Scalar UI
-    app.MapScalarApiReference(options =>
-    {
-        options.WithTitle("Transport Booking API")
-               .WithTheme(ScalarTheme.Purple)
-               .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
-    });
+// Use Scalar UI
+app.MapScalarApiReference(options =>
+{
+    options.WithTitle("Transport Booking API")
+           .WithTheme(ScalarTheme.Purple)
+           .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
+});
 
-    // Swagger UI
-    // app.UseSwaggerUI(c =>
-    // {
-    //     c.SwaggerEndpoint("/openapi/v1.json", "Transport Booking API V1");
-    // });
+// Swagger UI
+// app.UseSwaggerUI(c =>
+//{
+//     c.SwaggerEndpoint("/openapi/v1.json", "Transport Booking API V1");
+// });
 //}
 
 app.UseRateLimiter();

@@ -21,14 +21,15 @@ namespace GP.Domain.Entities
         public DateTime BookingTime { get; set; } 
         public BookingStatus Status { get; set; } = BookingStatus.Pending;
         public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
+        public DateTime? HoldExpiresAt { get; set; }
 
         // Navigation properties
         public User User { get; set; } = null!;
-        public Trip Trip { get; set; } = null!;
         public TripOccurrence Occurrence { get; set; } = null!;
         public CoachClass CoachClass { get; set; } = null!;
-        public ICollection<BookingPassenger> BookingPassengers { get; set; } = new List<BookingPassenger>();
+        public ICollection<BookingPassenger> BookingPassengers { get; set; } = [];
         public Stop OriginStation { get; set; } = null!;
         public Stop DestinationStation { get; set; } = null!;
+        public ICollection<WalletTransaction> WalletTransactions { get; set; } = [];
     }
 }

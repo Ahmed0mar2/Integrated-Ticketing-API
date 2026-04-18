@@ -1,4 +1,6 @@
-﻿using FluentValidation;
+﻿namespace GP.Application.Validators;
+
+using FluentValidation;
 using GP.Application.DTOs.Auth;
 
 public class ForgotPasswordRequestValidator : AbstractValidator<ForgotPasswordRequest>

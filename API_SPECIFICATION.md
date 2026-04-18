@@ -71,19 +71,19 @@ Base route: `/api/Auth`
 ```
 
 ### Request Field Reference
-| Field | Type | Required | Notes |
-|---|---|---|---|
-| email | string | Yes | Valid email, max 255 |
-| password | string | Yes | Min 8, upper/lower/digit |
-| confirmPassword | string | Yes | Must match password |
-| phoneNumber | string | Yes | E.164 format |
-| firstName | string | Yes | Max 100 |
-| lastName | string | Yes | Max 100 |
-| familyName | string | Yes | Max 100 |
-| gender | int | Yes | 1=Male,2=Female,3=Other |
-| dateOfBirth | date | Yes | At least 16 years old |
-| nationalIdNumber | string | No | 14 digits if provided |
-| countryCode | string | Yes | 2 chars, must exist |
+| Field            | Type   | Required | Notes                    |
+| ---------------- | ------ | -------- | ------------------------ |
+| email            | string | Yes      | Valid email, max 255     |
+| password         | string | Yes      | Min 8, upper/lower/digit |
+| confirmPassword  | string | Yes      | Must match password      |
+| phoneNumber      | string | Yes      | E.164 format             |
+| firstName        | string | Yes      | Max 100                  |
+| lastName         | string | Yes      | Max 100                  |
+| familyName       | string | Yes      | Max 100                  |
+| gender           | int    | Yes      | 1=Male,2=Female,3=Other  |
+| dateOfBirth      | date   | Yes      | At least 16 years old    |
+| nationalIdNumber | string | No       | 14 digits if provided    |
+| countryCode      | string | Yes      | 2 chars, must exist      |
 
 ### Response Example (200 OK)
 ```json
@@ -132,11 +132,11 @@ Base route: `/api/Auth`
 ```
 
 ### Request Field Reference
-| Field | Type | Required | Notes |
-|---|---|---|---|
-| email | string | Yes | Valid email |
-| password | string | Yes | Non-empty |
-| deviceInfo | string | No | Optional device metadata |
+| Field      | Type   | Required | Notes                    |
+| ---------- | ------ | -------- | ------------------------ |
+| email      | string | Yes      | Valid email              |
+| password   | string | Yes      | Non-empty                |
+| deviceInfo | string | No       | Optional device metadata |
 
 ### Response Example (200 OK)
 ```json
@@ -181,9 +181,9 @@ Base route: `/api/Auth`
 ```
 
 ### Request Field Reference
-| Field | Type | Required | Notes |
-|---|---|---|---|
-| refreshToken | string | Yes | Must be active token |
+| Field        | Type   | Required | Notes                |
+| ------------ | ------ | -------- | -------------------- |
+| refreshToken | string | Yes      | Must be active token |
 
 ### Response Example (200 OK)
 ```json
@@ -218,9 +218,9 @@ Base route: `/api/Auth`
 ```
 
 ### Request Field Reference
-| Field | Type | Required | Notes |
-|---|---|---|---|
-| refreshToken | string | Yes | Required |
+| Field        | Type   | Required | Notes    |
+| ------------ | ------ | -------- | -------- |
+| refreshToken | string | Yes      | Required |
 
 ### Response Example (200 OK)
 ```json
@@ -293,9 +293,9 @@ No request body.
 ```
 
 ### Request Field Reference
-| Field | Type | Required | Notes |
-|---|---|---|---|
-| email | string | Yes | Valid email format |
+| Field | Type   | Required | Notes              |
+| ----- | ------ | -------- | ------------------ |
+| email | string | Yes      | Valid email format |
 
 ### Response Example (200 OK)
 ```json
@@ -319,10 +319,10 @@ No request body.
 ```
 
 ### Request Field Reference
-| Field | Type | Required | Notes |
-|---|---|---|---|
-| userId | string | Yes | Identity user id (string form) |
-| token | string | Yes | Email confirmation token |
+| Field  | Type   | Required | Notes                          |
+| ------ | ------ | -------- | ------------------------------ |
+| userId | string | Yes      | Identity user id (string form) |
+| token  | string | Yes      | Email confirmation token       |
 
 ### Response Example (200 OK)
 ```json
@@ -346,9 +346,9 @@ No request body.
 ```
 
 ### Request Field Reference
-| Field | Type | Required | Notes |
-|---|---|---|---|
-| email | string | Yes | Valid email |
+| Field | Type   | Required | Notes       |
+| ----- | ------ | -------- | ----------- |
+| email | string | Yes      | Valid email |
 
 ### Response Example (200 OK)
 ```json
@@ -377,12 +377,12 @@ No request body.
 ```
 
 ### Request Field Reference
-| Field | Type | Required | Notes |
-|---|---|---|---|
-| email | string | Yes | Valid email |
-| token | string | Yes | Password reset token |
-| newPassword | string | Yes | Min 8, upper/lower/digit |
-| confirmPassword | string | Yes | Must match newPassword |
+| Field           | Type   | Required | Notes                    |
+| --------------- | ------ | -------- | ------------------------ |
+| email           | string | Yes      | Valid email              |
+| token           | string | Yes      | Password reset token     |
+| newPassword     | string | Yes      | Min 8, upper/lower/digit |
+| confirmPassword | string | Yes      | Must match newPassword   |
 
 ### Response Example (200 OK)
 ```json
@@ -410,11 +410,11 @@ No request body.
 ```
 
 ### Request Field Reference
-| Field | Type | Required | Notes |
-|---|---|---|---|
-| currentPassword | string | Yes | Current user password |
-| newPassword | string | Yes | Min 8, upper/lower/digit |
-| confirmPassword | string | Yes | Must match newPassword |
+| Field           | Type   | Required | Notes                    |
+| --------------- | ------ | -------- | ------------------------ |
+| currentPassword | string | Yes      | Current user password    |
+| newPassword     | string | Yes      | Min 8, upper/lower/digit |
+| confirmPassword | string | Yes      | Must match newPassword   |
 
 ### Response Example (200 OK)
 ```json
@@ -658,9 +658,9 @@ No request body.
 { "role": "Partner" }
 ```
 ### Request Field Reference
-| Field | Type | Required | Notes |
-|---|---|---|---|
-| role | string | Yes | Must exist in Identity roles |
+| Field | Type   | Required | Notes                        |
+| ----- | ------ | -------- | ---------------------------- |
+| role  | string | Yes      | Must exist in Identity roles |
 ### Response Example (200 OK)
 ```json
 { "success": true, "message": "Role assigned successfully.", "data": null, "errors": null, "timestamp": "2026-03-06T12:00:00Z" }
@@ -741,13 +741,13 @@ No request body.
 }
 ```
 ### Request Field Reference
-| Field | Type | Required | Notes |
-|---|---|---|---|
-| firstName | string | Yes | Max 50 |
-| familyName | string | No | Max 50 |
-| lastName | string | Yes | Max 50 |
-| email | string | No | Unique + valid email |
-| phoneNumber | string | No | Unique + valid phone |
+| Field       | Type   | Required | Notes                |
+| ----------- | ------ | -------- | -------------------- |
+| firstName   | string | Yes      | Max 50               |
+| familyName  | string | No       | Max 50               |
+| lastName    | string | Yes      | Max 50               |
+| email       | string | No       | Unique + valid email |
+| phoneNumber | string | No       | Unique + valid phone |
 ### Response Example (200 OK)
 ```json
 { "success": true, "message": "Profile updated successfully.", "data": null, "errors": null, "timestamp": "2026-03-10T00:00:00Z" }
@@ -818,13 +818,16 @@ No request body.
 
 # 7. Search API
 
-Base route: `/api/Search`
+Preferred base route: `/api/trips`
 
-## 7.1 Search Trips
+Backward-compatible base route: `/api/Search`
+
+## 7.1 Search Trips (Pagination)
 
 ### Endpoint Overview
 - **Method:** `GET`
-- **URL:** `/api/Search`
+- **URL:** `/api/trips/search`
+- **Backward-Compatible Alias:** `/api/Search`
 - **Business Use Case:** Performs flexible governorate/station-based intercity trip search with dynamic seat inventory filtering.
 
 ### Authentication / Authorization
@@ -845,64 +848,105 @@ Query string parameters:
   "transport": 0,
   "sortBy": 1,
   "maxPrice": 250.0,
-  "preferredAgencies": ["GoBus", "Blue Bus"]
+  "preferredAgencies": ["GoBus", "Blue Bus"],
+  "pageNumber": 1,
+  "pageSize": 10
 }
 ```
 
 ### Request Field Reference
-| Field | Type | Required | Notes |
-|---|---|---|---|
-| travelDate | date | Yes | Must be today..+60 days |
-| fromGovernorate | string | Conditional | Required if fromStationId missing |
-| fromStationId | int | Conditional | Required if fromGovernorate missing |
-| toGovernorate | string | Conditional | Required if toStationId missing |
-| toStationId | int | Conditional | Required if toGovernorate missing |
-| passengers | int | Yes | Must be > 0 |
-| transport | int | No | 0=All, 1=Bus, 2=Train |
-| sortBy | int | No | 0=DepartureTime, 1=LowestPrice, 2=ShortestDuration |
-| maxPrice | decimal | No | Excludes trips where cheapest available class exceeds this value |
-| preferredAgencies | string[] | No | Optional exact-match allowlist for agency names |
+| Field             | Type     | Required    | Notes                                                            |
+| ----------------- | -------- | ----------- | ---------------------------------------------------------------- |
+| travelDate        | date     | Yes         | Must be today..+60 days                                          |
+| fromGovernorate   | string   | Conditional | Required if fromStationId missing                                |
+| fromStationId     | int      | Conditional | Required if fromGovernorate missing                              |
+| toGovernorate     | string   | Conditional | Required if toStationId missing                                  |
+| toStationId       | int      | Conditional | Required if toGovernorate missing                                |
+| passengers        | int      | Yes         | Must be > 0                                                      |
+| transport         | int      | No          | 0=All, 1=Bus, 2=Train                                            |
+| sortBy            | int      | No          | 0=DepartureTime, 1=LowestPrice, 2=ShortestDuration               |
+| maxPrice          | decimal  | No          | Excludes trips where cheapest available class exceeds this value |
+| preferredAgencies | string[] | No          | Optional exact-match allowlist for agency names                  |
+| pageNumber        | int      | No          | Defaults to 1. Must be > 0                                       |
+| pageSize          | int      | No          | Defaults to 10. Allowed range: 1..100                            |
+
+### Paged Response Envelope Fields
+| Field       | Type                    | Description                               |
+| ----------- | ----------------------- | ----------------------------------------- |
+| items       | TripSearchResponseDto[] | Current page of matching trips            |
+| totalCount  | int                     | Total matching records across all pages   |
+| totalPages  | int                     | Computed as `ceil(totalCount / pageSize)` |
+| currentPage | int                     | Current page index (1-based)              |
+| pageSize    | int                     | Page size actually applied                |
+
+### Time Semantics
+- `boardingTime` / `dropoffTime`: passenger segment-local times (selected origin to selected destination).
+- `departureTime` / `arrivalTime`: global occurrence-level trip start and end times.
 
 ### Response Example (200 OK)
 ```json
 {
   "success": true,
   "message": "Successfully found 2 available trips.",
-  "data": [
-    {
-      "tripOccurrenceId": 1001,
-      "tripId": 200,
-      "agencyName": "GoBus",
-      "departureTime": "2026-03-20T07:00:00Z",
-      "arrivalTime": "2026-03-20T10:00:00Z",
-      "totalDurationMinutes": 180,
-      "originStationId": 101,
-      "originStationName": "رمسيس",
-      "originGovernorate": "Cairo",
-      "destinationStationId": 201,
-      "destinationStationName": "سيدي جابر",
-      "destinationGovernorate": "Alexandria",
-      "availableClasses": [
-        {
-          "coachClassId": 1,
-          "className": "Business",
-          "remainingSeats": 14,
-          "price": 180.0
-        }
-      ]
-    }
-  ],
+  "data": {
+    "items": [
+      {
+        "tripOccurrenceId": 1001,
+        "tripId": 200,
+        "agencyName": "GoBus",
+        "boardingTime": "2026-03-20T07:20:00Z",
+        "dropoffTime": "2026-03-20T10:00:00Z",
+        "departureTime": "2026-03-20T07:00:00Z",
+        "arrivalTime": "2026-03-20T10:40:00Z",
+        "totalDurationMinutes": 160,
+        "originStationId": 101,
+        "originStationName": "رمسيس",
+        "originGovernorate": "Cairo",
+        "destinationStationId": 201,
+        "destinationStationName": "سيدي جابر",
+        "destinationGovernorate": "Alexandria",
+        "startingPrice": 180.0,
+        "routeStops": [
+          {
+            "stationName": "رمسيس",
+            "arrivalTime": null,
+            "departureTime": "07:20:00",
+            "stopSequence": 1
+          },
+          {
+            "stationName": "سيدي جابر",
+            "arrivalTime": "10:00:00",
+            "departureTime": null,
+            "stopSequence": 5
+          }
+        ],
+        "availableClasses": [
+          {
+            "coachClassId": 1,
+            "className": "Business",
+            "remainingSeats": 14,
+            "price": 180.0
+          }
+        ]
+      }
+    ],
+    "totalCount": 2,
+    "totalPages": 1,
+    "currentPage": 1,
+    "pageSize": 10
+  },
   "errors": null,
   "timestamp": "2026-03-20T00:00:00Z"
 }
 ```
 
-## 7.2 Search Indirect Trips (1-Stop)
+## 7.2 Search Indirect Trips (1-Stop, Pagination)
 
 ### Endpoint Overview
 - **Method:** `GET`
-- **URL:** `/api/Search/indirect`
-- **Business Use Case:** Finds valid 1-stop routes via spatial transfer-hub pruning, layover validation, and seat-aware class filtering.
+- **URL:** `/api/trips/search/indirect`
+- **Backward-Compatible Alias:** `/api/Search/indirect`
+- **Business Use Case:** Finds valid 1-stop routes via spatial transfer-hub pruning, layover validation, and seat-aware class filtering, returned in a paginated envelope.
 
 ### Authentication / Authorization
 - **JWT Required:** No
@@ -920,72 +964,100 @@ Query string parameters:
   "transport": 0,
   "sortBy": 2,
   "maxPrice": 600.0,
-  "preferredAgencies": ["Egyptian National Railways", "GoBus"]
+  "preferredAgencies": ["Egyptian National Railways", "GoBus"],
+  "pageNumber": 1,
+  "pageSize": 10
 }
 ```
 
 ### Request Field Reference
-| Field | Type | Required | Notes |
-|---|---|---|---|
-| travelDate | date | Yes | Must be today..+60 days |
-| fromGovernorate | string | Conditional | Required if fromStationId missing |
-| fromStationId | int | Conditional | Required if fromGovernorate missing |
-| toGovernorate | string | Conditional | Required if toStationId missing |
-| toStationId | int | Conditional | Required if toGovernorate missing |
-| passengers | int | Yes | Must be > 0 |
-| transport | int | No | 0=All, 1=Bus, 2=Train |
-| sortBy | int | No | 0=DepartureTime, 1=LowestPrice, 2=ShortestDuration |
-| maxPrice | decimal | No | Applied through class price filtering |
-| preferredAgencies | string[] | No | Optional exact-match allowlist for agency names |
+| Field             | Type     | Required    | Notes                                              |
+| ----------------- | -------- | ----------- | -------------------------------------------------- |
+| travelDate        | date     | Yes         | Must be today..+60 days                            |
+| fromGovernorate   | string   | Conditional | Required if fromStationId missing                  |
+| fromStationId     | int      | Conditional | Required if fromGovernorate missing                |
+| toGovernorate     | string   | Conditional | Required if toStationId missing                    |
+| toStationId       | int      | Conditional | Required if toGovernorate missing                  |
+| passengers        | int      | Yes         | Must be > 0                                        |
+| transport         | int      | No          | 0=All, 1=Bus, 2=Train                              |
+| sortBy            | int      | No          | 0=DepartureTime, 1=LowestPrice, 2=ShortestDuration |
+| maxPrice          | decimal  | No          | Applied through class price filtering              |
+| preferredAgencies | string[] | No          | Optional exact-match allowlist for agency names    |
+| pageNumber        | int      | No          | Defaults to 1. Must be > 0                         |
+| pageSize          | int      | No          | Defaults to 10. Allowed range: 1..100              |
+
+### Indirect Search Behavior Notes
+- Indirect routes are returned only when direct routes do not exist for the same request criteria.
+- Routes are evaluated with layover window constraints (minimum 1 hour, maximum 6 hours).
 
 ### Response Example (200 OK)
 ```json
 {
   "success": true,
   "message": "Found 1 indirect routes.",
-  "data": [
-    {
-      "totalDurationMinutes": 505,
-      "layoverDurationMinutes": 95,
-      "totalStartingPrice": 420.0,
-      "legs": [
-        {
-          "tripOccurrenceId": 5011,
-          "tripId": 310,
-          "agencyName": "GoBus",
-          "departureTime": "2026-03-20T06:30:00Z",
-          "arrivalTime": "2026-03-20T09:30:00Z",
-          "totalDurationMinutes": 180,
-          "originStationId": 101,
-          "originStationName": "رمسيس",
-          "originGovernorate": "Cairo",
-          "destinationStationId": 220,
-          "destinationStationName": "المنيا",
-          "destinationGovernorate": "Minya",
-          "availableClasses": [
-            { "coachClassId": 1, "className": "Business", "remainingSeats": 9, "price": 180.0 }
-          ]
-        },
-        {
-          "tripOccurrenceId": 9912,
-          "tripId": 777,
-          "agencyName": "Egyptian National Railways",
-          "departureTime": "2026-03-20T11:05:00Z",
-          "arrivalTime": "2026-03-20T16:30:00Z",
-          "totalDurationMinutes": 325,
-          "originStationId": 220,
-          "originStationName": "المنيا",
-          "originGovernorate": "Minya",
-          "destinationStationId": 880,
-          "destinationStationName": "أسوان",
-          "destinationGovernorate": "Aswan",
-          "availableClasses": [
-            { "coachClassId": 2, "className": "Second Class", "remainingSeats": 22, "price": 240.0 }
-          ]
-        }
-      ]
-    }
-  ],
+  "data": {
+    "items": [
+      {
+        "totalDurationMinutes": 600,
+        "layoverDurationMinutes": 95,
+        "totalStartingPrice": 420.0,
+        "legs": [
+          {
+            "tripOccurrenceId": 5011,
+            "tripId": 310,
+            "agencyName": "GoBus",
+            "boardingTime": "2026-03-20T06:30:00Z",
+            "dropoffTime": "2026-03-20T09:30:00Z",
+            "departureTime": "2026-03-20T06:00:00Z",
+            "arrivalTime": "2026-03-20T10:00:00Z",
+            "totalDurationMinutes": 180,
+            "originStationId": 101,
+            "originStationName": "رمسيس",
+            "originGovernorate": "Cairo",
+            "destinationStationId": 220,
+            "destinationStationName": "المنيا",
+            "destinationGovernorate": "Minya",
+            "startingPrice": 180.0,
+            "routeStops": [
+              { "stationName": "رمسيس", "arrivalTime": null, "departureTime": "06:30:00", "stopSequence": 1 },
+              { "stationName": "المنيا", "arrivalTime": "09:30:00", "departureTime": null, "stopSequence": 4 }
+            ],
+            "availableClasses": [
+              { "coachClassId": 1, "className": "Business", "remainingSeats": 9, "price": 180.0 }
+            ]
+          },
+          {
+            "tripOccurrenceId": 9912,
+            "tripId": 777,
+            "agencyName": "Egyptian National Railways",
+            "boardingTime": "2026-03-20T11:05:00Z",
+            "dropoffTime": "2026-03-20T16:30:00Z",
+            "departureTime": "2026-03-20T10:30:00Z",
+            "arrivalTime": "2026-03-20T17:10:00Z",
+            "totalDurationMinutes": 325,
+            "originStationId": 220,
+            "originStationName": "المنيا",
+            "originGovernorate": "Minya",
+            "destinationStationId": 880,
+            "destinationStationName": "أسوان",
+            "destinationGovernorate": "Aswan",
+            "startingPrice": 240.0,
+            "routeStops": [
+              { "stationName": "المنيا", "arrivalTime": null, "departureTime": "11:05:00", "stopSequence": 2 },
+              { "stationName": "أسوان", "arrivalTime": "16:30:00", "departureTime": null, "stopSequence": 7 }
+            ],
+            "availableClasses": [
+              { "coachClassId": 2, "className": "Second Class", "remainingSeats": 22, "price": 240.0 }
+            ]
+          }
+        ]
+      }
+    ],
+    "totalCount": 1,
+    "totalPages": 1,
+    "currentPage": 1,
+    "pageSize": 10
+  },
   "errors": null,
   "timestamp": "2026-03-20T00:00:00Z"
 }
@@ -993,37 +1065,457 @@ Query string parameters:
 
 ---
 
+# 8. Occurrences API
+
+Base route: `/api/occurrences`
+
+## 8.1 Get Seat Map
+### Endpoint Overview
+- **Method:** `GET`
+- **URL:** `/api/occurrences/{id}/seats`
+- **Business Use Case:** Returns real-time seat status for each class on a trip occurrence, including layout metadata and temporary pending holds.
+
+### Authentication / Authorization
+- **JWT Required:** No
+- **Role Required:** None
+
+### Path Parameters
+| Field | Type | Required | Notes                      |
+| ----- | ---- | -------- | -------------------------- |
+| id    | int  | Yes      | Trip occurrence identifier |
+
+### Response Example (200 OK)
+```json
+{
+  "success": true,
+  "message": "Seat map retrieved successfully.",
+  "data": {
+    "occurrenceId": 1001,
+    "generatedAtUtc": "2026-04-18T12:35:00Z",
+    "classes": [
+      {
+        "coachClassId": 1,
+        "className": "Business",
+        "totalSeats": 36,
+        "remainingSeats": 12,
+        "layoutType": "2x1",
+        "deckCount": 1,
+        "seatMapJson": "{\"rows\":12,\"cols\":3}",
+        "availableCount": 12,
+        "pendingCount": 4,
+        "bookedCount": 20,
+        "seats": [
+          {
+            "seatNumber": "1",
+            "status": "Booked",
+            "bookingId": 4001,
+            "holdExpiresAt": null
+          },
+          {
+            "seatNumber": "2",
+            "status": "Pending",
+            "bookingId": 4050,
+            "holdExpiresAt": "2026-04-18T12:40:00Z"
+          },
+          {
+            "seatNumber": "3",
+            "status": "Available",
+            "bookingId": null,
+            "holdExpiresAt": null
+          }
+        ]
+      }
+    ]
+  },
+  "errors": null,
+  "timestamp": "2026-04-18T12:35:00Z"
+}
+```
+
+### Seat Status Semantics
+- **Available:** Seat is free and can be selected.
+- **Pending:** Seat is held by a pending booking whose hold has not expired; includes `holdExpiresAt`.
+- **Booked:** Seat belongs to a confirmed/completed booking.
+
+### Response Field Highlights
+| Field                           | Type      | Description                                            |
+| ------------------------------- | --------- | ------------------------------------------------------ |
+| classes[].layoutType            | string?   | Optional layout descriptor such as `2x1`, `2x2`, etc.  |
+| classes[].deckCount             | int       | Number of decks for this class layout                  |
+| classes[].seatMapJson           | string?   | Serialized layout metadata for advanced seat rendering |
+| classes[].availableCount        | int       | Seats currently available                              |
+| classes[].pendingCount          | int       | Seats on active pending hold                           |
+| classes[].bookedCount           | int       | Seats locked by confirmed/completed bookings           |
+| classes[].seats[].holdExpiresAt | datetime? | Present only when seat status is `Pending`             |
+
+---
+
+# 9. Bookings API
+
+Base route: `/api/Bookings`
+
+## 9.1 Add Trip to Cart (Soft Lock)
+### Endpoint Overview
+- **Method:** `POST`
+- **URL:** `/api/Bookings/cart`
+- **Backward-Compatible Alias:** `/api/Bookings/cart/add`
+- **Business Use Case:** Adds a new independent cart item with its own 10-minute hold timer.
+
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** Any logged-in User
+
+### Request Payload
+```json
+{
+  "tripOccurrenceId": 1001,
+  "coachClassId": 1,
+  "originStationId": 101,
+  "destinationStationId": 201,
+  "passengers": [
+    { "name": "Ali Hassan", "age": 28, "idType": 1, "idNumber": "29805151111121", "seatNumber": "7" },
+    { "name": "Sara Mohamed", "age": 25, "idType": 2, "idNumber": "A12345678", "seatNumber": "8" }
+  ]
+}
+```
+
+### Request Field Reference
+| Field                   | Type     | Required | Notes                                                        |
+| ----------------------- | -------- | -------- | ------------------------------------------------------------ |
+| tripOccurrenceId        | int      | Yes      | Valid trip occurrence ID                                     |
+| coachClassId            | int      | Yes      | Desired class for that occurrence                            |
+| originStationId         | int      | Yes      | Origin station ID                                            |
+| destinationStationId    | int      | Yes      | Destination station ID                                       |
+| passengers              | object[] | Yes      | At least one passenger                                       |
+| passengers[].name       | string   | Yes      | Passenger full name                                          |
+| passengers[].age        | int      | Yes      | 1..120                                                       |
+| passengers[].idType     | int      | Yes      | 1=NationalId,2=Passport,3=DrivingLicense,4=StudentId,5=Other |
+| passengers[].idNumber   | string   | Yes      | Passenger ID document number                                 |
+| passengers[].seatNumber | string   | Yes      | Required. One seat per passenger                             |
+
+### Booking Rules Enforced
+- Seat numbers must be unique inside the same request.
+- Passenger ID numbers must be unique inside the same request.
+- A passenger ID cannot hold more than one seat on the same `tripOccurrenceId` when an existing booking is `Pending` or `Confirmed`.
+
+### Response Example (200 OK)
+```json
+{
+  "success": true,
+  "message": "Trip added to cart successfully.",
+  "data": {
+    "items": [
+      {
+        "bookingId": 1024,
+        "totalPrice": 360.0,
+        "seatsBooked": 2,
+        "holdExpiresAt": "2026-03-20T07:10:00Z",
+        "agencyName": "GoBus",
+        "className": "Business",
+        "origin": "رمسيس",
+        "destination": "سيدي جابر",
+        "boardingTime": "2026-03-20T07:20:00Z",
+        "dropoffTime": "2026-03-20T10:00:00Z",
+        "passengers": [
+          {
+            "name": "Ali Hassan",
+            "idNumber": "29805151111121",
+            "seatNumber": "7"
+          },
+          {
+            "name": "Sara Mohamed",
+            "idNumber": "A12345678",
+            "seatNumber": "8"
+          }
+        ]
+      }
+    ],
+    "grandTotal": 360.0
+  },
+  "errors": null,
+  "timestamp": "2026-03-20T00:10:00Z"
+}
+```
+
+## 9.2 Checkout & Confirm Booking
+### Endpoint Overview
+- **Method:** `POST`
+- **URL:** `/api/Bookings/checkout`
+- **Business Use Case:** Checks out all valid pending cart items in one operation and charges wallet once.
+
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** Any logged-in User
+
+### Request Payload
+```json
+{
+  "paymentMethod": "Wallet"
+}
+```
+
+### Request Field Reference
+| Field         | Type   | Required | Notes                                |
+| ------------- | ------ | -------- | ------------------------------------ |
+| paymentMethod | string | Yes      | Currently only `Wallet` is supported |
+
+### Response Example (200 OK)
+```json
+{
+  "success": true,
+  "message": "Checkout successful. 360.00 was deducted from your wallet for 2 trip(s).",
+  "data": "Checkout successful. 360.00 was deducted from your wallet for 2 trip(s).",
+  "errors": null,
+  "timestamp": "2026-03-31T00:10:00.000Z"
+}
+```
+
+## 9.3 Get Active Cart
+### Endpoint Overview
+- **Method:** `GET`
+- **URL:** `/api/Bookings/cart`
+- **Business Use Case:** Returns the current pending, unexpired cart for the authenticated user.
+
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** Any logged-in User
+
+### Request Payload
+No request body.
+
+### Response Example (200 OK - cart exists)
+```json
+{
+  "success": true,
+  "message": "Active cart retrieved successfully.",
+  "data": {
+    "items": [
+      {
+        "bookingId": 1024,
+        "totalPrice": 360.0,
+        "seatsBooked": 2,
+        "holdExpiresAt": "2026-03-31T00:15:00Z",
+        "agencyName": "GoBus",
+        "className": "Business",
+        "origin": "رمسيس",
+        "destination": "سيدي جابر",
+        "boardingTime": "2026-04-02T07:20:00Z",
+        "dropoffTime": "2026-04-02T10:00:00Z",
+        "passengers": [
+          {
+            "name": "Ali Hassan",
+            "idNumber": "29805151111121",
+            "seatNumber": "7"
+          },
+          {
+            "name": "Sara Mohamed",
+            "idNumber": "A12345678",
+            "seatNumber": "8"
+          }
+        ]
+      }
+    ],
+    "grandTotal": 360.0
+  },
+  "errors": null,
+  "timestamp": "2026-03-31T00:10:00Z"
+}
+```
+
+### Response Example (200 OK - no cart)
+```json
+{
+  "success": true,
+  "message": "No active cart found.",
+  "data": null,
+  "errors": null,
+  "timestamp": "2026-03-31T00:10:00Z"
+}
+```
+
+## 9.4 Get My Tickets
+### Endpoint Overview
+- **Method:** `GET`
+- **URL:** `/api/Bookings/my-tickets`
+- **Business Use Case:** Returns ticket history for the authenticated user (all non-pending bookings).
+
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** Any logged-in User
+
+### Request Payload
+No request body.
+
+### Response Example (200 OK)
+```json
+{
+  "success": true,
+  "message": "Tickets retrieved successfully.",
+  "data": [
+    {
+      "bookingId": 1024,
+      "status": "Confirmed",
+      "paymentStatus": "Paid",
+      "totalPrice": 360.0,
+      "seatsBooked": 2,
+      "bookingDate": "2026-03-31T00:02:00Z",
+      "agencyName": "GoBus",
+      "className": "Business",
+      "originStation": "رمسيس",
+      "destinationStation": "سيدي جابر",
+      "boardingTime": "2026-04-02T07:20:00Z",
+      "dropoffTime": "2026-04-02T10:00:00Z",
+      "passengers": [
+        {
+          "name": "Ali Hassan",
+          "idNumber": "29805151111121",
+          "seatNumber": "7"
+        },
+        {
+          "name": "Sara Mohamed",
+          "idNumber": "A12345678",
+          "seatNumber": "8"
+        }
+      ]
+    }
+  ],
+  "errors": null,
+  "timestamp": "2026-03-31T00:10:00Z"
+}
+```
+
+---
+
+# 10. Wallet API
+
+Base route: `/api/Wallet`
+
+## 10.1 Deposit to Wallet
+### Endpoint Overview
+- **Method:** `POST`
+- **URL:** `/api/Wallet/deposit`
+- **Business Use Case:** Simulates a payment gateway card deposit and records a wallet ledger transaction.
+
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** Authenticated user
+
+### Response Statuses
+- **200 OK**: Deposit processed successfully.
+- **400 Bad Request**: Validation or business rule failure.
+- **401 Unauthorized**: Missing/invalid token.
+
+### Request Payload
+```json
+{
+  "amount": 500.0,
+  "mockCardNumber": "4242424242424242",
+  "expiryDate": "12/29",
+  "cvv": "123"
+}
+```
+
+### Request Field Reference
+| Field          | Type    | Required | Notes                        |
+| -------------- | ------- | -------- | ---------------------------- |
+| amount         | decimal | Yes      | Must be between 10 and 10000 |
+| mockCardNumber | string  | Yes      | Exactly 16 digits            |
+| expiryDate     | string  | Yes      | Format `MM/YY`               |
+| cvv            | string  | Yes      | Exactly 3 digits             |
+
+### Response Example (200 OK)
+```json
+{
+  "success": true,
+  "message": "Successfully deposited 500.00 EGP. Your new balance is 650.00 EGP.",
+  "data": "Successfully deposited 500.00 EGP. Your new balance is 650.00 EGP.",
+  "errors": null,
+  "timestamp": "2026-03-31T01:20:00.000Z"
+}
+```
+
+## 10.2 Get Wallet Transaction History
+### Endpoint Overview
+- **Method:** `GET`
+- **URL:** `/api/Wallet/history`
+- **Business Use Case:** Returns the authenticated user's wallet ledger transactions, newest first.
+
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** Authenticated user
+
+### Request Payload
+No request body.
+
+### Response Example (200 OK)
+```json
+{
+  "success": true,
+  "message": "Wallet transaction history retrieved successfully.",
+  "data": [
+    {
+      "id": 51,
+      "amount": -360.0,
+      "type": "TicketPurchase",
+      "description": "Checkout for multiple trips.",
+      "bookingId": null,
+      "createdAt": "2026-03-31T00:10:00Z"
+    },
+    {
+      "id": 50,
+      "amount": 500.0,
+      "type": "Deposit",
+      "description": "Deposit via simulated card ending in 4242",
+      "bookingId": null,
+      "createdAt": "2026-03-31T01:20:00Z"
+    }
+  ],
+  "errors": null,
+  "timestamp": "2026-03-31T01:21:00Z"
+}
+```
+
 # Quick Endpoint Index
 
-| Method | URL | Auth | Description |
-|---|---|---:|---|
-| `POST` | `/api/Auth/register` | No | Register user and return tokens |
-| `POST` | `/api/Auth/login` | No | Login and return tokens |
-| `POST` | `/api/Auth/refresh` | No | Refresh access token |
-| `POST` | `/api/Auth/revoke` | No | Revoke one refresh token |
-| `POST` | `/api/Auth/revoke-all` | Yes | Revoke all active refresh tokens |
-| `GET` | `/api/Auth/me` | Yes | Return current JWT claim info |
-| `POST` | `/api/Auth/send-verification-email` | No | Send verification email |
-| `POST` | `/api/Auth/verify-email` | No | Confirm email token |
-| `POST` | `/api/Auth/forgot-password` | No | Send reset link |
-| `POST` | `/api/Auth/reset-password` | No | Reset password |
-| `POST` | `/api/Auth/change-password` | Yes | Change password |
-| `GET` | `/api/Countries` | No | List countries |
-| `POST` | `/api/Seed/init-identity` | Yes (Admin) | Initialize identity roles/admin |
-| `POST` | `/api/Seed/import-master-stations` | Yes (Admin) | Import master stations |
-| `POST` | `/api/Seed/import-horus` | Yes (Admin) | Import Horus trips |
-| `POST` | `/api/Seed/import-gobus` | Yes (Admin) | Import GoBus trips |
-| `POST` | `/api/Seed/import-bluebus` | Yes (Admin) | Import BlueBus trips |
-| `POST` | `/api/Seed/import-trains` | Yes (Admin) | Import train trips |
-| `POST` | `/api/Seed/generate-occurrences` | Yes (Admin) | Generate future occurrences |
-| `GET` | `/api/admin/users` | Yes (Admin) | List all users |
-| `GET` | `/api/admin/users/{id}` | Yes (Admin) | Get user detail |
-| `PATCH` | `/api/admin/users/{id}/toggle-status` | Yes (Admin) | Toggle user active status |
-| `POST` | `/api/admin/users/{id}/roles` | Yes (Admin) | Assign role |
-| `DELETE` | `/api/admin/users/{id}` | Yes (Admin) | Delete user |
-| `GET` | `/api/Users/me` | Yes | Get profile |
-| `PUT` | `/api/Users/me` | Yes | Update profile |
-| `POST` | `/api/Users/me/profile-picture` | Yes | Upload profile picture |
-| `GET` | `/api/Stations` | No | Get grouped stations |
-| `GET` | `/api/Search` | No | Flexible governorate/station trip search with inventory filtering |
-| `GET` | `/api/Search/indirect` | No | Advanced 1-stop indirect routing with spatial transfer-hub pruning |
+| Method   | URL                                   |        Auth | Description                                                  |
+| -------- | ------------------------------------- | ----------: | ------------------------------------------------------------ |
+| `POST`   | `/api/Auth/register`                  |          No | Register user and return tokens                              |
+| `POST`   | `/api/Auth/login`                     |          No | Login and return tokens                                      |
+| `POST`   | `/api/Auth/refresh`                   |          No | Refresh access token                                         |
+| `POST`   | `/api/Auth/revoke`                    |          No | Revoke one refresh token                                     |
+| `POST`   | `/api/Auth/revoke-all`                |         Yes | Revoke all active refresh tokens                             |
+| `GET`    | `/api/Auth/me`                        |         Yes | Return current JWT claim info                                |
+| `POST`   | `/api/Auth/send-verification-email`   |          No | Send verification email                                      |
+| `POST`   | `/api/Auth/verify-email`              |          No | Confirm email token                                          |
+| `POST`   | `/api/Auth/forgot-password`           |          No | Send reset link                                              |
+| `POST`   | `/api/Auth/reset-password`            |          No | Reset password                                               |
+| `POST`   | `/api/Auth/change-password`           |         Yes | Change password                                              |
+| `GET`    | `/api/Countries`                      |          No | List countries                                               |
+| `POST`   | `/api/Seed/init-identity`             | Yes (Admin) | Initialize identity roles/admin                              |
+| `POST`   | `/api/Seed/import-master-stations`    | Yes (Admin) | Import master stations                                       |
+| `POST`   | `/api/Seed/import-horus`              | Yes (Admin) | Import Horus trips                                           |
+| `POST`   | `/api/Seed/import-gobus`              | Yes (Admin) | Import GoBus trips                                           |
+| `POST`   | `/api/Seed/import-bluebus`            | Yes (Admin) | Import BlueBus trips                                         |
+| `POST`   | `/api/Seed/import-trains`             | Yes (Admin) | Import train trips                                           |
+| `POST`   | `/api/Seed/generate-occurrences`      | Yes (Admin) | Generate future occurrences                                  |
+| `GET`    | `/api/admin/users`                    | Yes (Admin) | List all users                                               |
+| `GET`    | `/api/admin/users/{id}`               | Yes (Admin) | Get user detail                                              |
+| `PATCH`  | `/api/admin/users/{id}/toggle-status` | Yes (Admin) | Toggle user active status                                    |
+| `POST`   | `/api/admin/users/{id}/roles`         | Yes (Admin) | Assign role                                                  |
+| `DELETE` | `/api/admin/users/{id}`               | Yes (Admin) | Delete user                                                  |
+| `GET`    | `/api/Users/me`                       |         Yes | Get profile                                                  |
+| `PUT`    | `/api/Users/me`                       |         Yes | Update profile                                               |
+| `POST`   | `/api/Users/me/profile-picture`       |         Yes | Upload profile picture                                       |
+| `GET`    | `/api/Stations`                       |          No | Get grouped stations                                         |
+| `GET`    | `/api/trips/search`                   |          No | Preferred paginated direct-trip search route                 |
+| `GET`    | `/api/Search`                         |          No | Backward-compatible alias for direct-trip search             |
+| `GET`    | `/api/trips/search/indirect`          |          No | Preferred 1-stop indirect search route                       |
+| `GET`    | `/api/Search/indirect`                |          No | Backward-compatible alias for indirect search                |
+| `GET`    | `/api/occurrences/{id}/seats`         |          No | Get real-time seat map with available/pending/booked states  |
+| `POST`   | `/api/Bookings/cart`                  |         Yes | Add trip to cart with 10-minute seat soft-lock               |
+| `POST`   | `/api/Bookings/cart/add`              |         Yes | Backward-compatible add-to-cart alias                        |
+| `GET`    | `/api/Bookings/cart`                  |         Yes | Retrieve current active cart                                 |
+| `POST`   | `/api/Bookings/checkout`              |         Yes | Checkout all valid pending cart items with one wallet charge |
+| `GET`    | `/api/Bookings/my-tickets`            |         Yes | Retrieve user's ticket history                               |
+| `POST`   | `/api/Wallet/deposit`                 |         Yes | Deposit wallet funds and write ledger entry                  |
+| `GET`    | `/api/Wallet/history`                 |         Yes | Retrieve wallet transaction history (newest first)           |

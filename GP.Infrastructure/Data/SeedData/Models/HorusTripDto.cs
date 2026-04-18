@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
@@ -29,5 +30,8 @@ namespace GP.Infrastructure.Data.SeedData.Models
 
         [JsonPropertyName("stations_from")]
         public List<HorusStationDto> StationsFrom { get; set; } = new();
+
+        [JsonPropertyName("seats_info")]
+        public JsonElement SeatsInfo { get; set; }
     }
 }

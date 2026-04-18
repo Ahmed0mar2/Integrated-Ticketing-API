@@ -292,6 +292,13 @@ namespace GP.Application.Services
             var bookings = await QueryActivePendingBookingsForUser(userId, now)
                 .AsNoTracking()
                 .Include(b => b.Occurrence)
+                    .ThenInclude(o => o.Trip)
+                        .ThenInclude(t => t.Agency)
+                .Include(b => b.Occurrence)
+                    .ThenInclude(o => o.Trip)
+                        .ThenInclude(t => t.TripStopTimes)
+                .Include(b => b.CoachClass)
+                .Include(b => b.BookingPassengers)
                 .Include(b => b.OriginStation)
                 .Include(b => b.DestinationStation)
                 .OrderBy(b => b.HoldExpiresAt)
@@ -300,15 +307,31 @@ namespace GP.Application.Services
             if (bookings.Count == 0)
                 return null;
 
-            var items = bookings.Select(b => new CartItemDto
+            var items = bookings.Select(b =>
             {
-                BookingId = b.BookingId,
-                TotalPrice = b.TotalPrice,
-                SeatsBooked = b.SeatsBooked,
-                HoldExpiresAt = DateTime.SpecifyKind(b.HoldExpiresAt!.Value, DateTimeKind.Utc),
-                Origin = b.OriginStation.ArabicName,
-                Destination = b.DestinationStation.ArabicName,
-                DepartureTime = DateTime.SpecifyKind(b.Occurrence.DepartureDateTime, DateTimeKind.Utc)
+                var (boardingTime, dropoffTime) = ResolvePassengerLocalTimes(b);
+
+                return new CartItemDto
+                {
+                    BookingId = b.BookingId,
+                    TotalPrice = b.TotalPrice,
+                    SeatsBooked = b.SeatsBooked,
+                    HoldExpiresAt = DateTime.SpecifyKind(b.HoldExpiresAt!.Value, DateTimeKind.Utc),
+                    AgencyName = b.Occurrence.Trip.Agency.AgencyName,
+                    ClassName = b.CoachClass.Name,
+                    Origin = b.OriginStation.ArabicName,
+                    Destination = b.DestinationStation.ArabicName,
+                    BoardingTime = boardingTime,
+                    DropoffTime = dropoffTime,
+                    Passengers = b.BookingPassengers
+                        .Select(p => new TicketPassengerDto
+                        {
+                            Name = p.Name,
+                            IdNumber = p.IdNumber,
+                            SeatNumber = p.SeatNumber
+                        })
+                        .ToList()
+                };
             }).ToList();
 
             return new BookingCartResponseDto
@@ -320,34 +343,51 @@ namespace GP.Application.Services
 
         public async Task<List<MyTicketResponseDto>> GetMyTicketsAsync(int userId, CancellationToken cancellationToken = default)
         {
-            return await _dbContext.Bookings
+            var bookings = await _dbContext.Bookings
                 .AsNoTracking()
                 .Where(b => b.UserId == userId && b.Status != BookingStatus.Pending)
                 .Include(b => b.Occurrence)
                     .ThenInclude(o => o.Trip)
                         .ThenInclude(t => t.Agency)
+                .Include(b => b.Occurrence)
+                    .ThenInclude(o => o.Trip)
+                        .ThenInclude(t => t.TripStopTimes)
+                .Include(b => b.CoachClass)
                 .Include(b => b.OriginStation)
                 .Include(b => b.DestinationStation)
                 .Include(b => b.BookingPassengers)
                 .OrderByDescending(b => b.Occurrence.DepartureDateTime)
-                .Select(b => new MyTicketResponseDto
-                {
-                    BookingId = b.BookingId,
-                    Status = b.Status.ToString(),
-                    PaymentStatus = b.PaymentStatus.ToString(),
-                    TotalPrice = b.TotalPrice,
-                    SeatsBooked = b.SeatsBooked,
-                    BookingDate = DateTime.SpecifyKind(b.BookingTime, DateTimeKind.Utc),
-                    AgencyName = b.Occurrence.Trip.Agency.AgencyName,
-                    OriginStation = b.OriginStation.ArabicName,
-                    DestinationStation = b.DestinationStation.ArabicName,
-                    DepartureTime = DateTime.SpecifyKind(b.Occurrence.DepartureDateTime, DateTimeKind.Utc),
-                    ArrivalTime = DateTime.SpecifyKind(b.Occurrence.ArrivalDateTime, DateTimeKind.Utc),
-                    AssignedSeats = b.BookingPassengers
-                        .Select(p => p.SeatNumber)
-                        .ToList()
-                })
                 .ToListAsync(cancellationToken);
+
+            return bookings.Select(b =>
+                {
+                    var (boardingTime, dropoffTime) = ResolvePassengerLocalTimes(b);
+
+                    return new MyTicketResponseDto
+                    {
+                        BookingId = b.BookingId,
+                        Status = b.Status.ToString(),
+                        PaymentStatus = b.PaymentStatus.ToString(),
+                        TotalPrice = b.TotalPrice,
+                        SeatsBooked = b.SeatsBooked,
+                        BookingDate = DateTime.SpecifyKind(b.BookingTime, DateTimeKind.Utc),
+                        AgencyName = b.Occurrence.Trip.Agency.AgencyName,
+                        ClassName = b.CoachClass.Name,
+                        OriginStation = b.OriginStation.ArabicName,
+                        DestinationStation = b.DestinationStation.ArabicName,
+                        BoardingTime = boardingTime,
+                        DropoffTime = dropoffTime,
+                        Passengers = b.BookingPassengers
+                        .Select(p => new TicketPassengerDto
+                        {
+                            Name = p.Name,
+                            IdNumber = p.IdNumber,
+                            SeatNumber = p.SeatNumber
+                        })
+                        .ToList()
+                    };
+                })
+                .ToList();
         }
 
         public async Task ReleaseExpiredHoldsAsync(CancellationToken cancellationToken = default)
@@ -487,6 +527,58 @@ namespace GP.Application.Services
                 .Select(id => id.ToUpperInvariant())
                 .Distinct()
                 .ToList();
+        }
+
+        private static (DateTime BoardingTime, DateTime DropoffTime) ResolvePassengerLocalTimes(Booking booking)
+        {
+            var fallbackBoarding = DateTime.SpecifyKind(booking.Occurrence.DepartureDateTime, DateTimeKind.Utc);
+            var fallbackDropoff = DateTime.SpecifyKind(booking.Occurrence.ArrivalDateTime, DateTimeKind.Utc);
+
+            var trip = booking.Occurrence.Trip;
+            if (trip?.TripStopTimes == null || trip.TripStopTimes.Count == 0)
+                return (fallbackBoarding, fallbackDropoff);
+
+            var fromStop = trip.TripStopTimes
+                .Where(ts => ts.StationId == booking.OriginStationId)
+                .OrderBy(ts => ts.StopSequence)
+                .FirstOrDefault();
+
+            var toStop = trip.TripStopTimes
+                .Where(ts => ts.StationId == booking.DestinationStationId)
+                .OrderBy(ts => ts.StopSequence)
+                .FirstOrDefault();
+
+            if (fromStop == null || toStop == null || fromStop.StopSequence >= toStop.StopSequence)
+                return (fallbackBoarding, fallbackDropoff);
+
+            var boardingTimeOnly = fromStop.DepartureTime ?? fromStop.ArrivalTime;
+            var dropoffTimeOnly = toStop.ArrivalTime ?? toStop.DepartureTime;
+
+            if (!boardingTimeOnly.HasValue || !dropoffTimeOnly.HasValue)
+                return (fallbackBoarding, fallbackDropoff);
+
+            var boardingTime = BuildSegmentDateTime(
+                booking.Occurrence.DepartureDateTime,
+                trip.DepartureTime,
+                boardingTimeOnly.Value);
+
+            var dropoffTime = BuildSegmentDateTime(
+                booking.Occurrence.DepartureDateTime,
+                trip.DepartureTime,
+                dropoffTimeOnly.Value);
+
+            return (
+                DateTime.SpecifyKind(boardingTime, DateTimeKind.Utc),
+                DateTime.SpecifyKind(dropoffTime, DateTimeKind.Utc));
+        }
+
+        private static DateTime BuildSegmentDateTime(DateTime occurrenceStart, TimeOnly tripOriginDeparture, TimeOnly segmentTime)
+        {
+            var offset = segmentTime.ToTimeSpan() - tripOriginDeparture.ToTimeSpan();
+            if (offset < TimeSpan.Zero)
+                offset = offset.Add(TimeSpan.FromDays(1));
+
+            return occurrenceStart.Add(offset);
         }
 
         private static bool HasPlaceholderSeat(BookingPassenger passenger)

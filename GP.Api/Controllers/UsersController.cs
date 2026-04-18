@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+﻿using GP.API.Extensions;
 using GP.Application.Common; 
 using GP.Application.DTOs.Profile;
 using GP.Application.Interfaces;
@@ -20,18 +20,6 @@ public class UsersController : ControllerBase
         _userProfileService = userProfileService;
     }
 
-    private int? GetCurrentDomainUserId()
-    {
-        var userIdStr = User.FindFirst("domain_user_id")?.Value
-                     ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        if (int.TryParse(userIdStr, out int userId))
-        {
-            return userId;
-        }
-        return null;
-    }
-
     /// <summary>
     /// Gets the logged-in user's profile, stats, and wallet balance
     /// </summary>
@@ -41,7 +29,7 @@ public class UsersController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetMyProfile(CancellationToken cancellationToken)
     {
-        var userId = GetCurrentDomainUserId();
+        var userId = User.GetDomainUserId();
         if (userId == null)
             return Unauthorized(ApiResponse.ErrorResponse("Invalid user token."));
 
@@ -65,7 +53,7 @@ public class UsersController : ControllerBase
         [FromBody] UpdateUserProfileDto dto,
         CancellationToken cancellationToken)
     {
-        var userId = GetCurrentDomainUserId();
+        var userId = User.GetDomainUserId();
         if (userId == null)
             return Unauthorized(ApiResponse.ErrorResponse("Invalid user token."));
 
@@ -95,7 +83,7 @@ public class UsersController : ControllerBase
         if (file == null || file.Length == 0)
             return BadRequest(ApiResponse.ErrorResponse("No file was uploaded."));
 
-        var userId = GetCurrentDomainUserId();
+        var userId = User.GetDomainUserId();
         if (userId == null)
             return Unauthorized(ApiResponse.ErrorResponse("Invalid user token."));
 

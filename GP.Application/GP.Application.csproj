@@ -20,4 +20,8 @@
     <ProjectReference Include="..\GP.Infrastructure\GP.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Common\Serialization\" />
+  </ItemGroup>
+
 </Project>

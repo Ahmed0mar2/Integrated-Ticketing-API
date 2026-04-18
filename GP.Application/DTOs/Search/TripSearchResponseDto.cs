@@ -12,6 +12,11 @@ namespace GP.Application.DTOs.Search
         public int TripId { get; set; }
         public string AgencyName { get; set; } = string.Empty;
 
+        // Segment-specific times (requested boarding -> requested dropoff)
+        public DateTime BoardingTime { get; set; }
+        public DateTime DropoffTime { get; set; }
+
+        // Global trip times (entire occurrence)
         public DateTime DepartureTime { get; set; }
         public DateTime? ArrivalTime { get; set; }
 
@@ -23,6 +28,9 @@ namespace GP.Application.DTOs.Search
 
         public string DestinationStationName { get; set; } = string.Empty;
         public string DestinationGovernorate { get; set; } = string.Empty;
+
+        public decimal StartingPrice { get; set; }
+        public List<IntermediateStopDto> RouteStops { get; set; } = new();
 
         public List<TripClassOptionDto> AvailableClasses { get; set; } = new();
     }

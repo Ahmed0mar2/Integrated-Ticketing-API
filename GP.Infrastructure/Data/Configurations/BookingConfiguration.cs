@@ -30,12 +30,15 @@ namespace GP.Infrastructure.Data.Configurations
             builder.Property(b => b.CreatedAt).IsRequired().HasDefaultValueSql("GETUTCDATE()");
             builder.Property(b => b.UpdatedAt).IsRequired(false);
             builder.Property(b => b.IsDeleted).IsRequired().HasDefaultValue(false);
+            builder.Property(b => b.HoldExpiresAt).IsRequired(false);
 
             // Indexes for quick lookups
             builder.HasIndex(b => b.UserId);
             builder.HasIndex(b => b.OccurrenceId);
             builder.HasIndex(b => b.Status);
             builder.HasIndex(b => b.PaymentStatus);
+            // Speeds up the background worker that clears expired carts
+            builder.HasIndex(b => new { b.Status, b.HoldExpiresAt });
 
             // Relationships
             builder.HasOne(b => b.User)
@@ -66,6 +69,11 @@ namespace GP.Infrastructure.Data.Configurations
                    .WithMany()
                    .HasForeignKey(b => b.DestinationStationId)
                    .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasMany(b => b.WalletTransactions)
+                .WithOne(w => w.Booking)
+                .HasForeignKey(w => w.BookingId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

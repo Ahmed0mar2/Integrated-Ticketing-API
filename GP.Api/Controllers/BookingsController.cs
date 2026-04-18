@@ -1,0 +1,132 @@
+﻿using GP.API.Extensions;
+using GP.Application.Common;
+using GP.Application.DTOs.Bookings;
+using GP.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+
+namespace GP.Api.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    [Authorize]
+    public class BookingsController : ControllerBase
+    {
+        private readonly IBookingService _bookingService;
+
+        public BookingsController(IBookingService bookingService)
+        {
+            _bookingService = bookingService;
+        }
+
+        [HttpPost("cart")]
+        [HttpPost("cart/add")]
+        [ProducesResponseType(typeof(ApiResponse<BookingCartResponseDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<BookingCartResponseDto>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<BookingCartResponseDto>), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> AddToCart([FromBody] AddToCartRequestDto request, CancellationToken cancellationToken)
+        {
+            var userId = User.GetDomainUserId();
+            if (userId == null)
+            {
+                return Unauthorized(ApiResponse.ErrorResponse("Invalid token"));
+            }
+
+            try
+            {
+                var result = await _bookingService.AddToCartAsync(userId.Value, request, cancellationToken);
+
+                return Ok(ApiResponse<BookingCartResponseDto>.SuccessResponse(
+                    result,
+                    "Trip added to cart successfully."));
+            }
+            catch (CartConcurrencyException ex)
+            {
+                return Conflict(ApiResponse<BookingCartResponseDto>.ErrorResponse(ex.Message));
+            }
+            catch (CartValidationException ex)
+            {
+                return BadRequest(ApiResponse<BookingCartResponseDto>.ErrorResponse(ex.Message));
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    ApiResponse.ErrorResponse("An unexpected error occurred while adding this trip to cart."));
+            }
+        }
+
+        [HttpGet("cart")]
+        [ProducesResponseType(typeof(ApiResponse<BookingCartResponseDto?>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> GetActiveCart(CancellationToken cancellationToken)
+        {
+            var userId = User.GetDomainUserId();
+            if (userId == null)
+            {
+                return Unauthorized(ApiResponse.ErrorResponse("Invalid token"));
+            }
+
+            var cart = await _bookingService.GetActiveCartAsync(userId.Value, cancellationToken);
+
+            if (cart == null)
+            {
+                return Ok(ApiResponse<BookingCartResponseDto?>.SuccessResponse(null, "No active cart found."));
+            }
+
+            return Ok(ApiResponse<BookingCartResponseDto?>.SuccessResponse(cart, "Active cart retrieved successfully."));
+        }
+
+        [HttpGet("my-tickets")]
+        [ProducesResponseType(typeof(ApiResponse<List<MyTicketResponseDto>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> GetMyTickets(CancellationToken cancellationToken)
+        {
+            var userId = User.GetDomainUserId();
+            if (userId == null)
+            {
+                return Unauthorized(ApiResponse.ErrorResponse("Invalid token"));
+            }
+
+            var tickets = await _bookingService.GetMyTicketsAsync(userId.Value, cancellationToken);
+            return Ok(ApiResponse<List<MyTicketResponseDto>>.SuccessResponse(tickets, "Tickets retrieved successfully."));
+        }
+
+        [HttpPost("checkout")]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> Checkout([FromBody] CheckoutRequestDto request, CancellationToken cancellationToken)
+        {
+            var userId = User.GetDomainUserId();
+            if (userId == null)
+            {
+                return Unauthorized(ApiResponse.ErrorResponse("Invalid token"));
+            }
+
+            try
+            {
+                var resultMessage = await _bookingService.CheckoutAsync(userId.Value, request, cancellationToken);
+
+                return Ok(ApiResponse<string>.SuccessResponse(resultMessage, resultMessage));
+            }
+            catch (CartValidationException ex)
+            {
+                return BadRequest(ApiResponse<string>.ErrorResponse(ex.Message));
+            }
+            catch (CartConcurrencyException ex)
+            {
+                return Conflict(ApiResponse<string>.ErrorResponse(ex.Message));
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    ApiResponse.ErrorResponse("An unexpected error occurred during checkout."));
+            }
+        }
+    }
+}
