@@ -185,7 +185,7 @@ namespace GP.Application.Services
             CancellationToken cancellationToken,
             bool applyPagination = true)
         {
-            var now = DateTime.UtcNow;
+            var now = AppTime.GetScheduleNow();
 
             var query = _dbContext.TripOccurrences
                 .AsNoTracking()
@@ -298,10 +298,10 @@ namespace GP.Application.Services
                         TripOccurrenceId = occurrence.TripOccurrenceId,
                         TripId = occurrence.TripId,
                         AgencyName = trip.Agency.AgencyName,
-                        BoardingTime = boardingTime,
-                        DropoffTime = dropoffTime,
-                        DepartureTime = occurrence.DepartureDateTime,
-                        ArrivalTime = occurrence.ArrivalDateTime,
+                        BoardingTime = AppTime.AsSchedule(boardingTime),
+                        DropoffTime = AppTime.AsSchedule(dropoffTime),
+                        DepartureTime = AppTime.AsSchedule(occurrence.DepartureDateTime),
+                        ArrivalTime = AppTime.AsSchedule(occurrence.ArrivalDateTime),
                         TotalDurationMinutes = duration,
                         OriginStationId = fromStop.StationId,
                         OriginStationName = fromStop.Station.ArabicName,

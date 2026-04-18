@@ -1,4 +1,5 @@
-﻿using GP.Application.Interfaces;
+﻿using GP.Application.Common;
+using GP.Application.Interfaces;
 using GP.Domain.Entities;
 using GP.Infrastructure.Data;
 using Microsoft.Data.SqlClient;
@@ -29,7 +30,7 @@ namespace GP.Application.Services
         {
             _logger.LogInformation("Starting Generator: Building Trip Occurrences for the next {Days} days.", targetDaysAhead);
 
-            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+            var today = DateOnly.FromDateTime(AppTime.GetScheduleNow());
             var targetEndDate = today.AddDays(targetDaysAhead);
 
             List<Trip> trips;
@@ -77,7 +78,7 @@ namespace GP.Application.Services
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                if (trip.Calendar == null) continue; 
+                if (trip.Calendar == null) continue;
 
                 for (var date = today; date <= targetEndDate; date = date.AddDays(1))
                 {
@@ -117,7 +118,7 @@ namespace GP.Application.Services
                         {
                             inventoriesBuffer.Add(new TripOccurrenceClassInventory
                             {
-                                TripOccurrence = newOccurrence, 
+                                TripOccurrence = newOccurrence,
                                 CoachClassId = coachClass.CoachClassId,
                                 RemainingSeats = coachClass.DefaultCapacity,
                                 TotalSeats = coachClass.DefaultCapacity
@@ -174,7 +175,7 @@ namespace GP.Application.Services
                     dbContext.TripOccurrences.AddRange(occurrences);
 
                 if (inventories?.Count > 0)
-                    dbContext.TripOccurrenceClassInventories.AddRange(inventories); 
+                    dbContext.TripOccurrenceClassInventories.AddRange(inventories);
 
                 await dbContext.SaveChangesAsync(cancellationToken);
             }
@@ -193,11 +194,11 @@ namespace GP.Application.Services
             }
             finally
             {
-               
+
                 dbContext.ChangeTracker.AutoDetectChangesEnabled = true;
             }
 
-            
+
         }
 
         private bool RunsOnDayOfWeek(Calendar calendar, DayOfWeek day)

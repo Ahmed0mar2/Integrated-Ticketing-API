@@ -36,6 +36,21 @@ Frontend integration guide for Flutter and Angular teams.
 }
 ```
 
+### Date & Time Contract
+
+- **UTC timestamps (absolute instants, serialized with `Z`):**
+  - Wrapper `timestamp`
+  - Booking/cart hold fields such as `holdExpiresAt`
+  - Booking audit fields such as `bookingDate`
+  - Occurrence seat snapshot field `generatedAtUtc`
+- **Schedule-local timestamps (timetable wall-clock, no timezone suffix):**
+  - `boardingTime`, `dropoffTime`
+  - Occurrence-level `departureTime`, `arrivalTime`
+- **Route stop clock values:**
+  - `routeStops[].arrivalTime` / `routeStops[].departureTime` are clock-only values like `HH:mm:ss`.
+- **Date window logic:**
+  - `travelDate` validation and occurrence generation use the schedule-local date boundary (Egypt/Cairo schedule timezone), not UTC day rollover.
+
 ---
 
 # 1. Authentication API
@@ -556,7 +571,7 @@ No request body.
 ### Endpoint Overview
 - **Method:** `POST`
 - **URL:** `/api/Seed/generate-occurrences`
-- **Business Use Case:** Generates next 60-day occurrences and class inventories.
+- **Business Use Case:** Generates next 60-day occurrences and class inventories using the schedule-local day boundary.
 ### Authentication / Authorization
 - **JWT Required:** Yes
 - **Role Required:** Admin
@@ -857,7 +872,7 @@ Query string parameters:
 ### Request Field Reference
 | Field             | Type     | Required    | Notes                                                            |
 | ----------------- | -------- | ----------- | ---------------------------------------------------------------- |
-| travelDate        | date     | Yes         | Must be today..+60 days                                          |
+| travelDate        | date     | Yes         | Must be schedule-local today..+60 days                           |
 | fromGovernorate   | string   | Conditional | Required if fromStationId missing                                |
 | fromStationId     | int      | Conditional | Required if fromGovernorate missing                              |
 | toGovernorate     | string   | Conditional | Required if toStationId missing                                  |
@@ -880,8 +895,9 @@ Query string parameters:
 | pageSize    | int                     | Page size actually applied                |
 
 ### Time Semantics
-- `boardingTime` / `dropoffTime`: passenger segment-local times (selected origin to selected destination).
-- `departureTime` / `arrivalTime`: global occurrence-level trip start and end times.
+- `boardingTime` / `dropoffTime`: passenger segment schedule-local times (selected origin to selected destination), serialized without timezone suffix.
+- `departureTime` / `arrivalTime`: global occurrence-level schedule-local trip start and end times, serialized without timezone suffix.
+- `timestamp` in wrapper remains UTC (`Z`).
 
 ### Response Example (200 OK)
 ```json
@@ -894,10 +910,10 @@ Query string parameters:
         "tripOccurrenceId": 1001,
         "tripId": 200,
         "agencyName": "GoBus",
-        "boardingTime": "2026-03-20T07:20:00Z",
-        "dropoffTime": "2026-03-20T10:00:00Z",
-        "departureTime": "2026-03-20T07:00:00Z",
-        "arrivalTime": "2026-03-20T10:40:00Z",
+        "boardingTime": "2026-03-20T07:20:00",
+        "dropoffTime": "2026-03-20T10:00:00",
+        "departureTime": "2026-03-20T07:00:00",
+        "arrivalTime": "2026-03-20T10:40:00",
         "totalDurationMinutes": 160,
         "originStationId": 101,
         "originStationName": "رمسيس",
@@ -973,7 +989,7 @@ Query string parameters:
 ### Request Field Reference
 | Field             | Type     | Required    | Notes                                              |
 | ----------------- | -------- | ----------- | -------------------------------------------------- |
-| travelDate        | date     | Yes         | Must be today..+60 days                            |
+| travelDate        | date     | Yes         | Must be schedule-local today..+60 days             |
 | fromGovernorate   | string   | Conditional | Required if fromStationId missing                  |
 | fromStationId     | int      | Conditional | Required if fromGovernorate missing                |
 | toGovernorate     | string   | Conditional | Required if toStationId missing                    |
@@ -1006,10 +1022,10 @@ Query string parameters:
             "tripOccurrenceId": 5011,
             "tripId": 310,
             "agencyName": "GoBus",
-            "boardingTime": "2026-03-20T06:30:00Z",
-            "dropoffTime": "2026-03-20T09:30:00Z",
-            "departureTime": "2026-03-20T06:00:00Z",
-            "arrivalTime": "2026-03-20T10:00:00Z",
+            "boardingTime": "2026-03-20T06:30:00",
+            "dropoffTime": "2026-03-20T09:30:00",
+            "departureTime": "2026-03-20T06:00:00",
+            "arrivalTime": "2026-03-20T10:00:00",
             "totalDurationMinutes": 180,
             "originStationId": 101,
             "originStationName": "رمسيس",
@@ -1030,10 +1046,10 @@ Query string parameters:
             "tripOccurrenceId": 9912,
             "tripId": 777,
             "agencyName": "Egyptian National Railways",
-            "boardingTime": "2026-03-20T11:05:00Z",
-            "dropoffTime": "2026-03-20T16:30:00Z",
-            "departureTime": "2026-03-20T10:30:00Z",
-            "arrivalTime": "2026-03-20T17:10:00Z",
+            "boardingTime": "2026-03-20T11:05:00",
+            "dropoffTime": "2026-03-20T16:30:00",
+            "departureTime": "2026-03-20T10:30:00",
+            "arrivalTime": "2026-03-20T17:10:00",
             "totalDurationMinutes": 325,
             "originStationId": 220,
             "originStationName": "المنيا",
@@ -1154,6 +1170,10 @@ Base route: `/api/occurrences`
 
 Base route: `/api/Bookings`
 
+### Time Semantics
+- `holdExpiresAt` and `bookingDate` are UTC timestamps (`Z`).
+- `boardingTime` and `dropoffTime` are schedule-local timetable timestamps without timezone suffix.
+
 ## 9.1 Add Trip to Cart (Soft Lock)
 ### Endpoint Overview
 - **Method:** `POST`
@@ -1214,8 +1234,8 @@ Base route: `/api/Bookings`
         "className": "Business",
         "origin": "رمسيس",
         "destination": "سيدي جابر",
-        "boardingTime": "2026-03-20T07:20:00Z",
-        "dropoffTime": "2026-03-20T10:00:00Z",
+        "boardingTime": "2026-03-20T07:20:00",
+        "dropoffTime": "2026-03-20T10:00:00",
         "passengers": [
           {
             "name": "Ali Hassan",
@@ -1299,8 +1319,8 @@ No request body.
         "className": "Business",
         "origin": "رمسيس",
         "destination": "سيدي جابر",
-        "boardingTime": "2026-04-02T07:20:00Z",
-        "dropoffTime": "2026-04-02T10:00:00Z",
+        "boardingTime": "2026-04-02T07:20:00",
+        "dropoffTime": "2026-04-02T10:00:00",
         "passengers": [
           {
             "name": "Ali Hassan",
@@ -1363,8 +1383,8 @@ No request body.
       "className": "Business",
       "originStation": "رمسيس",
       "destinationStation": "سيدي جابر",
-      "boardingTime": "2026-04-02T07:20:00Z",
-      "dropoffTime": "2026-04-02T10:00:00Z",
+      "boardingTime": "2026-04-02T07:20:00",
+      "dropoffTime": "2026-04-02T10:00:00",
       "passengers": [
         {
           "name": "Ali Hassan",
@@ -1475,47 +1495,113 @@ No request body.
 }
 ```
 
+---
+
+# 11. Jobs API
+
+Base route: `/api/Jobs`
+
+These endpoints are intended for scheduler/automation usage.
+
+Authentication model:
+- JWT is not required.
+- A `secret` query parameter is required and must match server-side `JobSecretKey`.
+
+## 11.1 Generate Occurrences (Scheduler)
+### Endpoint Overview
+- **Method:** `POST`
+- **URL:** `/api/Jobs/generate-occurrences?secret=<JobSecretKey>`
+- **Business Use Case:** Generates next 60-day occurrences and inventories using schedule-local day boundaries.
+
+### Response Example (200 OK)
+```json
+{
+  "success": true,
+  "message": "Trip occurrences generated successfully.",
+  "data": null,
+  "errors": null,
+  "timestamp": "2026-04-18T17:00:00Z"
+}
+```
+
+## 11.2 Process Completed Trips
+### Endpoint Overview
+- **Method:** `POST`
+- **URL:** `/api/Jobs/process-completed-trips?secret=<JobSecretKey>`
+- **Business Use Case:** Marks eligible confirmed bookings as completed based on schedule-local arrival cutoff.
+
+### Response Example (200 OK)
+```json
+{
+  "success": true,
+  "message": "Completed trips processed successfully.",
+  "data": null,
+  "errors": null,
+  "timestamp": "2026-04-18T17:00:00Z"
+}
+```
+
+## 11.3 Release Expired Holds
+### Endpoint Overview
+- **Method:** `POST`
+- **URL:** `/api/Jobs/release-expired-holds?secret=<JobSecretKey>`
+- **Business Use Case:** Releases expired pending holds and restores inventory.
+
+### Response Example (200 OK)
+```json
+{
+  "success": true,
+  "message": "Expired holds released and inventory restored.",
+  "data": null,
+  "errors": null,
+  "timestamp": "2026-04-18T17:00:00Z"
+}
+```
+
 # Quick Endpoint Index
 
-| Method   | URL                                   |        Auth | Description                                                  |
-| -------- | ------------------------------------- | ----------: | ------------------------------------------------------------ |
-| `POST`   | `/api/Auth/register`                  |          No | Register user and return tokens                              |
-| `POST`   | `/api/Auth/login`                     |          No | Login and return tokens                                      |
-| `POST`   | `/api/Auth/refresh`                   |          No | Refresh access token                                         |
-| `POST`   | `/api/Auth/revoke`                    |          No | Revoke one refresh token                                     |
-| `POST`   | `/api/Auth/revoke-all`                |         Yes | Revoke all active refresh tokens                             |
-| `GET`    | `/api/Auth/me`                        |         Yes | Return current JWT claim info                                |
-| `POST`   | `/api/Auth/send-verification-email`   |          No | Send verification email                                      |
-| `POST`   | `/api/Auth/verify-email`              |          No | Confirm email token                                          |
-| `POST`   | `/api/Auth/forgot-password`           |          No | Send reset link                                              |
-| `POST`   | `/api/Auth/reset-password`            |          No | Reset password                                               |
-| `POST`   | `/api/Auth/change-password`           |         Yes | Change password                                              |
-| `GET`    | `/api/Countries`                      |          No | List countries                                               |
-| `POST`   | `/api/Seed/init-identity`             | Yes (Admin) | Initialize identity roles/admin                              |
-| `POST`   | `/api/Seed/import-master-stations`    | Yes (Admin) | Import master stations                                       |
-| `POST`   | `/api/Seed/import-horus`              | Yes (Admin) | Import Horus trips                                           |
-| `POST`   | `/api/Seed/import-gobus`              | Yes (Admin) | Import GoBus trips                                           |
-| `POST`   | `/api/Seed/import-bluebus`            | Yes (Admin) | Import BlueBus trips                                         |
-| `POST`   | `/api/Seed/import-trains`             | Yes (Admin) | Import train trips                                           |
-| `POST`   | `/api/Seed/generate-occurrences`      | Yes (Admin) | Generate future occurrences                                  |
-| `GET`    | `/api/admin/users`                    | Yes (Admin) | List all users                                               |
-| `GET`    | `/api/admin/users/{id}`               | Yes (Admin) | Get user detail                                              |
-| `PATCH`  | `/api/admin/users/{id}/toggle-status` | Yes (Admin) | Toggle user active status                                    |
-| `POST`   | `/api/admin/users/{id}/roles`         | Yes (Admin) | Assign role                                                  |
-| `DELETE` | `/api/admin/users/{id}`               | Yes (Admin) | Delete user                                                  |
-| `GET`    | `/api/Users/me`                       |         Yes | Get profile                                                  |
-| `PUT`    | `/api/Users/me`                       |         Yes | Update profile                                               |
-| `POST`   | `/api/Users/me/profile-picture`       |         Yes | Upload profile picture                                       |
-| `GET`    | `/api/Stations`                       |          No | Get grouped stations                                         |
-| `GET`    | `/api/trips/search`                   |          No | Preferred paginated direct-trip search route                 |
-| `GET`    | `/api/Search`                         |          No | Backward-compatible alias for direct-trip search             |
-| `GET`    | `/api/trips/search/indirect`          |          No | Preferred 1-stop indirect search route                       |
-| `GET`    | `/api/Search/indirect`                |          No | Backward-compatible alias for indirect search                |
-| `GET`    | `/api/occurrences/{id}/seats`         |          No | Get real-time seat map with available/pending/booked states  |
-| `POST`   | `/api/Bookings/cart`                  |         Yes | Add trip to cart with 10-minute seat soft-lock               |
-| `POST`   | `/api/Bookings/cart/add`              |         Yes | Backward-compatible add-to-cart alias                        |
-| `GET`    | `/api/Bookings/cart`                  |         Yes | Retrieve current active cart                                 |
-| `POST`   | `/api/Bookings/checkout`              |         Yes | Checkout all valid pending cart items with one wallet charge |
-| `GET`    | `/api/Bookings/my-tickets`            |         Yes | Retrieve user's ticket history                               |
-| `POST`   | `/api/Wallet/deposit`                 |         Yes | Deposit wallet funds and write ledger entry                  |
-| `GET`    | `/api/Wallet/history`                 |         Yes | Retrieve wallet transaction history (newest first)           |
+| Method   | URL                                   |               Auth | Description                                                  |
+| -------- | ------------------------------------- | -----------------: | ------------------------------------------------------------ |
+| `POST`   | `/api/Auth/register`                  |                 No | Register user and return tokens                              |
+| `POST`   | `/api/Auth/login`                     |                 No | Login and return tokens                                      |
+| `POST`   | `/api/Auth/refresh`                   |                 No | Refresh access token                                         |
+| `POST`   | `/api/Auth/revoke`                    |                 No | Revoke one refresh token                                     |
+| `POST`   | `/api/Auth/revoke-all`                |                Yes | Revoke all active refresh tokens                             |
+| `GET`    | `/api/Auth/me`                        |                Yes | Return current JWT claim info                                |
+| `POST`   | `/api/Auth/send-verification-email`   |                 No | Send verification email                                      |
+| `POST`   | `/api/Auth/verify-email`              |                 No | Confirm email token                                          |
+| `POST`   | `/api/Auth/forgot-password`           |                 No | Send reset link                                              |
+| `POST`   | `/api/Auth/reset-password`            |                 No | Reset password                                               |
+| `POST`   | `/api/Auth/change-password`           |                Yes | Change password                                              |
+| `GET`    | `/api/Countries`                      |                 No | List countries                                               |
+| `POST`   | `/api/Seed/init-identity`             |        Yes (Admin) | Initialize identity roles/admin                              |
+| `POST`   | `/api/Seed/import-master-stations`    |        Yes (Admin) | Import master stations                                       |
+| `POST`   | `/api/Seed/import-horus`              |        Yes (Admin) | Import Horus trips                                           |
+| `POST`   | `/api/Seed/import-gobus`              |        Yes (Admin) | Import GoBus trips                                           |
+| `POST`   | `/api/Seed/import-bluebus`            |        Yes (Admin) | Import BlueBus trips                                         |
+| `POST`   | `/api/Seed/import-trains`             |        Yes (Admin) | Import train trips                                           |
+| `POST`   | `/api/Seed/generate-occurrences`      |        Yes (Admin) | Generate future occurrences                                  |
+| `POST`   | `/api/Jobs/generate-occurrences`      | Secret query param | Generate future occurrences (scheduler endpoint)             |
+| `POST`   | `/api/Jobs/process-completed-trips`   | Secret query param | Mark eligible trips as completed                             |
+| `POST`   | `/api/Jobs/release-expired-holds`     | Secret query param | Release expired holds and restore inventory                  |
+| `GET`    | `/api/admin/users`                    |        Yes (Admin) | List all users                                               |
+| `GET`    | `/api/admin/users/{id}`               |        Yes (Admin) | Get user detail                                              |
+| `PATCH`  | `/api/admin/users/{id}/toggle-status` |        Yes (Admin) | Toggle user active status                                    |
+| `POST`   | `/api/admin/users/{id}/roles`         |        Yes (Admin) | Assign role                                                  |
+| `DELETE` | `/api/admin/users/{id}`               |        Yes (Admin) | Delete user                                                  |
+| `GET`    | `/api/Users/me`                       |                Yes | Get profile                                                  |
+| `PUT`    | `/api/Users/me`                       |                Yes | Update profile                                               |
+| `POST`   | `/api/Users/me/profile-picture`       |                Yes | Upload profile picture                                       |
+| `GET`    | `/api/Stations`                       |                 No | Get grouped stations                                         |
+| `GET`    | `/api/trips/search`                   |                 No | Preferred paginated direct-trip search route                 |
+| `GET`    | `/api/Search`                         |                 No | Backward-compatible alias for direct-trip search             |
+| `GET`    | `/api/trips/search/indirect`          |                 No | Preferred 1-stop indirect search route                       |
+| `GET`    | `/api/Search/indirect`                |                 No | Backward-compatible alias for indirect search                |
+| `GET`    | `/api/occurrences/{id}/seats`         |                 No | Get real-time seat map with available/pending/booked states  |
+| `POST`   | `/api/Bookings/cart`                  |                Yes | Add trip to cart with 10-minute seat soft-lock               |
+| `POST`   | `/api/Bookings/cart/add`              |                Yes | Backward-compatible add-to-cart alias                        |
+| `GET`    | `/api/Bookings/cart`                  |                Yes | Retrieve current active cart                                 |
+| `POST`   | `/api/Bookings/checkout`              |                Yes | Checkout all valid pending cart items with one wallet charge |
+| `GET`    | `/api/Bookings/my-tickets`            |                Yes | Retrieve user's ticket history                               |
+| `POST`   | `/api/Wallet/deposit`                 |                Yes | Deposit wallet funds and write ledger entry                  |
+| `GET`    | `/api/Wallet/history`                 |                Yes | Retrieve wallet transaction history (newest first)           |
