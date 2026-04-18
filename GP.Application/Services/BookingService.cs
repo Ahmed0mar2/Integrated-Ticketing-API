@@ -291,6 +291,7 @@ namespace GP.Application.Services
 
             var bookings = await QueryActivePendingBookingsForUser(userId, now)
                 .AsNoTracking()
+                .AsSplitQuery()
                 .Include(b => b.Occurrence)
                     .ThenInclude(o => o.Trip)
                         .ThenInclude(t => t.Agency)

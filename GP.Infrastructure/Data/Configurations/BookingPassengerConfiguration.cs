@@ -2,11 +2,6 @@
 using GP.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GP.Infrastructure.Data.Configurations
 {
@@ -20,16 +15,16 @@ namespace GP.Infrastructure.Data.Configurations
             builder.Property(bp => bp.BookingId).IsRequired();
             builder.Property(bp => bp.Name).IsRequired().HasMaxLength(200);
             builder.Property(bp => bp.Age).IsRequired();
-            builder.Property(bp => bp.SeatNumber).IsRequired().HasMaxLength(50); 
+            builder.Property(bp => bp.SeatNumber).IsRequired().HasMaxLength(50);
             builder.Property(bp => bp.IdType).IsRequired();
             builder.Property(bp => bp.IdNumber).IsRequired().HasMaxLength(50);
 
-                 // Shadow copy of parent booking status used by filtered unique index enforcement.
-                 builder.Property<int>("BookingStatus")
-                     .IsRequired()
-                     .HasDefaultValue((int)BookingStatus.Pending);
+            // Shadow copy of parent booking status used by filtered unique index enforcement.
+            builder.Property<int>("BookingStatus")
+                .IsRequired()
+                .HasDefaultValue((int)BookingStatus.Pending);
 
-            // Audit fields 
+            // Audit fields
             builder.Property(bp => bp.CreatedAt).IsRequired().HasDefaultValueSql("GETUTCDATE()");
             builder.Property(bp => bp.UpdatedAt).IsRequired(false);
             builder.Property(bp => bp.IsDeleted).IsRequired().HasDefaultValue(false);
@@ -41,10 +36,10 @@ namespace GP.Infrastructure.Data.Configurations
             builder.HasIndex(bp => new { bp.OccurrenceId, bp.CoachClassId, bp.SeatNumber })
                    .IsUnique()
                    .HasDatabaseName("IX_BookingPassenger_UniqueSeat");
-                 builder.HasIndex("OccurrenceId", "IdNumber")
-                     .IsUnique()
-                     .HasDatabaseName("IX_BookingPassenger_UniquePassengerPerOccurrence_Active")
-                     .HasFilter($"[BookingStatus] IN ({(int)BookingStatus.Pending}, {(int)BookingStatus.Confirmed})");
+            builder.HasIndex("OccurrenceId", "IdNumber")
+                .IsUnique()
+                .HasDatabaseName("IX_BookingPassenger_UniquePassengerPerOccurrence_Active")
+                .HasFilter($"[BookingStatus] IN ({(int)BookingStatus.Pending}, {(int)BookingStatus.Confirmed})");
 
             // Relationship
             builder.HasOne(bp => bp.Booking)
@@ -52,8 +47,12 @@ namespace GP.Infrastructure.Data.Configurations
                 .HasForeignKey(bp => bp.BookingId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Constraint: Age >= 0
-            builder.ToTable(t => t.HasCheckConstraint("CK_ValidAge", "[Age] >= 0"));
+            // Table metadata: check constraint + SQL trigger registration
+            builder.ToTable(tb =>
+            {
+                tb.HasCheckConstraint("CK_ValidAge", "[Age] >= 0");
+                tb.HasTrigger("TR_BookingPassengers_SyncBookingStatus");
+            });
         }
     }
 }

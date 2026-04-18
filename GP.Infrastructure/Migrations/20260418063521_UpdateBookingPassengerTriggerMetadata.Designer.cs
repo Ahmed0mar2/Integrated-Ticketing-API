@@ -4,6 +4,7 @@ using GP.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GP.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260418063521_UpdateBookingPassengerTriggerMetadata")]
+    partial class UpdateBookingPassengerTriggerMetadata
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -126,12 +129,7 @@ namespace GP.Infrastructure.Migrations
 
                     b.HasIndex("Status", "HoldExpiresAt");
 
-                    b.ToTable("Bookings", t =>
-                        {
-                            t.HasTrigger("TR_Bookings_PropagateStatusToPassengers");
-                        });
-
-                    b.HasAnnotation("SqlServer:UseSqlOutputClause", false);
+                    b.ToTable("Bookings");
                 });
 
             modelBuilder.Entity("GP.Domain.Entities.BookingPassenger", b =>
