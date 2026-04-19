@@ -15,6 +15,9 @@ namespace GP.Domain.Entities
         public int BookingId { get; set; }
         public Booking Booking { get; set; } = null!;
 
+        // The exact passenger ticket being resold
+        public int PassengerId { get; set; }
+
         public int SellerId { get; set; }
         public User Seller { get; set; } = null!;
 
