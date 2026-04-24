@@ -31,16 +31,19 @@ namespace GP.Infrastructure.Services
                 .Where(m => m.AgencyId == agency.AgencyId)
                 .ToDictionaryAsync(m => m.ExternalStationId, m => m.StopId);
 
+            var mappedStopIds = stationMappings.Values.Distinct().ToList();
+            var stationCoordinates = await _context.Set<Stop>()
+                .AsNoTracking()
+                .Where(s => mappedStopIds.Contains(s.StopId))
+                .Select(s => new { s.StopId, s.Latitude, s.Longitude })
+                .ToDictionaryAsync(s => s.StopId, s => (s.Latitude, s.Longitude));
+
             string jsonString = await File.ReadAllTextAsync(jsonFilePath);
             var trips = JsonSerializer.Deserialize<List<HorusTripDto>>(jsonString);
             if (trips == null) return;
 
-            // =====================================================================
-            // NEW: PRE-FLIGHT COACH CLASS CHECK (Solves the Tracking Crash)
-            // =====================================================================
             Console.WriteLine("Pre-flight: Resolving Coach Classes...");
 
-            // 1. Get unique classes from the JSON
             var uniqueClasses = trips
                 .SelectMany(ExtractFareClassSpecs)
                 .GroupBy(c => c.Name, StringComparer.OrdinalIgnoreCase)
@@ -51,7 +54,6 @@ namespace GP.Infrastructure.Services
                 })
                 .ToList();
 
-            // 2. Fetch existing classes from DB
             var existingClasses = await _context.Set<CoachClass>()
                 .AsNoTracking()
                 .Where(c => c.Name.StartsWith("Horus - "))
@@ -60,7 +62,6 @@ namespace GP.Infrastructure.Services
             var classCache = existingClasses
                 .ToDictionary(c => c.Name, c => c.CoachClassId, StringComparer.OrdinalIgnoreCase);
 
-            // 3. Add any missing classes safely BEFORE touching the Trips
             foreach (var cls in uniqueClasses)
             {
                 if (!classCache.ContainsKey(cls.Name))
@@ -71,7 +72,7 @@ namespace GP.Infrastructure.Services
                     classCache[cls.Name] = newClass.CoachClassId;
                 }
             }
-            // =====================================================================
+
             _context.ChangeTracker.Clear();
 
             Console.WriteLine($"Found {trips.Count} Horus trips. Importing...");
@@ -135,6 +136,24 @@ namespace GP.Infrastructure.Services
                     }
                 }
 
+                int estimatedDurationMinutes = 180;
+                if (stationCoordinates.TryGetValue(originStopId, out var originCoords)
+                    && stationCoordinates.TryGetValue(destinationStopId, out var destinationCoords)
+                    && originCoords.Latitude.HasValue
+                    && originCoords.Longitude.HasValue
+                    && destinationCoords.Latitude.HasValue
+                    && destinationCoords.Longitude.HasValue)
+                {
+                    var distanceKm = CalculateDistanceKm(
+                        (double)originCoords.Latitude.Value,
+                        (double)originCoords.Longitude.Value,
+                        (double)destinationCoords.Latitude.Value,
+                        (double)destinationCoords.Longitude.Value);
+
+                    var computedDuration = (distanceKm * 1.2 / 75.0) * 60.0;
+                    estimatedDurationMinutes = Math.Max(1, (int)Math.Round(computedDuration));
+                }
+
                 var newTrip = new Trip
                 {
                     AgencyId = agency.AgencyId,
@@ -142,12 +161,11 @@ namespace GP.Infrastructure.Services
                     OriginStationId = originStopId,
                     DestinationStationId = destinationStopId,
                     DepartureTime = departureTime.Value,
-                    ServiceId = defaultCalendar.ServiceId
+                    ServiceId = defaultCalendar.ServiceId,
+                    TotalDurationMinutes = estimatedDurationMinutes
                 };
 
                 int seq = 1;
-                TimeOnly? firstDepartureTime = null;
-                TimeOnly? lastBoardingDeparture = null;
 
                 foreach (var stop in dto.StationsFrom)
                 {
@@ -162,12 +180,6 @@ namespace GP.Infrastructure.Services
                             DepartureTime = stopDepartureTime,
                             ArrivalTime = null
                         });
-
-                        if (stopDepartureTime.HasValue)
-                        {
-                            firstDepartureTime ??= stopDepartureTime;
-                            lastBoardingDeparture = stopDepartureTime;
-                        }
 
                         foreach (var classSpec in classSpecs)
                         {
@@ -188,16 +200,7 @@ namespace GP.Infrastructure.Services
                 if (newTrip.TripStopTimes.Count == 0 || newTrip.TripFares.Count == 0)
                     continue;
 
-                var effectiveFirstDeparture = firstDepartureTime ?? departureTime;
-                var effectiveLastBoarding = lastBoardingDeparture ?? effectiveFirstDeparture;
-
-                int estimatedDurationMinutes = EstimateDurationMinutes(
-                    effectiveFirstDeparture!.Value,
-                    effectiveLastBoarding!.Value);
-
-                newTrip.TotalDurationMinutes = estimatedDurationMinutes;
-
-                var estimatedDestinationArrival = effectiveFirstDeparture.Value.AddMinutes(estimatedDurationMinutes);
+                var estimatedDestinationArrival = departureTime.Value.AddMinutes(estimatedDurationMinutes);
 
                 newTrip.TripStopTimes.Add(new TripStopTime
                 {
@@ -259,36 +262,76 @@ namespace GP.Infrastructure.Services
         {
             var fareClasses = new List<HorusFareClassSpec>();
             var fallbackCapacity = dto.BusCapacity > 0 ? dto.BusCapacity : 40;
-            var baseClassName = $"Horus - {dto.BusType}";
+            var baseClassName = BuildCoachClassBaseName(dto.BusType);
 
             if (dto.SeatsInfo.ValueKind == JsonValueKind.Object
                 && dto.SeatsInfo.TryGetProperty("type", out var seatsType)
                 && string.Equals(seatsType.GetString(), "double_deck", StringComparison.OrdinalIgnoreCase))
             {
-                if (dto.SeatsInfo.TryGetProperty("floor_1", out var floor1))
+                if (dto.SeatsInfo.TryGetProperty("floor_1", out var floor1)
+                    && TryGetDecimalProperty(floor1, "price_egp", out decimal floor1Price)
+                    && floor1Price > 0)
                 {
-                    AddDeckClass(fareClasses, floor1, $"{baseClassName} - Floor 1 Single", fallbackCapacity);
+                    int floor1Capacity = fallbackCapacity;
+                    if (TryGetIntProperty(floor1, "seats", out int floor1Seats) && floor1Seats > 0)
+                    {
+                        floor1Capacity = floor1Seats;
+                    }
+
+                    fareClasses.Add(new HorusFareClassSpec($"{baseClassName} - Floor 1", floor1Price, floor1Capacity));
                 }
 
                 if (dto.SeatsInfo.TryGetProperty("floor_2", out var floor2))
                 {
-                    bool hasNamedSubClasses = false;
+                    decimal floor2Price = 0m;
+                    int floor2Capacity = 0;
 
                     if (floor2.TryGetProperty("single", out var floor2Single))
                     {
-                        AddDeckClass(fareClasses, floor2Single, $"{baseClassName} - Floor 2 Single", fallbackCapacity);
-                        hasNamedSubClasses = true;
+                        if (TryGetDecimalProperty(floor2Single, "price_egp", out decimal singlePrice) && singlePrice > 0)
+                        {
+                            floor2Price = singlePrice;
+                        }
+
+                        if (TryGetIntProperty(floor2Single, "seats", out int singleSeats) && singleSeats > 0)
+                        {
+                            floor2Capacity += singleSeats;
+                        }
                     }
 
                     if (floor2.TryGetProperty("double", out var floor2Double))
                     {
-                        AddDeckClass(fareClasses, floor2Double, $"{baseClassName} - Floor 2 Double", fallbackCapacity);
-                        hasNamedSubClasses = true;
+                        if (floor2Price <= 0 && TryGetDecimalProperty(floor2Double, "price_egp", out decimal doublePrice) && doublePrice > 0)
+                        {
+                            floor2Price = doublePrice;
+                        }
+
+                        if (TryGetIntProperty(floor2Double, "seats", out int doubleSeats) && doubleSeats > 0)
+                        {
+                            floor2Capacity += doubleSeats;
+                        }
                     }
 
-                    if (!hasNamedSubClasses)
+                    if (floor2Price <= 0)
                     {
-                        AddDeckClass(fareClasses, floor2, $"{baseClassName} - Floor 2", fallbackCapacity);
+                        TryGetDecimalProperty(floor2, "price_egp", out floor2Price);
+                    }
+
+                    if (floor2Capacity <= 0)
+                    {
+                        if (TryGetIntProperty(floor2, "seats", out int floor2Seats) && floor2Seats > 0)
+                        {
+                            floor2Capacity = floor2Seats;
+                        }
+                        else
+                        {
+                            floor2Capacity = fallbackCapacity;
+                        }
+                    }
+
+                    if (floor2Price > 0)
+                    {
+                        fareClasses.Add(new HorusFareClassSpec($"{baseClassName} - Floor 2", floor2Price, floor2Capacity));
                     }
                 }
             }
@@ -318,18 +361,13 @@ namespace GP.Infrastructure.Services
                 .ToList();
         }
 
-        private static void AddDeckClass(List<HorusFareClassSpec> fareClasses, JsonElement deckElement, string className, int fallbackCapacity)
+        private static string BuildCoachClassBaseName(string busType)
         {
-            if (!TryGetDecimalProperty(deckElement, "price_egp", out decimal price) || price <= 0)
-                return;
+            var normalizedBusType = string.IsNullOrWhiteSpace(busType)
+                ? "Unknown"
+                : string.Join(" ", busType.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries));
 
-            int capacity = fallbackCapacity;
-            if (TryGetIntProperty(deckElement, "seats", out int deckSeats) && deckSeats > 0)
-            {
-                capacity = deckSeats;
-            }
-
-            fareClasses.Add(new HorusFareClassSpec(className, price, capacity));
+            return $"Horus - {normalizedBusType}";
         }
 
         private static bool TryGetDecimalProperty(JsonElement element, string propertyName, out decimal value)
@@ -362,24 +400,23 @@ namespace GP.Infrastructure.Services
             return false;
         }
 
-        private static int EstimateDurationMinutes(TimeOnly firstDeparture, TimeOnly lastBoardingDeparture)
+        private static double CalculateDistanceKm(double lat1, double lon1, double lat2, double lon2)
         {
-            int boardingWindowMinutes = CalculatePositiveMinutes(firstDeparture, lastBoardingDeparture);
-            if (boardingWindowMinutes <= 0)
-                return 180;
+            const double EarthRadiusKm = 6371.0;
 
-            int estimated = Math.Max(90, boardingWindowMinutes * 2);
-            return Math.Min(estimated, 960);
+            var dLat = DegreesToRadians(lat2 - lat1);
+            var dLon = DegreesToRadians(lon2 - lon1);
+
+            var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2)
+                    + Math.Cos(DegreesToRadians(lat1))
+                    * Math.Cos(DegreesToRadians(lat2))
+                    * Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+
+            var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+            return EarthRadiusKm * c;
         }
 
-        private static int CalculatePositiveMinutes(TimeOnly start, TimeOnly end)
-        {
-            var diff = end.ToTimeSpan() - start.ToTimeSpan();
-            if (diff < TimeSpan.Zero)
-                diff = diff.Add(TimeSpan.FromDays(1));
-
-            return (int)Math.Round(diff.TotalMinutes);
-        }
+        private static double DegreesToRadians(double degrees) => degrees * (Math.PI / 180.0);
 
         private TimeOnly? ParseTime(string? timeString)
         {

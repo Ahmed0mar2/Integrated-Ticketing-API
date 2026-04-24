@@ -122,6 +122,37 @@ namespace GP.Infrastructure.Services
             string pricesJson = await File.ReadAllTextAsync(pricesFilePath);
 
             using JsonDocument doc = JsonDocument.Parse(pricesJson);
+
+            var tripsList = await _context.Trips
+                .AsNoTracking()
+                .Where(t => t.AgencyId == agency.AgencyId && !string.IsNullOrWhiteSpace(t.TripCode))
+                .ToListAsync();
+
+            var tripsDict = tripsList
+                .GroupBy(t => t.TripCode!, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+
+            var allCoachClasses = await _context.CoachClasses.ToListAsync();
+            var classDict = allCoachClasses
+                .GroupBy(c => c.Name, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+
+            var existingFareRows = await _context.TripFares
+                .AsNoTracking()
+                .Where(f => f.Trip.AgencyId == agency.AgencyId)
+                .Select(f => new
+                {
+                    f.TripId,
+                    f.OriginStationId,
+                    f.DestinationStationId,
+                    ClassName = f.CoachClass.Name
+                })
+                .ToListAsync();
+
+            var existingFareKeys = new HashSet<string>(
+                existingFareRows.Select(f => $"{f.TripId}_{f.OriginStationId}_{f.DestinationStationId}_{f.ClassName}"),
+                StringComparer.OrdinalIgnoreCase);
+
             int addedFares = 0;
             int pendingFares = 0;
 
@@ -136,51 +167,68 @@ namespace GP.Infrastructure.Services
                     !stationMappings.TryGetValue(toSlug, out int toId))
                     continue;
 
-                var trip = await _context.Trips.FirstOrDefaultAsync(t => t.TripCode == trainNumber && t.AgencyId == agency.AgencyId);
-                if (trip == null) continue;
+                if (!tripsDict.TryGetValue(trainNumber, out var trip))
+                    continue;
 
                 var pricesObj = fareElement.GetProperty("prices");
                 foreach (JsonProperty classPrice in pricesObj.EnumerateObject())
                 {
                     string className = classPrice.Name;
 
-                    if (!decimal.TryParse(classPrice.Value.GetString(), out decimal priceValue)) continue;
+                    if (!decimal.TryParse(classPrice.Value.GetString(), NumberStyles.Any, CultureInfo.InvariantCulture, out decimal priceValue))
+                        continue;
 
                     string fullClassName = $"{trainTypeAr} - {className}";
                     int estimatedCapacity = 150;
 
-                    var coachClass = await GetOrCreateCoachClassAsync(fullClassName, estimatedCapacity);
-
-                    bool fareExists = await _context.TripFares.AnyAsync(f =>
-                        f.TripId == trip.TripId &&
-                        f.OriginStationId == fromId &&
-                        f.DestinationStationId == toId &&
-                        f.CoachClassId == coachClass.CoachClassId);
-
-                    if (!fareExists)
+                    if (!classDict.TryGetValue(fullClassName, out var coachClass))
                     {
-                        _context.TripFares.Add(new TripFare
+                        coachClass = new CoachClass
                         {
-                            TripId = trip.TripId,
-                            OriginStationId = fromId,
-                            DestinationStationId = toId,
-                            CoachClassId = coachClass.CoachClassId,
-                            Price = priceValue
-                        });
-                        addedFares++;
-                        pendingFares++;
+                            Name = fullClassName,
+                            DefaultCapacity = estimatedCapacity
+                        };
 
-                        if (pendingFares >= 500)
-                        {
-                            await _context.SaveChangesAsync();
-                            _context.ChangeTracker.Clear();
-                            pendingFares = 0;
-                        }
+                        _context.CoachClasses.Add(coachClass);
+                        classDict[fullClassName] = coachClass;
+                    }
+
+                    var fareKey = $"{trip.TripId}_{fromId}_{toId}_{fullClassName}";
+                    if (existingFareKeys.Contains(fareKey))
+                        continue;
+
+                    var newFare = new TripFare
+                    {
+                        TripId = trip.TripId,
+                        OriginStationId = fromId,
+                        DestinationStationId = toId,
+                        Price = priceValue
+                    };
+
+                    if (coachClass.CoachClassId > 0)
+                    {
+                        newFare.CoachClassId = coachClass.CoachClassId;
+                    }
+                    else
+                    {
+                        newFare.CoachClass = coachClass;
+                    }
+
+                    _context.TripFares.Add(newFare);
+                    existingFareKeys.Add(fareKey);
+                    addedFares++;
+                    pendingFares++;
+
+                    if (pendingFares >= 500)
+                    {
+                        await _context.SaveChangesAsync();
+                        _context.ChangeTracker.Clear();
+                        pendingFares = 0;
                     }
                 }
             }
 
-            if (pendingFares > 0)
+            if (pendingFares > 0 || _context.ChangeTracker.HasChanges())
             {
                 await _context.SaveChangesAsync();
                 _context.ChangeTracker.Clear();
