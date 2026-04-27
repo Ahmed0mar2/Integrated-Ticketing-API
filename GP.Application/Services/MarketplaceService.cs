@@ -193,7 +193,11 @@ public class MarketplaceService : IMarketplaceService
         }
     }
 
-    public async Task<PagedResult<MarketplaceListingResponseDto>> GetActiveListingsAsync(int pageNumber, int pageSize, CancellationToken cancellationToken = default)
+    public async Task<PagedResult<MarketplaceListingResponseDto>> GetActiveListingsAsync(
+        int pageNumber,
+        int pageSize,
+        MarketplaceSearchRequestDto searchDto,
+        CancellationToken cancellationToken = default)
     {
         pageNumber = Math.Max(1, pageNumber);
         pageSize = Math.Max(1, pageSize);
@@ -219,6 +223,31 @@ public class MarketplaceService : IMarketplaceService
             .Include(l => l.Seller)
             .Where(l => l.Status == ListingStatus.Available)
             .Where(l => l.Booking.Occurrence.DepartureDateTime > scheduleNow);
+
+        if (searchDto.OriginStationId.HasValue)
+        {
+            query = query.Where(l => l.Booking.OriginStationId == searchDto.OriginStationId.Value);
+        }
+
+        if (searchDto.DestinationStationId.HasValue)
+        {
+            query = query.Where(l => l.Booking.DestinationStationId == searchDto.DestinationStationId.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(searchDto.OriginGovernorate))
+        {
+            query = query.Where(l => l.Booking.OriginStation.Governorate == searchDto.OriginGovernorate);
+        }
+
+        if (!string.IsNullOrWhiteSpace(searchDto.DestinationGovernorate))
+        {
+            query = query.Where(l => l.Booking.DestinationStation.Governorate == searchDto.DestinationGovernorate);
+        }
+
+        if (searchDto.TravelDate.HasValue)
+        {
+            query = query.Where(l => l.Booking.Occurrence.DepartureDateTime.Date == searchDto.TravelDate.Value.Date);
+        }
 
         var totalCount = await query.CountAsync(cancellationToken);
 
@@ -321,7 +350,7 @@ public class MarketplaceService : IMarketplaceService
         }
         catch
         {
-            
+
         }
     }
 }

@@ -70,9 +70,12 @@ namespace GP.Api.Controllers
         public async Task<IActionResult> GetActiveListings(
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10,
+            [FromQuery] MarketplaceSearchRequestDto? searchDto = null,
             CancellationToken cancellationToken = default)
         {
-            var listings = await _marketplaceService.GetActiveListingsAsync(pageNumber, pageSize, cancellationToken);
+            searchDto ??= new MarketplaceSearchRequestDto();
+
+            var listings = await _marketplaceService.GetActiveListingsAsync(pageNumber, pageSize, searchDto, cancellationToken);
 
             if (listings.TotalCount == 0)
             {

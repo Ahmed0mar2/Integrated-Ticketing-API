@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GP.Api.Controllers
 {
-   // [Authorize(Policy = Policies.RequireAdminRole)]
+    // [Authorize(Policy = Policies.RequireAdminRole)]
     [Route("api/[controller]")]
     [ApiController]
     public class SeedController : ControllerBase

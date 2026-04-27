@@ -42,16 +42,16 @@ GP/
 
 ## 🛠️ Tech Stack
 
-| Category       | Technology         |
-|---------------------|---------------------------|
-| **Framework**       | ASP.NET Core 9.0   |
-| **ORM**    | Entity Framework Core 9.0 |
-| **Database**        | SQL Server                |
-| **Authentication**  | JWT Bearer Tokens         |
-| **Identity**        | ASP.NET Core Identity     |
-| **Email Service**   | SendGrid    |
-| **Validation**      | FluentValidation     |
-| **API Documentation** | OpenAPI / Scalar UI     |
+| Category              | Technology                |
+| --------------------- | ------------------------- |
+| **Framework**         | ASP.NET Core 9.0          |
+| **ORM**               | Entity Framework Core 9.0 |
+| **Database**          | SQL Server                |
+| **Authentication**    | JWT Bearer Tokens         |
+| **Identity**          | ASP.NET Core Identity     |
+| **Email Service**     | SendGrid                  |
+| **Validation**        | FluentValidation          |
+| **API Documentation** | OpenAPI / Scalar UI       |
 
 ---
 
@@ -214,10 +214,10 @@ curl -X POST https://localhost:<PORT>/api/Seed/import-trains
 
 After running migrations, you can log in with the seeded admin account:
 
-| Field        | Value      |
-|--------------|------------------|
-| **Email**    | `admin@gp.com`   |
-| **Password** | `Admin@123456`   |
+| Field        | Value          |
+| ------------ | -------------- |
+| **Email**    | `admin@gp.com` |
+| **Password** | `Admin@123456` |
 
 > ⚠️ Change these credentials in production!
 
@@ -227,67 +227,76 @@ After running migrations, you can log in with the seeded admin account:
 
 ### 🔐 Authentication (`/api/Auth`)
 
-| Method | Endpoint           | Description         | Auth Required |
-|--------|-----------------------------------|----------------------------------------------|---------------|
-| `POST` | `/api/Auth/register`  | Register a new user         | ❌            |
-| `POST` | `/api/Auth/login`          | Login with email and password          | ❌         |
-| `POST` | `/api/Auth/refresh`            | Refresh access token using refresh token     | ❌   |
-| `POST` | `/api/Auth/revoke`                | Revoke a specific refresh token (logout)     | ❌       |
-| `POST` | `/api/Auth/revoke-all`            | Revoke all refresh tokens (logout all devices) | ✅   |
-| `GET`  | `/api/Auth/me`            | Get current authenticated user info          | ✅            |
-| `POST` | `/api/Auth/send-verification-email` | Send email verification link              | ❌       |
-| `POST` | `/api/Auth/verify-email`   | Verify email address with token            | ❌    |
-| `POST` | `/api/Auth/forgot-password`       | Request password reset email  | ❌   |
-| `POST` | `/api/Auth/reset-password`        | Reset password with token              | ❌   |
-| `POST` | `/api/Auth/change-password`       | Change password for authenticated user       | ✅     |
+| Method | Endpoint                            | Description                                    | Auth Required |
+| ------ | ----------------------------------- | ---------------------------------------------- | ------------- |
+| `POST` | `/api/Auth/register`                | Register a new user                            | ❌             |
+| `POST` | `/api/Auth/login`                   | Login with email and password                  | ❌             |
+| `POST` | `/api/Auth/refresh`                 | Refresh access token using refresh token       | ❌             |
+| `POST` | `/api/Auth/revoke`                  | Revoke a specific refresh token (logout)       | ❌             |
+| `POST` | `/api/Auth/revoke-all`              | Revoke all refresh tokens (logout all devices) | ✅             |
+| `GET`  | `/api/Auth/me`                      | Get current authenticated user info            | ✅             |
+| `POST` | `/api/Auth/send-verification-email` | Send email verification link                   | ❌             |
+| `POST` | `/api/Auth/verify-email`            | Verify email address with token                | ❌             |
+| `POST` | `/api/Auth/forgot-password`         | Request password reset email                   | ❌             |
+| `POST` | `/api/Auth/reset-password`          | Reset password with token                      | ❌             |
+| `POST` | `/api/Auth/change-password`         | Change password for authenticated user         | ✅             |
 
 ### 🌍 Countries (`/api/Countries`)
 
-| Method | Endpoint          | Description        | Auth Required |
-|--------|-------------------|------------------------------------------|---------------|
-| `GET`  | `/api/Countries`  | Get all countries (for registration dropdown) | ❌       |
+| Method | Endpoint         | Description                                   | Auth Required |
+| ------ | ---------------- | --------------------------------------------- | ------------- |
+| `GET`  | `/api/Countries` | Get all countries (for registration dropdown) | ❌             |
 
 ### 🔎 Search (`/api/trips` preferred, `/api/Search` alias)
 
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|---------------|
-| `GET` | `/api/trips/search` | Preferred paginated direct-trip search endpoint (`pageNumber`, `pageSize`) | ❌ |
-| `GET` | `/api/Search` | Backward-compatible direct-trip search alias | ❌ |
-| `GET` | `/api/trips/search/indirect` | Preferred 1-stop indirect search route | ❌ |
-| `GET` | `/api/Search/indirect` | Backward-compatible indirect search alias | ❌ |
+| Method | Endpoint                     | Description                                                                | Auth Required |
+| ------ | ---------------------------- | -------------------------------------------------------------------------- | ------------- |
+| `GET`  | `/api/trips/search`          | Preferred paginated direct-trip search endpoint (`pageNumber`, `pageSize`) | ❌             |
+| `GET`  | `/api/Search`                | Backward-compatible direct-trip search alias                               | ❌             |
+| `GET`  | `/api/trips/search/indirect` | Preferred 1-stop indirect search route                                     | ❌             |
+| `GET`  | `/api/Search/indirect`       | Backward-compatible indirect search alias                                  | ❌             |
 
 ### 🪑 Occurrence Seat Map (`/api/occurrences`)
 
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|---------------|
-| `GET` | `/api/occurrences/{id}/seats` | Real-time seat states (Available/Pending/Booked) plus layout metadata (`layoutType`, `deckCount`, `seatMapJson`) | ❌ |
+| Method | Endpoint                      | Description                                                                                                      | Auth Required |
+| ------ | ----------------------------- | ---------------------------------------------------------------------------------------------------------------- | ------------- |
+| `GET`  | `/api/occurrences/{id}/seats` | Real-time seat states (Available/Pending/Booked) plus layout metadata (`layoutType`, `deckCount`, `seatMapJson`) | ❌             |
 
 ### 🚉 Stations (`/api/Stations`)
 
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|---------------|
-| `GET` | `/api/Stations` | Get bilingual station dropdown data grouped by governorate | ❌ |
+| Method | Endpoint        | Description                                                | Auth Required |
+| ------ | --------------- | ---------------------------------------------------------- | ------------- |
+| `GET`  | `/api/Stations` | Get bilingual station dropdown data grouped by governorate | ❌             |
 
 ### 🌱 Data Seeding (`/api/Seed`)
 
-| Method | Endpoint      | Description      | Auth Required |
-|--------|---------------------------|--------------------------------------|---------------|
-| `POST` | `/api/Seed/init-identity` | Create default roles + admin user | ✅ |
-| `POST` | `/api/Seed/import-master-stations` | Upload master stations JSON file | ✅ |
-| `POST` | `/api/Seed/import-horus` | Import trips from Horus JSON files | ✅ |
-| `POST` | `/api/Seed/import-bluebus` | Import Blue Bus trips data | ✅ |
-| `POST` | `/api/Seed/import-gobus` | Import GoBus CSV/JSON data | ✅ |
-| `POST` | `/api/Seed/import-trains` | Import train CSV/JSON data | ✅ |
+| Method | Endpoint                           | Description                        | Auth Required |
+| ------ | ---------------------------------- | ---------------------------------- | ------------- |
+| `POST` | `/api/Seed/init-identity`          | Create default roles + admin user  | ❌ (currently) |
+| `POST` | `/api/Seed/import-master-stations` | Upload master stations JSON file   | ❌ (currently) |
+| `POST` | `/api/Seed/import-horus`           | Import trips from Horus JSON files | ❌ (currently) |
+| `POST` | `/api/Seed/import-bluebus`         | Import Blue Bus trips data         | ❌ (currently) |
+| `POST` | `/api/Seed/import-gobus`           | Import GoBus CSV/JSON data         | ❌ (currently) |
+| `POST` | `/api/Seed/import-trains`          | Import train CSV/JSON data         | ❌ (currently) |
+| `POST` | `/api/Seed/generate-occurrences`   | Generate future occurrences        | ❌ (currently) |
+
+### ⚙️ Jobs (`/api/Jobs`)
+
+| Method | Endpoint                                                  | Description                                      | Auth Required      |
+| ------ | --------------------------------------------------------- | ------------------------------------------------ | ------------------ |
+| `POST` | `/api/Jobs/generate-occurrences?secret=<JobSecretKey>`    | Generate future occurrences (scheduler endpoint) | Secret query param |
+| `POST` | `/api/Jobs/process-completed-trips?secret=<JobSecretKey>` | Mark eligible trips as completed                 | Secret query param |
+| `POST` | `/api/Jobs/release-expired-holds?secret=<JobSecretKey>`   | Release expired holds and restore inventory      | Secret query param |
 
 ### 🛡️ Admin Users (`/api/admin/users`)
 
-| Method | Endpoint | Auth Required | Description |
-|--------|----------|---------------|-------------|
-| `GET` | `/api/admin/users` | ✅ | List all domain users alongside their country metadata |
-| `GET` | `/api/admin/users/{id}` | ✅ | View complete details of a specific user |
-| `PATCH` | `/api/admin/users/{id}/toggle-status` | ✅ | Suspend or activate a user account |
-| `POST` | `/api/admin/users/{id}/roles` | ✅ | Assign a system role to a user |
-| `DELETE` | `/api/admin/users/{id}` | ✅ | Permanently delete a user | 
+| Method   | Endpoint                              | Auth Required | Description                                            |
+| -------- | ------------------------------------- | ------------- | ------------------------------------------------------ |
+| `GET`    | `/api/admin/users`                    | ✅             | List all domain users alongside their country metadata |
+| `GET`    | `/api/admin/users/{id}`               | ✅             | View complete details of a specific user               |
+| `PATCH`  | `/api/admin/users/{id}/toggle-status` | ✅             | Suspend or activate a user account                     |
+| `POST`   | `/api/admin/users/{id}/roles`         | ✅             | Assign a system role to a user                         |
+| `DELETE` | `/api/admin/users/{id}`               | ✅             | Permanently delete a user                              |
 
 ### 🧑‍💻 User Profile 
 
@@ -295,31 +304,39 @@ These endpoints were added as part of the User Profile epic. They allow authenti
 
 #### User Profile (`/api/users`)
 
-| Method | Endpoint | Auth Required | Description |
-|--------|----------|---------------|-------------|
-| `GET` | `/api/users/me` | ✅ | Get current user's profile, gamification stats and wallet balance |
-| `PUT` | `/api/users/me` | ✅ | Update current user's basic profile info (first/family/last name, email, phone). Email & phone uniqueness validated at domain and identity levels |
-| `POST` | `/api/users/me/profile-picture` | ✅ | Upload or replace user's profile picture (multipart file). Allowed extensions: `.jpg`, `.jpeg`, `.png` |
+| Method | Endpoint                        | Auth Required | Description                                                                                                                                       |
+| ------ | ------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`  | `/api/users/me`                 | ✅             | Get current user's profile, gamification stats and wallet balance                                                                                 |
+| `PUT`  | `/api/users/me`                 | ✅             | Update current user's basic profile info (first/family/last name, email, phone). Email & phone uniqueness validated at domain and identity levels |
+| `POST` | `/api/users/me/profile-picture` | ✅             | Upload or replace user's profile picture (multipart file). Allowed extensions: `.jpg`, `.jpeg`, `.png`                                            |
 
 ### 🛒 Bookings (`/api/Bookings`)
 
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|---------------|
-| `POST` | `/api/Bookings/cart` | Add trip to cart with 10-minute seat soft-lock (one passenger ↔ one required seat number) | ✅ |
-| `POST` | `/api/Bookings/cart/add` | Backward-compatible add-to-cart alias | ✅ |
-| `GET` | `/api/Bookings/cart` | Get current active cart (pending + not expired) | ✅ |
-| `POST` | `/api/Bookings/checkout` | Confirm booking via wallet deduction and auto-seat assignment | ✅ |
-| `GET` | `/api/Bookings/my-tickets` | Get user's ticket history (non-pending bookings) | ✅ |
+| Method | Endpoint                   | Description                                                                               | Auth Required |
+| ------ | -------------------------- | ----------------------------------------------------------------------------------------- | ------------- |
+| `POST` | `/api/Bookings/cart`       | Add trip to cart with 10-minute seat soft-lock (one passenger ↔ one required seat number) | ✅             |
+| `POST` | `/api/Bookings/cart/add`   | Backward-compatible add-to-cart alias                                                     | ✅             |
+| `GET`  | `/api/Bookings/cart`       | Get current active cart (pending + not expired)                                           | ✅             |
+| `POST` | `/api/Bookings/checkout`   | Checkout all pending cart items with one wallet charge                                    | ✅             |
+| `GET`  | `/api/Bookings/my-tickets` | Get user's ticket history (non-pending bookings)                                          | ✅             |
+
+### 🏪 Marketplace (`/api/Marketplace`)
+
+| Method | Endpoint                           | Description                          | Auth Required |
+| ------ | ---------------------------------- | ------------------------------------ | ------------- |
+| `POST` | `/api/Marketplace/list`            | List a ticket for resale             | ✅             |
+| `POST` | `/api/Marketplace/buy/{listingId}` | Purchase a listed ticket             | ✅             |
+| `GET`  | `/api/Marketplace/active`          | Retrieve active marketplace listings | ❌             |
 
 ### 💳 Wallet (`/api/Wallet`)
 
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|---------------|
-| `POST` | `/api/Wallet/deposit` | Deposit funds into user wallet using simulated card gateway | ✅ |
-| `GET` | `/api/Wallet/history` | Retrieve wallet transaction ledger history (latest first) | ✅ |
+| Method | Endpoint              | Description                                                 | Auth Required |
+| ------ | --------------------- | ----------------------------------------------------------- | ------------- |
+| `POST` | `/api/Wallet/deposit` | Deposit funds into user wallet using simulated card gateway | ✅             |
+| `GET`  | `/api/Wallet/history` | Retrieve wallet transaction ledger history (latest first)   | ✅             |
 
 
-> 📖 For complete API documentation with request/response schemas, visit `/scalar/v1` when the application is running.
+> 📖 For complete API documentation with request/response schemas, see API_SPECIFICATION.md or visit `/scalar/v1` when the application is running.
 
 ---
 

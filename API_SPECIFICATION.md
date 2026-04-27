@@ -317,6 +317,9 @@ No request body.
 { "success": true, "message": "Verification email sent successfully", "data": null, "errors": null, "timestamp": "2026-03-06T12:00:00Z" }
 ```
 
+### Notes
+- Returns 400 if the user does not exist or the email is already verified.
+
 ## 1.8 Verify Email
 
 ### Endpoint Overview
@@ -343,6 +346,9 @@ No request body.
 ```json
 { "success": true, "message": "Email verified successfully", "data": null, "errors": null, "timestamp": "2026-03-06T12:00:00Z" }
 ```
+
+### Notes
+- `userId` must be a numeric identity user ID. Invalid IDs or already verified emails return 400.
 
 ## 1.9 Forgot Password
 
@@ -1167,6 +1173,9 @@ Base route: `/api/occurrences`
 | classes[].bookedCount           | int       | Seats locked by confirmed/completed bookings           |
 | classes[].seats[].holdExpiresAt | datetime? | Present only when seat status is `Pending`             |
 
+### Note
+Seat layout metadata depends on CoachClass seat layout columns being present; missing migrations can cause this endpoint to fail.
+
 ---
 
 # 9. Bookings API
@@ -1289,6 +1298,11 @@ Base route: `/api/Bookings`
 | Field         | Type   | Required | Notes                                |
 | ------------- | ------ | -------- | ------------------------------------ |
 | paymentMethod | string | Yes      | Currently only `Wallet` is supported |
+
+### Checkout Rules
+- Only `Wallet` payment is accepted (case-insensitive).
+- Returns 400 if the cart is empty/expired or wallet balance is insufficient.
+- Returns 409 on seat concurrency conflicts.
 
 ### Response Example (200 OK)
 ```json
@@ -1569,6 +1583,133 @@ Authentication model:
 }
 ```
 
+---
+
+# 12. Marketplace API
+
+Base route: `/api/Marketplace`
+
+## 12.1 List Ticket
+### Endpoint Overview
+- **Method:** `POST`
+- **URL:** `/api/Marketplace/list`
+- **Business Use Case:** Lists a single passenger ticket for resale.
+
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** Authenticated user
+
+### Request Payload
+```json
+{
+  "bookingId": 1024,
+  "passengerId": 5001,
+  "askingPrice": 120.0
+}
+```
+
+### Request Field Reference
+| Field       | Type    | Required | Notes                       |
+| ----------- | ------- | -------- | --------------------------- |
+| bookingId   | int     | Yes      | Must be a confirmed booking |
+| passengerId | int     | Yes      | Passenger within booking    |
+| askingPrice | decimal | Yes      | Must be > 0                 |
+
+### Listing Rules
+- Only the booking owner can list a ticket.
+- Booking must be `Confirmed` and trip departure must be in the future.
+- Passenger must exist and not be already offered for resale.
+
+### Response Example (200 OK)
+```json
+{ "success": true, "message": "Ticket listed on marketplace successfully.", "data": null, "errors": null, "timestamp": "2026-03-06T12:00:00Z" }
+```
+
+## 12.2 Buy Ticket
+### Endpoint Overview
+- **Method:** `POST`
+- **URL:** `/api/Marketplace/buy/{listingId}`
+- **Business Use Case:** Purchases a listed ticket and transfers ownership.
+
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** Authenticated user
+
+### Path Parameters
+| Field     | Type | Required | Notes          |
+| --------- | ---- | -------- | -------------- |
+| listingId | int  | Yes      | Marketplace ID |
+
+### Purchase Rules
+- Listing must exist and be `Available`.
+- Buyer cannot be the seller.
+- Trip departure must be in the future.
+- Buyer wallet balance must cover `askingPrice`.
+
+### Response Example (200 OK)
+```json
+{ "success": true, "message": "Ticket purchased successfully.", "data": null, "errors": null, "timestamp": "2026-03-06T12:00:00Z" }
+```
+
+## 12.3 Get Active Listings
+### Endpoint Overview
+- **Method:** `GET`
+- **URL:** `/api/Marketplace/active`
+- **Business Use Case:** Returns paged active listings with trip details.
+
+### Authentication / Authorization
+- **JWT Required:** No
+- **Role Required:** None
+
+### Request Payload
+Query string parameters:
+
+| Field                  | Type   | Required | Notes                             |
+| ---------------------- | ------ | -------- | --------------------------------- |
+| pageNumber             | int    | No       | Default 1, must be > 0            |
+| pageSize               | int    | No       | Default 10, must be >= 1          |
+| originStationId        | int    | No       | Filter by origin station          |
+| destinationStationId   | int    | No       | Filter by destination station     |
+| originGovernorate      | string | No       | Filter by origin governorate      |
+| destinationGovernorate | string | No       | Filter by destination governorate |
+| travelDate             | date   | No       | Schedule-local departure date     |
+
+### Response Example (200 OK)
+```json
+{
+  "success": true,
+  "message": "Active marketplace listings retrieved successfully.",
+  "data": {
+    "items": [
+      {
+        "listingId": 100,
+        "originalPrice": 180.0,
+        "askingPrice": 150.0,
+        "sellerName": "Ahmed Hassan",
+        "tripDetails": {
+          "origin": "Ramses",
+          "destination": "Sidi Gaber",
+          "time": "2026-04-02T07:20:00",
+          "class": "GoBus - Business"
+        }
+      }
+    ],
+    "totalCount": 1,
+    "totalPages": 1,
+    "currentPage": 1,
+    "pageSize": 10
+  },
+  "errors": null,
+  "timestamp": "2026-04-02T00:00:00Z"
+}
+```
+
+### Notes
+- If no listings exist, the message is "No active marketplace listings found." and items list is empty.
+- `tripDetails.time` is a schedule-local timestamp without timezone suffix.
+- Filters are optional and combined with AND logic.
+- `travelDate` matches the schedule-local date portion of the trip departure.
+
 # Quick Endpoint Index
 
 | Method   | URL                                   |               Auth | Description                                                  |
@@ -1614,5 +1755,8 @@ Authentication model:
 | `GET`    | `/api/Bookings/cart`                  |                Yes | Retrieve current active cart                                 |
 | `POST`   | `/api/Bookings/checkout`              |                Yes | Checkout all valid pending cart items with one wallet charge |
 | `GET`    | `/api/Bookings/my-tickets`            |                Yes | Retrieve user's ticket history                               |
+| `POST`   | `/api/Marketplace/list`               |                Yes | List ticket for resale                                       |
+| `POST`   | `/api/Marketplace/buy/{listingId}`    |                Yes | Purchase listed ticket                                       |
+| `GET`    | `/api/Marketplace/active`             |                 No | Retrieve active marketplace listings                         |
 | `POST`   | `/api/Wallet/deposit`                 |                Yes | Deposit wallet funds and write ledger entry                  |
 | `GET`    | `/api/Wallet/history`                 |                Yes | Retrieve wallet transaction history (newest first)           |
