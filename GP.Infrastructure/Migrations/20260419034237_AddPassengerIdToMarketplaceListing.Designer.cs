@@ -4,6 +4,7 @@ using GP.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GP.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260419034237_AddPassengerIdToMarketplaceListing")]
+    partial class AddPassengerIdToMarketplaceListing
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -61,21 +64,6 @@ namespace GP.Infrastructure.Migrations
 
                     b.Property<int>("CoachClassId")
                         .HasColumnType("int");
-
-                    b.Property<string>("ContactEmail")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("ContactName")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("ContactPhone")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -157,6 +145,9 @@ namespace GP.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PassengerId"));
 
+                    b.Property<int>("Age")
+                        .HasColumnType("int");
+
                     b.Property<int>("BookingId")
                         .HasColumnType("int");
 
@@ -174,10 +165,11 @@ namespace GP.Infrastructure.Migrations
                         .HasDefaultValueSql("GETUTCDATE()");
 
                     b.Property<string>("IdNumber")
+                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<int?>("IdType")
+                    b.Property<int>("IdType")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsDeleted")
@@ -215,7 +207,7 @@ namespace GP.Infrastructure.Migrations
                     b.HasIndex("OccurrenceId", "IdNumber")
                         .IsUnique()
                         .HasDatabaseName("IX_BookingPassenger_UniquePassengerPerOccurrence_Active")
-                        .HasFilter("[BookingStatus] IN (1, 2) AND [IdNumber] IS NOT NULL");
+                        .HasFilter("[BookingStatus] IN (1, 2)");
 
                     b.HasIndex("OccurrenceId", "CoachClassId", "SeatNumber")
                         .IsUnique()
@@ -224,6 +216,8 @@ namespace GP.Infrastructure.Migrations
                     b.ToTable("BookingPassengers", t =>
                         {
                             t.HasTrigger("TR_BookingPassengers_SyncBookingStatus");
+
+                            t.HasCheckConstraint("CK_ValidAge", "[Age] >= 0");
                         });
 
                     b.HasAnnotation("SqlServer:UseSqlOutputClause", false);
