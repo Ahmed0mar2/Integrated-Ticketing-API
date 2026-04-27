@@ -30,7 +30,7 @@ namespace GP.Application.DTOs.Bookings
     public class TicketPassengerDto
     {
         public string Name { get; set; } = string.Empty;
-        public string IdNumber { get; set; } = string.Empty;
+        public string? IdNumber { get; set; }
         public string SeatNumber { get; set; } = string.Empty;
     }
 }

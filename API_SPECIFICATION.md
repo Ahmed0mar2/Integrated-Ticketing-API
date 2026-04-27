@@ -116,9 +116,9 @@ Base route: `/api/Auth`
       "phoneNumber": "+201234567890",
       "gender": "Male",
       "countryCode": "EG",
-      "countryName": "Egyptian",
+      "countryName": "Egypt",
       "profilePictureUrl": null,
-      "roles": ["User"]
+      "roles": []
     }
   },
   "errors": null,
@@ -169,9 +169,9 @@ Base route: `/api/Auth`
       "phoneNumber": "+201234567890",
       "gender": "Male",
       "countryCode": "EG",
-      "countryName": "Egyptian",
+      "countryName": "Egypt",
       "profilePictureUrl": null,
-      "roles": ["User"]
+      "roles": []
     }
   },
   "errors": null,
@@ -209,7 +209,7 @@ Base route: `/api/Auth`
     "accessToken": "eyJ...",
     "refreshToken": "new-refresh-token",
     "expiresAt": "2026-03-06T13:00:00Z",
-    "user": { "userId": 15, "email": "user@example.com", "fullName": "Ahmed Mohamed Hassan", "phoneNumber": "+201234567890", "gender": "Male", "countryCode": "EG", "countryName": "Egyptian", "profilePictureUrl": null, "roles": ["User"] }
+    "user": { "userId": 15, "email": "user@example.com", "fullName": "Ahmed Mohamed Hassan", "phoneNumber": "+201234567890", "gender": "Male", "countryCode": "EG", "countryName": "Egypt", "profilePictureUrl": null, "roles": [] }
   },
   "errors": null,
   "timestamp": "2026-03-06T12:00:00Z"
@@ -475,7 +475,7 @@ No request body.
 
 Base route: `/api/Seed`
 
-All endpoints require Admin policy.
+Admin authorization is currently disabled in controller code (the `[Authorize]` attribute is commented). Treat these endpoints as internal-only.
 
 ## 3.1 Initialize Identity
 ### Endpoint Overview
@@ -483,8 +483,8 @@ All endpoints require Admin policy.
 - **URL:** `/api/Seed/init-identity`
 - **Business Use Case:** Seeds default roles + admin user.
 ### Authentication / Authorization
-- **JWT Required:** Yes
-- **Role Required:** Admin
+- **JWT Required:** No (currently)
+- **Role Required:** None
 ### Request Payload
 No request body.
 ### Response Example (200 OK)
@@ -498,8 +498,8 @@ No request body.
 - **URL:** `/api/Seed/import-master-stations`
 - **Business Use Case:** Imports spatial master stations + agency mappings.
 ### Authentication / Authorization
-- **JWT Required:** Yes
-- **Role Required:** Admin
+- **JWT Required:** No (currently)
+- **Role Required:** None
 ### Request Payload
 No request body.
 ### Response Example (200 OK)
@@ -513,8 +513,8 @@ No request body.
 - **URL:** `/api/Seed/import-horus`
 - **Business Use Case:** Imports Horus schedules and fares.
 ### Authentication / Authorization
-- **JWT Required:** Yes
-- **Role Required:** Admin
+- **JWT Required:** No (currently)
+- **Role Required:** None
 ### Request Payload
 No request body.
 ### Response Example (200 OK)
@@ -528,8 +528,8 @@ No request body.
 - **URL:** `/api/Seed/import-bluebus`
 - **Business Use Case:** Imports BlueBus trip blueprints and destination fare matrices.
 ### Authentication / Authorization
-- **JWT Required:** Yes
-- **Role Required:** Admin
+- **JWT Required:** No (currently)
+- **Role Required:** None
 ### Request Payload
 No request body.
 ### Response Example (200 OK)
@@ -543,8 +543,8 @@ No request body.
 - **URL:** `/api/Seed/import-gobus`
 - **Business Use Case:** Imports GoBus trips and synthetic route blueprints.
 ### Authentication / Authorization
-- **JWT Required:** Yes
-- **Role Required:** Admin
+- **JWT Required:** No (currently)
+- **Role Required:** None
 ### Request Payload
 No request body.
 ### Response Example (200 OK)
@@ -558,8 +558,8 @@ No request body.
 - **URL:** `/api/Seed/import-trains`
 - **Business Use Case:** Imports ENR schedules, stop sequence, and fare matrix.
 ### Authentication / Authorization
-- **JWT Required:** Yes
-- **Role Required:** Admin
+- **JWT Required:** No (currently)
+- **Role Required:** None
 ### Request Payload
 No request body.
 ### Response Example (200 OK)
@@ -573,8 +573,8 @@ No request body.
 - **URL:** `/api/Seed/generate-occurrences`
 - **Business Use Case:** Generates next 60-day occurrences and class inventories using the schedule-local day boundary.
 ### Authentication / Authorization
-- **JWT Required:** Yes
-- **Role Required:** Admin
+- **JWT Required:** No (currently)
+- **Role Required:** None
 ### Request Payload
 No request body.
 ### Response Example (200 OK)
@@ -638,7 +638,10 @@ No request body.
     "totalDistanceTraveled": 1200.5,
     "createdAt": "2026-03-01T10:00:00Z",
     "lastLoginAt": "2026-03-05T09:00:00Z",
-    "isActive": true
+    "isActive": true,
+    "countryCode": "EG",
+    "countryName": "Egypt",
+    "roles": ["User"]
   },
   "errors": null,
   "timestamp": "2026-03-06T12:00:00Z"
@@ -1192,31 +1195,39 @@ Base route: `/api/Bookings`
   "coachClassId": 1,
   "originStationId": 101,
   "destinationStationId": 201,
+  "contactName": "Ali Hassan",
+  "contactPhone": "+201234567890",
+  "contactEmail": "ali@example.com",
   "passengers": [
-    { "name": "Ali Hassan", "age": 28, "idType": 1, "idNumber": "29805151111121", "seatNumber": "7" },
-    { "name": "Sara Mohamed", "age": 25, "idType": 2, "idNumber": "A12345678", "seatNumber": "8" }
+    { "seatNumber": "7", "passengerName": "Ali Hassan", "idType": "NationalId", "idNumber": "29805151111121" },
+    { "seatNumber": "8", "passengerName": "Sara Mohamed", "idType": "Passport", "idNumber": "A12345678" }
   ]
 }
 ```
 
 ### Request Field Reference
-| Field                   | Type     | Required | Notes                                                        |
-| ----------------------- | -------- | -------- | ------------------------------------------------------------ |
-| tripOccurrenceId        | int      | Yes      | Valid trip occurrence ID                                     |
-| coachClassId            | int      | Yes      | Desired class for that occurrence                            |
-| originStationId         | int      | Yes      | Origin station ID                                            |
-| destinationStationId    | int      | Yes      | Destination station ID                                       |
-| passengers              | object[] | Yes      | At least one passenger                                       |
-| passengers[].name       | string   | Yes      | Passenger full name                                          |
-| passengers[].age        | int      | Yes      | 1..120                                                       |
-| passengers[].idType     | int      | Yes      | 1=NationalId,2=Passport,3=DrivingLicense,4=StudentId,5=Other |
-| passengers[].idNumber   | string   | Yes      | Passenger ID document number                                 |
-| passengers[].seatNumber | string   | Yes      | Required. One seat per passenger                             |
+| Field                      | Type     | Required    | Notes                                                                                              |
+| -------------------------- | -------- | ----------- | -------------------------------------------------------------------------------------------------- |
+| tripOccurrenceId           | int      | Yes         | Must be > 0                                                                                        |
+| coachClassId               | int      | Yes         | Must be > 0                                                                                        |
+| originStationId            | int      | Yes         | Must be > 0                                                                                        |
+| destinationStationId       | int      | Yes         | Must be > 0 and cannot equal origin                                                                |
+| contactName                | string   | Yes         | Required, max 200                                                                                  |
+| contactPhone               | string   | Yes         | Required, max 50                                                                                   |
+| contactEmail               | string   | Yes         | Required, valid email, max 255                                                                     |
+| passengers                 | object[] | Yes         | Minimum 1 and maximum 10 passengers                                                                |
+| passengers[].seatNumber    | string   | Conditional | Required for non-ENR agencies, max 50                                                              |
+| passengers[].passengerName | string   | Conditional | Required for ENR agency, max 200                                                                   |
+| passengers[].idType        | string   | Conditional | Required for ENR agency. Allowed: `NationalId`, `Passport`, `DrivingLicense`, `StudentId`, `Other` |
+| passengers[].idNumber      | string   | Conditional | Required for ENR agency, max 50                                                                    |
 
 ### Booking Rules Enforced
-- Seat numbers must be unique inside the same request.
-- Passenger ID numbers must be unique inside the same request.
-- A passenger ID cannot hold more than one seat on the same `tripOccurrenceId` when an existing booking is `Pending` or `Confirmed`.
+- Hold duration is 10 minutes per cart item.
+- Inventory and fare must exist for the selected occurrence/class/segment.
+- **Non-ENR agencies:** seat number is mandatory per passenger; seats must be unique, numeric, and within class capacity.
+- **ENR agency:** seats are auto-assigned; each passenger must provide `passengerName`, `idType`, and `idNumber`.
+- For ENR, passenger ID numbers must be unique in the same request and cannot already exist on active pending/confirmed bookings for the same occurrence.
+- If seats are taken concurrently, API returns conflict and asks client to refresh seat map.
 
 ### Response Example (200 OK)
 ```json
@@ -1436,12 +1447,12 @@ Base route: `/api/Wallet`
 ```
 
 ### Request Field Reference
-| Field          | Type    | Required | Notes                        |
-| -------------- | ------- | -------- | ---------------------------- |
-| amount         | decimal | Yes      | Must be between 10 and 10000 |
-| mockCardNumber | string  | Yes      | Exactly 16 digits            |
-| expiryDate     | string  | Yes      | Format `MM/YY`               |
-| cvv            | string  | Yes      | Exactly 3 digits             |
+| Field          | Type    | Required | Notes                                            |
+| -------------- | ------- | -------- | ------------------------------------------------ |
+| amount         | decimal | Yes      | Must be between 10 and 10000                     |
+| mockCardNumber | string  | Yes      | Exactly 16 digits                                |
+| expiryDate     | string  | Yes      | Format `MM/YY`, must be a valid non-expired date |
+| cvv            | string  | Yes      | Exactly 3 digits                                 |
 
 ### Response Example (200 OK)
 ```json
@@ -1574,13 +1585,13 @@ Authentication model:
 | `POST`   | `/api/Auth/reset-password`            |                 No | Reset password                                               |
 | `POST`   | `/api/Auth/change-password`           |                Yes | Change password                                              |
 | `GET`    | `/api/Countries`                      |                 No | List countries                                               |
-| `POST`   | `/api/Seed/init-identity`             |        Yes (Admin) | Initialize identity roles/admin                              |
-| `POST`   | `/api/Seed/import-master-stations`    |        Yes (Admin) | Import master stations                                       |
-| `POST`   | `/api/Seed/import-horus`              |        Yes (Admin) | Import Horus trips                                           |
-| `POST`   | `/api/Seed/import-gobus`              |        Yes (Admin) | Import GoBus trips                                           |
-| `POST`   | `/api/Seed/import-bluebus`            |        Yes (Admin) | Import BlueBus trips                                         |
-| `POST`   | `/api/Seed/import-trains`             |        Yes (Admin) | Import train trips                                           |
-| `POST`   | `/api/Seed/generate-occurrences`      |        Yes (Admin) | Generate future occurrences                                  |
+| `POST`   | `/api/Seed/init-identity`             |     No (currently) | Initialize identity roles/admin                              |
+| `POST`   | `/api/Seed/import-master-stations`    |     No (currently) | Import master stations                                       |
+| `POST`   | `/api/Seed/import-horus`              |     No (currently) | Import Horus trips                                           |
+| `POST`   | `/api/Seed/import-gobus`              |     No (currently) | Import GoBus trips                                           |
+| `POST`   | `/api/Seed/import-bluebus`            |     No (currently) | Import BlueBus trips                                         |
+| `POST`   | `/api/Seed/import-trains`             |     No (currently) | Import train trips                                           |
+| `POST`   | `/api/Seed/generate-occurrences`      |     No (currently) | Generate future occurrences                                  |
 | `POST`   | `/api/Jobs/generate-occurrences`      | Secret query param | Generate future occurrences (scheduler endpoint)             |
 | `POST`   | `/api/Jobs/process-completed-trips`   | Secret query param | Mark eligible trips as completed                             |
 | `POST`   | `/api/Jobs/release-expired-holds`     | Secret query param | Release expired holds and restore inventory                  |

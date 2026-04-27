@@ -14,10 +14,9 @@ namespace GP.Infrastructure.Data.Configurations
             // Required fields
             builder.Property(bp => bp.BookingId).IsRequired();
             builder.Property(bp => bp.Name).IsRequired().HasMaxLength(200);
-            builder.Property(bp => bp.Age).IsRequired();
             builder.Property(bp => bp.SeatNumber).IsRequired().HasMaxLength(50);
-            builder.Property(bp => bp.IdType).IsRequired();
-            builder.Property(bp => bp.IdNumber).IsRequired().HasMaxLength(50);
+            builder.Property(bp => bp.IdType).IsRequired(false);
+            builder.Property(bp => bp.IdNumber).IsRequired(false).HasMaxLength(50);
 
             // Shadow copy of parent booking status used by filtered unique index enforcement.
             builder.Property<int>("BookingStatus")
@@ -39,7 +38,7 @@ namespace GP.Infrastructure.Data.Configurations
             builder.HasIndex("OccurrenceId", "IdNumber")
                 .IsUnique()
                 .HasDatabaseName("IX_BookingPassenger_UniquePassengerPerOccurrence_Active")
-                .HasFilter($"[BookingStatus] IN ({(int)BookingStatus.Pending}, {(int)BookingStatus.Confirmed})");
+                .HasFilter($"[BookingStatus] IN ({(int)BookingStatus.Pending}, {(int)BookingStatus.Confirmed}) AND [IdNumber] IS NOT NULL");
 
             // Relationship
             builder.HasOne(bp => bp.Booking)
@@ -47,10 +46,9 @@ namespace GP.Infrastructure.Data.Configurations
                 .HasForeignKey(bp => bp.BookingId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Table metadata: check constraint + SQL trigger registration
+            // Table metadata: SQL trigger registration
             builder.ToTable(tb =>
             {
-                tb.HasCheckConstraint("CK_ValidAge", "[Age] >= 0");
                 tb.HasTrigger("TR_BookingPassengers_SyncBookingStatus");
             });
         }

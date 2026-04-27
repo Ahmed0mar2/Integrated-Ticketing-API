@@ -34,20 +34,32 @@ namespace GP.Application.Services
                     if (request.Passengers == null || request.Passengers.Count == 0)
                         throw new CartValidationException("You must provide at least one passenger.");
 
+                    if (string.IsNullOrWhiteSpace(request.ContactName)
+                        || string.IsNullOrWhiteSpace(request.ContactPhone)
+                        || string.IsNullOrWhiteSpace(request.ContactEmail))
+                    {
+                        throw new CartValidationException("ContactName, ContactPhone, and ContactEmail are required.");
+                    }
+
+                    var tripContext = await _dbContext.TripOccurrences
+                        .AsNoTracking()
+                        .Where(o => o.TripOccurrenceId == request.TripOccurrenceId)
+                        .Select(o => new
+                        {
+                            o.TripId,
+                            AgencyName = o.Trip.Agency.AgencyName
+                        })
+                        .FirstOrDefaultAsync(cancellationToken);
+
+                    if (tripContext == null)
+                        throw new CartValidationException("Trip occurrence not found.");
+
+                    var isEnrAgency = string.Equals(
+                        tripContext.AgencyName,
+                        "Egyptian National Railways",
+                        StringComparison.OrdinalIgnoreCase);
+
                     var requestedSeats = request.Passengers.Count;
-                    var requestedSeatNumbers = GetRequestedSeatNumbers(request);
-                    var requestedPassengerIds = GetRequestedPassengerIds(request);
-
-                    if (requestedSeatNumbers.Any(string.IsNullOrWhiteSpace))
-                        throw new CartValidationException("Seat number is required for each passenger.");
-
-                    if (requestedPassengerIds.Any(string.IsNullOrWhiteSpace))
-                        throw new CartValidationException("Passenger ID/Passport number is required for each passenger.");
-
-                    var normalizedRequestedPassengerIds = NormalizePassengerIds(requestedPassengerIds);
-
-                    if (requestedSeatNumbers.Count != requestedSeatNumbers.Distinct(StringComparer.OrdinalIgnoreCase).Count())
-                        throw new CartValidationException("Seat numbers must be unique within the same cart item.");
 
                     var inventory = await _dbContext.TripOccurrenceClassInventories
                         .FirstOrDefaultAsync(i => i.TripOccurrenceId == request.TripOccurrenceId
@@ -57,45 +69,93 @@ namespace GP.Application.Services
                         throw new CartValidationException("Class inventory not found for this trip.");
 
                     if (inventory.RemainingSeats < requestedSeats)
-                        throw new CartValidationException($"Only {inventory.RemainingSeats} seats remaining. Cannot book {requestedSeats} seats.");
-
-                    var outOfRangeSeats = requestedSeatNumbers
-                        .Where(seat => !int.TryParse(seat, out var seatNo) || seatNo <= 0 || seatNo > inventory.TotalSeats)
-                        .ToList();
-
-                    if (outOfRangeSeats.Count > 0)
-                        throw new CartValidationException("One or more selected seats are invalid for this class.");
+                        throw new CartValidationException("Not enough capacity.");
 
                     var now = DateTime.UtcNow;
-                    var lockedSeatNumbers = await _dbContext.BookingPassengers
-                        .Where(p => p.OccurrenceId == request.TripOccurrenceId
-                                 && p.CoachClassId == request.CoachClassId)
-                        .Where(p => p.Booking.Status == BookingStatus.Confirmed
-                                 || (p.Booking.Status == BookingStatus.Pending
-                                     && p.Booking.HoldExpiresAt.HasValue
-                                     && p.Booking.HoldExpiresAt.Value > now))
-                        .Select(p => p.SeatNumber)
-                        .ToListAsync(cancellationToken);
 
-                    var conflictingSeats = requestedSeatNumbers
-                        .Intersect(lockedSeatNumbers, StringComparer.OrdinalIgnoreCase)
-                        .ToList();
+                    List<string> resolvedSeatNumbers;
+                    var parsedPassengerIdTypes = new List<IdType>();
 
-                    if (conflictingSeats.Count > 0)
-                        throw new CartConcurrencyException("One or more selected seats were just taken. Please refresh the seat map.");
+                    if (isEnrAgency)
+                    {
+                        if (request.Passengers.Any(p => string.IsNullOrWhiteSpace(p.PassengerName)))
+                            throw new CartValidationException("PassengerName is required for every ENR passenger.");
 
-                    var tripId = await _dbContext.TripOccurrences
-                        .AsNoTracking()
-                        .Where(o => o.TripOccurrenceId == request.TripOccurrenceId)
-                        .Select(o => (int?)o.TripId)
-                        .FirstOrDefaultAsync(cancellationToken);
+                        if (request.Passengers.Any(p => string.IsNullOrWhiteSpace(p.IdType)))
+                            throw new CartValidationException("IdType is required for every ENR passenger.");
 
-                    if (!tripId.HasValue)
-                        throw new CartValidationException("Trip occurrence not found.");
+                        if (request.Passengers.Any(p => string.IsNullOrWhiteSpace(p.IdNumber)))
+                            throw new CartValidationException("IdNumber is required for every ENR passenger.");
+
+                        var requestedPassengerIds = GetRequestedPassengerIds(request);
+                        var normalizedRequestedPassengerIds = NormalizePassengerIds(requestedPassengerIds);
+
+                        if (normalizedRequestedPassengerIds.Count != requestedPassengerIds.Count)
+                            throw new CartValidationException("Passenger ID numbers must be unique within the same cart item.");
+
+                        parsedPassengerIdTypes = request.Passengers
+                            .Select((p, index) => ParsePassengerIdTypeOrThrow(p.IdType!, index + 1))
+                            .ToList();
+
+                        var duplicatePassengerId = await _dbContext.BookingPassengers
+                            .Include(p => p.Booking)
+                            .Where(p => p.OccurrenceId == request.TripOccurrenceId
+                                     && p.IdNumber != null
+                                     && (p.Booking.Status == BookingStatus.Confirmed
+                                         || (p.Booking.Status == BookingStatus.Pending
+                                             && p.Booking.HoldExpiresAt.HasValue
+                                             && p.Booking.HoldExpiresAt.Value > now))
+                                     && normalizedRequestedPassengerIds.Contains(p.IdNumber.Trim().ToUpper()))
+                            .Select(p => p.IdNumber)
+                            .FirstOrDefaultAsync(cancellationToken);
+
+                        if (!string.IsNullOrWhiteSpace(duplicatePassengerId))
+                            throw new CartValidationException($"Passenger [{duplicatePassengerId.Trim()}] already holds a ticket for this specific trip.");
+
+                        resolvedSeatNumbers = await AssignNextAvailableSeatNumbersAsync(
+                            request.TripOccurrenceId,
+                            request.CoachClassId,
+                            requestedSeats,
+                            inventory.TotalSeats,
+                            now,
+                            cancellationToken);
+                    }
+                    else
+                    {
+                        var requestedSeatNumbers = GetRequestedSeatNumbers(request);
+
+                        if (requestedSeatNumbers.Any(string.IsNullOrWhiteSpace))
+                            throw new CartValidationException("Seat number is required for each passenger.");
+
+                        if (requestedSeatNumbers.Count != requestedSeatNumbers.Distinct(StringComparer.OrdinalIgnoreCase).Count())
+                            throw new CartValidationException("Seat numbers must be unique within the same cart item.");
+
+                        var outOfRangeSeats = requestedSeatNumbers
+                            .Where(seat => !int.TryParse(seat, out var seatNo) || seatNo <= 0 || seatNo > inventory.TotalSeats)
+                            .ToList();
+
+                        if (outOfRangeSeats.Count > 0)
+                            throw new CartValidationException("One or more selected seats are invalid for this class.");
+
+                        var lockedSeatNumbers = await GetLockedSeatNumbersAsync(
+                            request.TripOccurrenceId,
+                            request.CoachClassId,
+                            now,
+                            cancellationToken);
+
+                        var conflictingSeats = requestedSeatNumbers
+                            .Intersect(lockedSeatNumbers, StringComparer.OrdinalIgnoreCase)
+                            .ToList();
+
+                        if (conflictingSeats.Count > 0)
+                            throw new CartConcurrencyException("One or more selected seats were just taken. Please refresh the seat map.");
+
+                        resolvedSeatNumbers = requestedSeatNumbers;
+                    }
 
                     var fare = await _dbContext.TripFares
                         .AsNoTracking()
-                        .FirstOrDefaultAsync(f => f.TripId == tripId.Value
+                        .FirstOrDefaultAsync(f => f.TripId == tripContext.TripId
                                                && f.OriginStationId == request.OriginStationId
                                                && f.DestinationStationId == request.DestinationStationId
                                                && f.CoachClassId == request.CoachClassId, cancellationToken);
@@ -103,21 +163,11 @@ namespace GP.Application.Services
                     if (fare == null)
                         throw new CartValidationException("Pricing not found for this route and class.");
 
-                    var duplicatePassengerId = await _dbContext.BookingPassengers
-                        .Include(p => p.Booking)
-                        .Where(p => p.OccurrenceId == request.TripOccurrenceId
-                                 && (p.Booking.Status == BookingStatus.Confirmed
-                                     || (p.Booking.Status == BookingStatus.Pending
-                                         && p.Booking.HoldExpiresAt.HasValue
-                                         && p.Booking.HoldExpiresAt.Value > now))
-                                 && normalizedRequestedPassengerIds.Contains(p.IdNumber.Trim().ToUpper()))
-                        .Select(p => p.IdNumber)
-                        .FirstOrDefaultAsync(cancellationToken);
-
-                    if (!string.IsNullOrWhiteSpace(duplicatePassengerId))
-                        throw new CartValidationException($"Passenger [{duplicatePassengerId.Trim()}] already holds a ticket for this specific trip.");
-
                     inventory.RemainingSeats -= requestedSeats;
+
+                    var normalizedContactName = request.ContactName.Trim();
+                    var normalizedContactPhone = request.ContactPhone.Trim();
+                    var normalizedContactEmail = request.ContactEmail.Trim();
 
                     var booking = new Booking
                     {
@@ -131,15 +181,19 @@ namespace GP.Application.Services
                         Status = BookingStatus.Pending,
                         PaymentStatus = PaymentStatus.Pending,
                         HoldExpiresAt = DateTime.UtcNow.AddMinutes(10),
-                        BookingPassengers = request.Passengers.Select(p => new BookingPassenger
+                        ContactName = normalizedContactName,
+                        ContactPhone = normalizedContactPhone,
+                        ContactEmail = normalizedContactEmail,
+                        BookingPassengers = request.Passengers.Select((p, index) => new BookingPassenger
                         {
-                            Name = p.Name,
-                            Age = p.Age,
-                            IdType = p.IdType,
-                            IdNumber = p.IdNumber.Trim(),
+                            Name = isEnrAgency ? p.PassengerName!.Trim() : normalizedContactName,
+                            IdType = isEnrAgency ? parsedPassengerIdTypes[index] : null,
+                            IdNumber = isEnrAgency
+                                ? p.IdNumber!.Trim()
+                                : null,
                             OccurrenceId = request.TripOccurrenceId,
                             CoachClassId = request.CoachClassId,
-                            SeatNumber = p.SeatNumber.Trim(),
+                            SeatNumber = resolvedSeatNumbers[index],
                             IsOfferedForResale = false
                         }).ToList()
                     };
@@ -528,6 +582,59 @@ namespace GP.Application.Services
                 .Select(id => id.ToUpperInvariant())
                 .Distinct()
                 .ToList();
+        }
+
+        private async Task<List<string>> GetLockedSeatNumbersAsync(
+            int tripOccurrenceId,
+            int coachClassId,
+            DateTime now,
+            CancellationToken cancellationToken)
+        {
+            return await _dbContext.BookingPassengers
+                .Where(p => p.OccurrenceId == tripOccurrenceId
+                         && p.CoachClassId == coachClassId)
+                .Where(p => p.Booking.Status == BookingStatus.Confirmed
+                         || (p.Booking.Status == BookingStatus.Pending
+                             && p.Booking.HoldExpiresAt.HasValue
+                             && p.Booking.HoldExpiresAt.Value > now))
+                .Select(p => p.SeatNumber)
+                .ToListAsync(cancellationToken);
+        }
+
+        private async Task<List<string>> AssignNextAvailableSeatNumbersAsync(
+            int tripOccurrenceId,
+            int coachClassId,
+            int seatsNeeded,
+            int capacity,
+            DateTime now,
+            CancellationToken cancellationToken)
+        {
+            var lockedSeatNumbers = await GetLockedSeatNumbersAsync(tripOccurrenceId, coachClassId, now, cancellationToken);
+
+            var reservedSeatNumbers = lockedSeatNumbers
+                .Select(seat => int.TryParse(seat, out var number) ? number : (int?)null)
+                .Where(number => number.HasValue && number.Value > 0 && number.Value <= capacity)
+                .Select(number => number!.Value)
+                .ToHashSet();
+
+            var nextAvailable = Enumerable.Range(1, capacity)
+                .Where(seat => !reservedSeatNumbers.Contains(seat))
+                .Take(seatsNeeded)
+                .Select(seat => seat.ToString())
+                .ToList();
+
+            if (nextAvailable.Count < seatsNeeded)
+                throw new CartValidationException("Not enough capacity.");
+
+            return nextAvailable;
+        }
+
+        private static IdType ParsePassengerIdTypeOrThrow(string rawIdType, int passengerIndex)
+        {
+            if (Enum.TryParse<IdType>(rawIdType.Trim(), true, out var parsed) && Enum.IsDefined(parsed))
+                return parsed;
+
+            throw new CartValidationException($"Invalid IdType for passenger #{passengerIndex}. Allowed values: NationalId, Passport, DrivingLicense, StudentId, Other.");
         }
 
         private static (DateTime BoardingTime, DateTime DropoffTime) ResolvePassengerLocalTimes(Booking booking)

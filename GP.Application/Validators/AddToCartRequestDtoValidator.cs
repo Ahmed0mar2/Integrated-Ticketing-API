@@ -1,10 +1,5 @@
 ﻿using FluentValidation;
 using GP.Application.DTOs.Bookings;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GP.Application.Validators
 {
@@ -21,14 +16,23 @@ namespace GP.Application.Validators
                 .Must(x => x.OriginStationId != x.DestinationStationId)
                 .WithMessage("Origin and destination stations cannot be the same.");
 
+            RuleFor(x => x.ContactName)
+                .NotEmpty().WithMessage("Contact name is required.")
+                .MaximumLength(200);
+
+            RuleFor(x => x.ContactPhone)
+                .NotEmpty().WithMessage("Contact phone is required.")
+                .MaximumLength(50);
+
+            RuleFor(x => x.ContactEmail)
+                .NotEmpty().WithMessage("Contact email is required.")
+                .EmailAddress().WithMessage("A valid contact email is required.")
+                .MaximumLength(255);
+
             RuleFor(x => x.Passengers)
                 .NotEmpty().WithMessage("You must have at least one passenger to book a ticket.")
                 .Must(p => p is { Count: <= 10 })
-                .WithMessage("You can only book up to 10 seats at a time.")
-                .Must(p => p.Select(x => x.IdNumber.Trim()).Distinct(StringComparer.OrdinalIgnoreCase).Count() == p.Count)
-                .WithMessage("Passenger ID numbers must be unique within a single booking.")
-                .Must(p => p.Select(x => x.SeatNumber.Trim()).Distinct(StringComparer.OrdinalIgnoreCase).Count() == p.Count)
-                .WithMessage("Seat numbers must be unique within a single booking.");
+                .WithMessage("You can only book up to 10 seats at a time.");
 
             RuleForEach(x => x.Passengers).SetValidator(new PassengerDetailDtoValidator());
         }
