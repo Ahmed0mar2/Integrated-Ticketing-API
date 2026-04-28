@@ -1613,12 +1613,13 @@ Base route: `/api/Marketplace`
 | ----------- | ------- | -------- | --------------------------- |
 | bookingId   | int     | Yes      | Must be a confirmed booking |
 | passengerId | int     | Yes      | Passenger within booking    |
-| askingPrice | decimal | Yes      | Must be > 0                 |
+| askingPrice | decimal | Yes      | Must be > 0 and below original ticket price |
 
 ### Listing Rules
 - Only the booking owner can list a ticket.
 - Booking must be `Confirmed` and trip departure must be in the future.
 - Passenger must exist and not be already offered for resale.
+- Asking price must be strictly less than the original ticket price.
 
 ### Response Example (200 OK)
 ```json
