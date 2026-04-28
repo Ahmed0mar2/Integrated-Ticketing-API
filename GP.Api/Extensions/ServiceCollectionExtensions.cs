@@ -239,6 +239,9 @@ public static class ServiceCollectionExtensions
         // Wallet Service
         services.AddScoped<IWalletService, WalletService>();
 
+        // Marketplace Service
+        services.AddScoped<IMarketplaceService, MarketplaceService>();
+
         return services;
     }
 

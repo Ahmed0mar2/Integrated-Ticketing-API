@@ -62,6 +62,9 @@ public class MarketplaceService : IMarketplaceService
             ? booking.TotalPrice / booking.SeatsBooked
             : booking.TotalPrice;
 
+        if (request.AskingPrice >= originalPrice)
+            throw new InvalidOperationException("The asking price must be strictly less than the original ticket price.");
+
         var listing = new MarketplaceListing
         {
             BookingId = booking.BookingId,
@@ -86,111 +89,119 @@ public class MarketplaceService : IMarketplaceService
 
     public async Task<ApiResponse> BuyTicketAsync(int buyerUserId, int listingId, CancellationToken cancellationToken = default)
     {
-        using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+        var strategy = _dbContext.Database.CreateExecutionStrategy();
 
-        try
+        return await strategy.ExecuteAsync(async () =>
         {
-            var listing = await _dbContext.MarketplaceListings
-                .Include(l => l.Booking)
-                    .ThenInclude(b => b.BookingPassengers)
-                .Include(l => l.Booking)
-                    .ThenInclude(b => b.Occurrence)
-                .Include(l => l.Seller)
-                .FirstOrDefaultAsync(l => l.Id == listingId, cancellationToken);
+            using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
 
-            if (listing == null)
-                return ApiResponse.Fail("Marketplace listing not found.");
-
-            if (listing.Status != ListingStatus.Available)
-                return ApiResponse.Fail("Listing is no longer available.");
-
-            if (buyerUserId == listing.SellerId)
-                return ApiResponse.Fail("You cannot buy your own listed ticket.");
-
-            if (listing.Booking.Occurrence.DepartureDateTime <= AppTime.GetScheduleNow())
-                return ApiResponse.Fail("This ticket can no longer be purchased because trip departure has passed.");
-
-            var buyer = await _dbContext.Users
-                .FirstOrDefaultAsync(u => u.UserId == buyerUserId, cancellationToken);
-
-            if (buyer == null)
-                return ApiResponse.Fail("Buyer account not found.");
-
-            if (buyer.WalletBalance < listing.AskingPrice)
-                return ApiResponse.Fail("Insufficient wallet balance to purchase this ticket.");
-
-            var oldBooking = listing.Booking;
-            if (oldBooking.Status != BookingStatus.Confirmed)
-                return ApiResponse.Fail("Source booking is not eligible for resale transfer.");
-
-            var passenger = oldBooking.BookingPassengers
-                .FirstOrDefault(p => p.PassengerId == listing.PassengerId);
-
-            if (passenger == null)
-                return ApiResponse.Fail("The listed passenger ticket could not be found.");
-
-            // Wallet transfer
-            buyer.WalletBalance -= listing.AskingPrice;
-            listing.Seller.WalletBalance += listing.AskingPrice;
-
-            _dbContext.WalletTransactions.Add(new WalletTransaction
+            try
             {
-                UserId = buyerUserId,
-                Amount = -listing.AskingPrice,
-                Type = TransactionType.TicketPurchase,
-                Description = "Purchased ticket from marketplace",
-                BookingId = null
-            });
+                var listing = await _dbContext.MarketplaceListings
+                    .Include(l => l.Booking)
+                        .ThenInclude(b => b.BookingPassengers)
+                    .Include(l => l.Booking)
+                        .ThenInclude(b => b.Occurrence)
+                    .Include(l => l.Seller)
+                    .FirstOrDefaultAsync(l => l.Id == listingId, cancellationToken);
 
-            _dbContext.WalletTransactions.Add(new WalletTransaction
+                if (listing == null)
+                    return ApiResponse.Fail("Marketplace listing not found.");
+
+                if (listing.Status != ListingStatus.Available)
+                    return ApiResponse.Fail("Listing is no longer available.");
+
+                if (buyerUserId == listing.SellerId)
+                    return ApiResponse.Fail("You cannot buy your own listed ticket.");
+
+                if (listing.Booking.Occurrence.DepartureDateTime <= AppTime.GetScheduleNow())
+                    return ApiResponse.Fail("This ticket can no longer be purchased because trip departure has passed.");
+
+                var buyer = await _dbContext.Users
+                    .FirstOrDefaultAsync(u => u.UserId == buyerUserId, cancellationToken);
+
+                if (buyer == null)
+                    return ApiResponse.Fail("Buyer account not found.");
+
+                if (buyer.WalletBalance < listing.AskingPrice)
+                    return ApiResponse.Fail("Insufficient wallet balance to purchase this ticket.");
+
+                var oldBooking = listing.Booking;
+                if (oldBooking.Status != BookingStatus.Confirmed)
+                    return ApiResponse.Fail("Source booking is not eligible for resale transfer.");
+
+                var passenger = oldBooking.BookingPassengers
+                    .FirstOrDefault(p => p.PassengerId == listing.PassengerId);
+
+                if (passenger == null)
+                    return ApiResponse.Fail("The listed passenger ticket could not be found.");
+
+                // Wallet transfer
+                buyer.WalletBalance -= listing.AskingPrice;
+                listing.Seller.WalletBalance += listing.AskingPrice;
+
+                _dbContext.WalletTransactions.Add(new WalletTransaction
+                {
+                    UserId = buyerUserId,
+                    Amount = -listing.AskingPrice,
+                    Type = TransactionType.TicketPurchase,
+                    Description = "Purchased ticket from marketplace",
+                    BookingId = null
+                });
+
+                _dbContext.WalletTransactions.Add(new WalletTransaction
+                {
+                    UserId = listing.SellerId,
+                    Amount = listing.AskingPrice,
+                    Type = TransactionType.Deposit,
+                    Description = "Ticket sold on marketplace",
+                    BookingId = null
+                });
+
+                // Booking split (ownership transfer)
+                var newBooking = new Booking
+                {
+                    UserId = buyerUserId,
+                    OccurrenceId = oldBooking.OccurrenceId,
+                    CoachClassId = oldBooking.CoachClassId,
+                    OriginStationId = oldBooking.OriginStationId,
+                    DestinationStationId = oldBooking.DestinationStationId,
+                    SeatsBooked = 1,
+                    TotalPrice = listing.AskingPrice,
+                    Status = BookingStatus.Confirmed,
+                    PaymentStatus = PaymentStatus.Paid,
+                    HoldExpiresAt = null,
+                    BookingPassengers = [passenger],
+                    ContactName = $"{buyer.FirstName} {buyer.LastName}".Trim(),
+                    ContactEmail = buyer.Email,
+                    ContactPhone = buyer.Phone ?? "N/A"
+                };
+
+                _dbContext.Bookings.Add(newBooking);
+
+                oldBooking.SeatsBooked -= 1;
+                if (oldBooking.SeatsBooked < 0)
+                    oldBooking.SeatsBooked = 0;
+
+                passenger.IsOfferedForResale = false;
+
+                listing.Status = ListingStatus.Sold;
+                listing.SoldAt = DateTime.UtcNow;
+
+                await _dbContext.SaveChangesAsync(cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+
+                _logger.LogInformation("Marketplace listing sold. ListingId: {ListingId}, BuyerId: {BuyerId}, SellerId: {SellerId}",
+                    listingId, buyerUserId, listing.SellerId);
+
+                return ApiResponse.Ok("Ticket purchased successfully.");
+            }
+            catch
             {
-                UserId = listing.SellerId,
-                Amount = listing.AskingPrice,
-                Type = TransactionType.Deposit,
-                Description = "Ticket sold on marketplace",
-                BookingId = null
-            });
-
-            // Booking split (ownership transfer)
-            var newBooking = new Booking
-            {
-                UserId = buyerUserId,
-                OccurrenceId = oldBooking.OccurrenceId,
-                CoachClassId = oldBooking.CoachClassId,
-                OriginStationId = oldBooking.OriginStationId,
-                DestinationStationId = oldBooking.DestinationStationId,
-                SeatsBooked = 1,
-                TotalPrice = listing.AskingPrice,
-                Status = BookingStatus.Confirmed,
-                PaymentStatus = PaymentStatus.Paid,
-                HoldExpiresAt = null,
-                BookingPassengers = [passenger]
-            };
-
-            _dbContext.Bookings.Add(newBooking);
-
-            oldBooking.SeatsBooked -= 1;
-            if (oldBooking.SeatsBooked < 0)
-                oldBooking.SeatsBooked = 0;
-
-            passenger.IsOfferedForResale = false;
-
-            listing.Status = ListingStatus.Sold;
-            listing.SoldAt = DateTime.UtcNow;
-
-            await _dbContext.SaveChangesAsync(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
-
-            _logger.LogInformation("Marketplace listing sold. ListingId: {ListingId}, BuyerId: {BuyerId}, SellerId: {SellerId}",
-                listingId, buyerUserId, listing.SellerId);
-
-            return ApiResponse.Ok("Ticket purchased successfully.");
-        }
-        catch
-        {
-            await SafeRollbackAsync(transaction, cancellationToken);
-            throw;
-        }
+                await SafeRollbackAsync(transaction, cancellationToken);
+                throw;
+            }
+        });
     }
 
     public async Task<PagedResult<MarketplaceListingResponseDto>> GetActiveListingsAsync(
