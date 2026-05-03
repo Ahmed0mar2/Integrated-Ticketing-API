@@ -14,6 +14,7 @@ namespace GP.Application.DTOs.Bookings
         public decimal TotalPrice { get; set; }
         public int SeatsBooked { get; set; }
         public DateTime BookingDate { get; set; }
+        public bool IsMarketplacePurchase { get; set; }
 
         // Trip Details
         public string AgencyName { get; set; } = string.Empty;
@@ -29,8 +30,10 @@ namespace GP.Application.DTOs.Bookings
 
     public class TicketPassengerDto
     {
+        public int PassengerId { get; set; }
         public string Name { get; set; } = string.Empty;
         public string? IdNumber { get; set; }
         public string SeatNumber { get; set; } = string.Empty;
+        public bool IsOfferedForResale { get; set; }
     }
 }

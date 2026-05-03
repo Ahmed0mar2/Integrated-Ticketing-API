@@ -17,7 +17,6 @@ public class UserProfileDto
 
     // The Gamification Stats
     public int TotalTripsCount { get; set; }
-    public decimal TotalDistanceTraveled { get; set; }
 
     // The Digital Money Foundation
     public decimal WalletBalance { get; set; }

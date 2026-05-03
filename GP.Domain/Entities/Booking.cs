@@ -22,6 +22,7 @@ namespace GP.Domain.Entities
         public BookingStatus Status { get; set; } = BookingStatus.Pending;
         public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
         public DateTime? HoldExpiresAt { get; set; }
+        public bool IsMarketplacePurchase { get; set; } = false;
         public string ContactName { get; set; } = null!;
         public string ContactPhone { get; set; } = null!;
         public string ContactEmail { get; set; } = null!;

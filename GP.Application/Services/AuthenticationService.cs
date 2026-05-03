@@ -136,7 +136,8 @@ namespace GP.Application.Services
                         Nationality = country.NationalityName, 
                         Country = country, 
                         TotalTripsCount = 0,
-                        TotalDistanceTraveled = 0,
+                        WalletBalance = 0m,
+                        LoyaltyPointsBalance = 0,
                         CreatedAt = DateTime.UtcNow
                     };
 

@@ -184,7 +184,6 @@ public class AdminUserService : IAdminUserService
             Phone = domainUser.Phone,
             NationalIdNumber = domainUser.NationalIdNumber,
             TotalTripsCount = domainUser.TotalTripsCount,
-            TotalDistanceTraveled = domainUser.TotalDistanceTraveled,
             CreatedAt = AppTime.AsUtc(domainUser.CreatedAt),
             LastLoginAt = identityUser.LastLoginAt.HasValue
                 ? AppTime.AsUtc(identityUser.LastLoginAt.Value)

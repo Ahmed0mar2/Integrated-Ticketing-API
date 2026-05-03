@@ -22,6 +22,7 @@ namespace GP.Infrastructure.Data.Configurations
             builder.Property(b => b.ContactName).IsRequired().HasMaxLength(200);
             builder.Property(b => b.ContactPhone).IsRequired().HasMaxLength(50);
             builder.Property(b => b.ContactEmail).IsRequired().HasMaxLength(255);
+            builder.Property(b => b.IsMarketplacePurchase).IsRequired().HasDefaultValue(false);
 
             // Audit fields
             builder.Property(b => b.CreatedAt).IsRequired().HasDefaultValueSql("GETUTCDATE()");

@@ -39,6 +39,9 @@ public class MarketplaceService : IMarketplaceService
         if (booking == null)
             return ApiResponse.Fail("Booking not found.");
 
+        if (booking.IsMarketplacePurchase)
+            return ApiResponse.Fail("Tickets purchased from the marketplace cannot be resold.");
+
         if (booking.UserId != sellerUserId)
             return ApiResponse.Fail("You can only list tickets from your own booking.");
 
@@ -171,6 +174,7 @@ public class MarketplaceService : IMarketplaceService
                     Status = BookingStatus.Confirmed,
                     PaymentStatus = PaymentStatus.Paid,
                     HoldExpiresAt = null,
+                    IsMarketplacePurchase = true,
                     BookingPassengers = [passenger],
                     ContactName = $"{buyer.FirstName} {buyer.LastName}".Trim(),
                     ContactEmail = buyer.Email,
@@ -202,6 +206,64 @@ public class MarketplaceService : IMarketplaceService
                 throw;
             }
         });
+    }
+
+    public async Task<ApiResponse> CancelListingAsync(int userId, int listingId, CancellationToken cancellationToken = default)
+    {
+        var listing = await _dbContext.MarketplaceListings
+            .Include(l => l.Booking)
+                .ThenInclude(b => b.BookingPassengers)
+            .FirstOrDefaultAsync(l => l.Id == listingId, cancellationToken);
+
+        if (listing == null)
+            return ApiResponse.Fail("Marketplace listing not found.");
+
+        if (listing.SellerId != userId)
+            return ApiResponse.Fail("You are not authorized to cancel this listing.");
+
+        if (listing.Status != ListingStatus.Available)
+            return ApiResponse.Fail("Only available listings can be cancelled.");
+
+        var passenger = listing.Booking?.BookingPassengers?.FirstOrDefault(p => p.PassengerId == listing.PassengerId);
+        if (passenger != null)
+            passenger.IsOfferedForResale = false;
+
+        listing.Status = ListingStatus.Cancelled;
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation("Marketplace listing cancelled. ListingId: {ListingId}, UserId: {UserId}", listingId, userId);
+
+        return ApiResponse.Ok("Listing cancelled successfully.");
+    }
+
+    public async Task<ApiResponse> CancelListingByBookingPassengerAsync(int userId, int bookingId, int passengerId, CancellationToken cancellationToken = default)
+    {
+        var listing = await _dbContext.MarketplaceListings
+            .Include(l => l.Booking)
+                .ThenInclude(b => b.BookingPassengers)
+            .FirstOrDefaultAsync(l => l.BookingId == bookingId && l.PassengerId == passengerId, cancellationToken);
+
+        if (listing == null)
+            return ApiResponse.Fail("Marketplace listing not found for the provided booking/passenger.");
+
+        if (listing.SellerId != userId)
+            return ApiResponse.Fail("You are not authorized to cancel this listing.");
+
+        if (listing.Status != ListingStatus.Available)
+            return ApiResponse.Fail("Only available listings can be cancelled.");
+
+        var passenger = listing.Booking?.BookingPassengers?.FirstOrDefault(p => p.PassengerId == listing.PassengerId);
+        if (passenger != null)
+            passenger.IsOfferedForResale = false;
+
+        listing.Status = ListingStatus.Cancelled;
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation("Marketplace listing cancelled by booking/passenger. BookingId: {BookingId}, PassengerId: {PassengerId}, UserId: {UserId}", bookingId, passengerId, userId);
+
+        return ApiResponse.Ok("Listing cancelled successfully.");
     }
 
     public async Task<PagedResult<MarketplaceListingResponseDto>> GetActiveListingsAsync(

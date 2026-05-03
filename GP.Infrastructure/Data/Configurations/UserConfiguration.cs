@@ -110,9 +110,8 @@ namespace GP.Infrastructure.Data.Configurations
                 .HasColumnName("total_trips_count")
                 .HasDefaultValue(0);
 
-            builder.Property(u => u.TotalDistanceTraveled)
-                .HasColumnName("total_distance_traveled")
-                .HasPrecision(10, 2)
+            builder.Property(u => u.LoyaltyPointsBalance)
+                .HasColumnName("loyalty_points_balance")
                 .HasDefaultValue(0);
 
             builder.Property(u => u.WalletBalance)

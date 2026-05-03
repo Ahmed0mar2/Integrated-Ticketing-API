@@ -25,8 +25,8 @@ namespace GP.Domain.Entities
         public decimal? Latitude { get; set; }
         public decimal? Longitude { get; set; }
         public int TotalTripsCount { get; set; }  // Completed trips count
-        public decimal TotalDistanceTraveled { get; set; }  // In kilometers
         public decimal WalletBalance { get; set; } = 0m;
+        public int LoyaltyPointsBalance { get; set; } = 0;
         public int CountryId { get; set; }
 
         // Account

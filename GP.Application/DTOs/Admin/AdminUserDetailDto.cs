@@ -8,7 +8,6 @@ namespace GP.Application.DTOs.Admin
         public string Phone { get; init; } = string.Empty;
         public string? NationalIdNumber { get; init; }
         public int TotalTripsCount { get; init; }
-        public decimal TotalDistanceTraveled { get; init; }
         public DateTime CreatedAt { get; init; }
         public DateTime? LastLoginAt { get; init; }
         public bool IsActive { get; init; }

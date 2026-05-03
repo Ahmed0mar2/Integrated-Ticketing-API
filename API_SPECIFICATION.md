@@ -1404,6 +1404,7 @@ No request body.
       "totalPrice": 360.0,
       "seatsBooked": 2,
       "bookingDate": "2026-03-31T00:02:00Z",
+      "isMarketplacePurchase": false,
       "agencyName": "GoBus",
       "className": "Business",
       "originStation": "رمسيس",
@@ -1412,14 +1413,18 @@ No request body.
       "dropoffTime": "2026-04-02T10:00:00",
       "passengers": [
         {
+          "passengerId": 5001,
           "name": "Ali Hassan",
           "idNumber": "29805151111121",
-          "seatNumber": "7"
+          "seatNumber": "7",
+          "isOfferedForResale": false
         },
         {
+          "passengerId": 5002,
           "name": "Sara Mohamed",
           "idNumber": "A12345678",
-          "seatNumber": "8"
+          "seatNumber": "8",
+          "isOfferedForResale": false
         }
       ]
     }
@@ -1609,15 +1614,16 @@ Base route: `/api/Marketplace`
 ```
 
 ### Request Field Reference
-| Field       | Type    | Required | Notes                       |
-| ----------- | ------- | -------- | --------------------------- |
-| bookingId   | int     | Yes      | Must be a confirmed booking |
-| passengerId | int     | Yes      | Passenger within booking    |
+| Field       | Type    | Required | Notes                                       |
+| ----------- | ------- | -------- | ------------------------------------------- |
+| bookingId   | int     | Yes      | Must be a confirmed booking                 |
+| passengerId | int     | Yes      | Passenger within booking                    |
 | askingPrice | decimal | Yes      | Must be > 0 and below original ticket price |
 
 ### Listing Rules
 - Only the booking owner can list a ticket.
 - Booking must be `Confirmed` and trip departure must be in the future.
+- Booking must not have `IsMarketplacePurchase = true` (tickets purchased from the marketplace cannot be resold).
 - Passenger must exist and not be already offered for resale.
 - Asking price must be strictly less than the original ticket price.
 
@@ -1711,6 +1717,33 @@ Query string parameters:
 - Filters are optional and combined with AND logic.
 - `travelDate` matches the schedule-local date portion of the trip departure.
 
+## 12.4 Cancel Listing
+### Endpoint Overview
+- **Method:** `POST`
+- **URL:** `/api/Marketplace/cancel/{listingId}`
+- **Business Use Case:** Cancels an active marketplace listing and removes it from resale.
+
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** Authenticated user (listing owner only)
+
+### Path Parameters
+| Field     | Type | Required | Notes          |
+| --------- | ---- | -------- | -------------- |
+| listingId | int  | Yes      | Marketplace ID |
+
+### Cancellation Rules
+- Listing must exist and belong to the authenticated user.
+- Listing must be in `Available` status.
+- The associated passenger ticket will have `IsOfferedForResale` set to `false`.
+
+### Response Example (200 OK)
+```json
+{ "success": true, "message": "Listing cancelled successfully.", "data": null, "errors": null, "timestamp": "2026-03-06T12:00:00Z" }
+```
+
+---
+
 # Quick Endpoint Index
 
 | Method   | URL                                   |               Auth | Description                                                  |
@@ -1759,5 +1792,6 @@ Query string parameters:
 | `POST`   | `/api/Marketplace/list`               |                Yes | List ticket for resale                                       |
 | `POST`   | `/api/Marketplace/buy/{listingId}`    |                Yes | Purchase listed ticket                                       |
 | `GET`    | `/api/Marketplace/active`             |                 No | Retrieve active marketplace listings                         |
+| `POST`   | `/api/Marketplace/cancel/{listingId}` |                Yes | Cancel an active marketplace listing                         |
 | `POST`   | `/api/Wallet/deposit`                 |                Yes | Deposit wallet funds and write ledger entry                  |
 | `GET`    | `/api/Wallet/history`                 |                Yes | Retrieve wallet transaction history (newest first)           |

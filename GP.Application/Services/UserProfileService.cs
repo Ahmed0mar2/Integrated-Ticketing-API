@@ -57,7 +57,6 @@ public class UserProfileService : IUserProfileService
             CountryCode = user.Country?.CountryCode ?? string.Empty,
             CountryName = user.Country?.CountryName ?? string.Empty,
             TotalTripsCount = user.TotalTripsCount,
-            TotalDistanceTraveled = user.TotalDistanceTraveled,
             WalletBalance = user.WalletBalance
         };
 

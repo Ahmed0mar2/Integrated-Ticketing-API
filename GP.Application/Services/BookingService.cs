@@ -383,7 +383,8 @@ namespace GP.Application.Services
                         {
                             Name = p.Name,
                             IdNumber = p.IdNumber,
-                            SeatNumber = p.SeatNumber
+                            SeatNumber = p.SeatNumber,
+                            IsOfferedForResale = p.IsOfferedForResale
                         })
                         .ToList()
                 };
@@ -426,6 +427,7 @@ namespace GP.Application.Services
                         TotalPrice = b.TotalPrice,
                         SeatsBooked = b.SeatsBooked,
                         BookingDate = AppTime.AsUtc(b.BookingTime),
+                        IsMarketplacePurchase = b.IsMarketplacePurchase,
                         AgencyName = b.Occurrence.Trip.Agency.AgencyName,
                         ClassName = b.CoachClass.Name,
                         OriginStation = b.OriginStation.ArabicName,
@@ -435,9 +437,11 @@ namespace GP.Application.Services
                         Passengers = b.BookingPassengers
                         .Select(p => new TicketPassengerDto
                         {
+                            PassengerId = p.PassengerId,
                             Name = p.Name,
                             IdNumber = p.IdNumber,
-                            SeatNumber = p.SeatNumber
+                            SeatNumber = p.SeatNumber,
+                            IsOfferedForResale = p.IsOfferedForResale
                         })
                         .ToList()
                     };
