@@ -48,22 +48,21 @@ public class MarketplaceService : IMarketplaceService
         if (booking.Status != BookingStatus.Confirmed)
             return ApiResponse.Fail("Only confirmed tickets can be listed on the marketplace.");
 
-        var passenger = booking.BookingPassengers
-            .FirstOrDefault(p => p.PassengerId == request.PassengerId);
+        if (booking.BookingPassengers == null || booking.BookingPassengers.Count == 0)
+            return ApiResponse.Fail("No passengers found for this booking.");
 
-        if (passenger == null)
-            return ApiResponse.Fail("Passenger ticket not found in this booking.");
+        var existingListing = await _dbContext.MarketplaceListings
+            .AsNoTracking()
+            .AnyAsync(l => l.BookingId == booking.BookingId && l.Status == ListingStatus.Available, cancellationToken);
 
-        if (passenger.IsOfferedForResale)
-            return ApiResponse.Fail("Ticket is already on the marketplace.");
+        if (existingListing || booking.BookingPassengers.Any(p => p.IsOfferedForResale))
+            return ApiResponse.Fail("Booking is already listed on the marketplace.");
 
         var scheduleNow = AppTime.GetScheduleNow();
         if (booking.Occurrence.DepartureDateTime <= scheduleNow)
             return ApiResponse.Fail("Ticket can no longer be listed because trip departure has passed.");
 
-        var originalPrice = booking.SeatsBooked > 0
-            ? booking.TotalPrice / booking.SeatsBooked
-            : booking.TotalPrice;
+        var originalPrice = booking.TotalPrice;
 
         if (request.AskingPrice > originalPrice)
             throw new InvalidOperationException("The asking price must be strictly less than the original ticket price.");
@@ -71,7 +70,10 @@ public class MarketplaceService : IMarketplaceService
         var listing = new MarketplaceListing
         {
             BookingId = booking.BookingId,
-            PassengerId = passenger.PassengerId,
+            PassengerId = booking.BookingPassengers
+                .OrderBy(p => p.PassengerId)
+                .First()
+                .PassengerId,
             SellerId = sellerUserId,
             OriginalPrice = originalPrice,
             AskingPrice = request.AskingPrice,
@@ -80,12 +82,16 @@ public class MarketplaceService : IMarketplaceService
         };
 
         _dbContext.MarketplaceListings.Add(listing);
-        passenger.IsOfferedForResale = true;
+
+        foreach (var bookingPassenger in booking.BookingPassengers)
+        {
+            bookingPassenger.IsOfferedForResale = true;
+        }
 
         await _dbContext.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation("Marketplace listing created. BookingId: {BookingId}, PassengerId: {PassengerId}, SellerId: {SellerId}",
-            booking.BookingId, passenger.PassengerId, sellerUserId);
+        _logger.LogInformation("Marketplace listing created. BookingId: {BookingId}, SellerId: {SellerId}",
+            booking.BookingId, sellerUserId);
 
         return ApiResponse.Ok("Ticket listed on marketplace successfully.");
     }
@@ -129,15 +135,15 @@ public class MarketplaceService : IMarketplaceService
                 if (buyer.WalletBalance < listing.AskingPrice)
                     return ApiResponse.Fail("Insufficient wallet balance to purchase this ticket.");
 
-                var oldBooking = listing.Booking;
-                if (oldBooking.Status != BookingStatus.Confirmed)
+                var booking = listing.Booking;
+                if (booking.Status != BookingStatus.Confirmed)
                     return ApiResponse.Fail("Source booking is not eligible for resale transfer.");
 
-                var passenger = oldBooking.BookingPassengers
-                    .FirstOrDefault(p => p.PassengerId == listing.PassengerId);
+                if (booking.UserId != listing.SellerId)
+                    return ApiResponse.Fail("Listing owner does not match booking owner.");
 
-                if (passenger == null)
-                    return ApiResponse.Fail("The listed passenger ticket could not be found.");
+                if (booking.BookingPassengers == null || booking.BookingPassengers.Count == 0)
+                    return ApiResponse.Fail("No passengers found for this booking.");
 
                 // Wallet transfer
                 buyer.WalletBalance -= listing.AskingPrice;
@@ -161,33 +167,19 @@ public class MarketplaceService : IMarketplaceService
                     BookingId = null
                 });
 
-                // Booking split (ownership transfer)
-                var newBooking = new Booking
+                // Booking transfer (all-or-nothing)
+                booking.UserId = buyerUserId;
+                booking.IsMarketplacePurchase = true;
+                booking.TotalPrice = listing.AskingPrice;
+                booking.ContactName = $"{buyer.FirstName} {buyer.LastName}".Trim();
+                booking.ContactEmail = buyer.Email;
+                booking.ContactPhone = buyer.Phone ?? "N/A";
+                booking.UpdatedAt = DateTime.UtcNow;
+
+                foreach (var passenger in booking.BookingPassengers)
                 {
-                    UserId = buyerUserId,
-                    OccurrenceId = oldBooking.OccurrenceId,
-                    CoachClassId = oldBooking.CoachClassId,
-                    OriginStationId = oldBooking.OriginStationId,
-                    DestinationStationId = oldBooking.DestinationStationId,
-                    SeatsBooked = 1,
-                    TotalPrice = listing.AskingPrice,
-                    Status = BookingStatus.Confirmed,
-                    PaymentStatus = PaymentStatus.Paid,
-                    HoldExpiresAt = null,
-                    IsMarketplacePurchase = true,
-                    BookingPassengers = [passenger],
-                    ContactName = $"{buyer.FirstName} {buyer.LastName}".Trim(),
-                    ContactEmail = buyer.Email,
-                    ContactPhone = buyer.Phone ?? "N/A"
-                };
-
-                _dbContext.Bookings.Add(newBooking);
-
-                oldBooking.SeatsBooked -= 1;
-                if (oldBooking.SeatsBooked < 0)
-                    oldBooking.SeatsBooked = 0;
-
-                passenger.IsOfferedForResale = false;
+                    passenger.IsOfferedForResale = false;
+                }
 
                 listing.Status = ListingStatus.Sold;
                 listing.SoldAt = DateTime.UtcNow;
@@ -212,21 +204,19 @@ public class MarketplaceService : IMarketplaceService
     {
         var listing = await _dbContext.MarketplaceListings
             .Include(l => l.Booking)
-                .ThenInclude(b => b.BookingPassengers)
             .FirstOrDefaultAsync(l => l.Id == listingId, cancellationToken);
 
         if (listing == null)
             return ApiResponse.Fail("Marketplace listing not found.");
 
-        if (listing.SellerId != userId)
+        if (listing.Booking == null)
+            return ApiResponse.Fail("Listing is missing booking data.");
+
+        if (listing.Booking.UserId != userId)
             return ApiResponse.Fail("You are not authorized to cancel this listing.");
 
         if (listing.Status != ListingStatus.Available)
             return ApiResponse.Fail("Only available listings can be cancelled.");
-
-        var passenger = listing.Booking?.BookingPassengers?.FirstOrDefault(p => p.PassengerId == listing.PassengerId);
-        if (passenger != null)
-            passenger.IsOfferedForResale = false;
 
         listing.Status = ListingStatus.Cancelled;
 
@@ -237,15 +227,15 @@ public class MarketplaceService : IMarketplaceService
         return ApiResponse.Ok("Listing cancelled successfully.");
     }
 
-    public async Task<ApiResponse> CancelListingByBookingPassengerAsync(int userId, int bookingId, int passengerId, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse> CancelListingByBookingAsync(int userId, int bookingId, CancellationToken cancellationToken = default)
     {
         var listing = await _dbContext.MarketplaceListings
             .Include(l => l.Booking)
                 .ThenInclude(b => b.BookingPassengers)
-            .FirstOrDefaultAsync(l => l.BookingId == bookingId && l.PassengerId == passengerId, cancellationToken);
+            .FirstOrDefaultAsync(l => l.BookingId == bookingId, cancellationToken);
 
         if (listing == null)
-            return ApiResponse.Fail("Marketplace listing not found for the provided booking/passenger.");
+            return ApiResponse.Fail("Marketplace listing not found for the provided booking.");
 
         if (listing.SellerId != userId)
             return ApiResponse.Fail("You are not authorized to cancel this listing.");
@@ -253,15 +243,19 @@ public class MarketplaceService : IMarketplaceService
         if (listing.Status != ListingStatus.Available)
             return ApiResponse.Fail("Only available listings can be cancelled.");
 
-        var passenger = listing.Booking?.BookingPassengers?.FirstOrDefault(p => p.PassengerId == listing.PassengerId);
-        if (passenger != null)
-            passenger.IsOfferedForResale = false;
+        if (listing.Booking?.BookingPassengers != null)
+        {
+            foreach (var passenger in listing.Booking.BookingPassengers)
+            {
+                passenger.IsOfferedForResale = false;
+            }
+        }
 
         listing.Status = ListingStatus.Cancelled;
 
         await _dbContext.SaveChangesAsync(cancellationToken);
 
-        _logger.LogInformation("Marketplace listing cancelled by booking/passenger. BookingId: {BookingId}, PassengerId: {PassengerId}, UserId: {UserId}", bookingId, passengerId, userId);
+        _logger.LogInformation("Marketplace listing cancelled by booking. BookingId: {BookingId}, UserId: {UserId}", bookingId, userId);
 
         return ApiResponse.Ok("Listing cancelled successfully.");
     }
@@ -345,6 +339,8 @@ public class MarketplaceService : IMarketplaceService
                 {
                     Origin = booking.OriginStation.ArabicName,
                     Destination = booking.DestinationStation.ArabicName,
+                    OriginGov = booking.OriginStation.Governorate ?? "Unknown",
+                    DestinationGov = booking.DestinationStation.Governorate ?? "Unknown",
                     Time = boardingTime,
                     Class = $"{booking.Occurrence.Trip.Agency.AgencyName} - {booking.CoachClass.Name}"
                 }

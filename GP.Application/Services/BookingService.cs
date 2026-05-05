@@ -464,8 +464,7 @@ namespace GP.Application.Services
                         {
                             Name = p.Name,
                             IdNumber = p.IdNumber,
-                            SeatNumber = p.SeatNumber,
-                            IsOfferedForResale = p.IsOfferedForResale
+                            SeatNumber = p.SeatNumber
                         })
                         .ToList()
                 };
@@ -496,9 +495,30 @@ namespace GP.Application.Services
                 .OrderByDescending(b => b.Occurrence.DepartureDateTime)
                 .ToListAsync(cancellationToken);
 
+            var activeListingLookup = new Dictionary<int, int?>();
+            if (bookings.Count > 0)
+            {
+                var bookingIds = bookings.Select(b => b.BookingId).ToList();
+
+                activeListingLookup = await _dbContext.MarketplaceListings
+                    .AsNoTracking()
+                    .Where(l => bookingIds.Contains(l.BookingId) && l.Status == ListingStatus.Available)
+                    .GroupBy(l => l.BookingId)
+                    .Select(g => new
+                    {
+                        BookingId = g.Key,
+                        ListingId = g.OrderByDescending(x => x.ListedAt)
+                            .Select(x => x.Id)
+                            .First()
+                    })
+                    .ToDictionaryAsync(x => x.BookingId, x => (int?)x.ListingId, cancellationToken);
+            }
+
             return bookings.Select(b =>
                 {
                     var (boardingTime, dropoffTime) = ResolvePassengerLocalTimes(b);
+
+                    activeListingLookup.TryGetValue(b.BookingId, out var activeListingId);
 
                     return new MyTicketResponseDto
                     {
@@ -509,6 +529,8 @@ namespace GP.Application.Services
                         SeatsBooked = b.SeatsBooked,
                         BookingDate = AppTime.AsUtc(b.BookingTime),
                         IsMarketplacePurchase = b.IsMarketplacePurchase,
+                        ActiveListingId = activeListingId,
+                        IsOfferedForResale = activeListingId.HasValue,
                         AgencyName = b.Occurrence.Trip.Agency.AgencyName,
                         ClassName = b.CoachClass.Name,
                         OriginStation = b.OriginStation.ArabicName,
@@ -521,8 +543,7 @@ namespace GP.Application.Services
                             PassengerId = p.PassengerId,
                             Name = p.Name,
                             IdNumber = p.IdNumber,
-                            SeatNumber = p.SeatNumber,
-                            IsOfferedForResale = p.IsOfferedForResale
+                            SeatNumber = p.SeatNumber
                         })
                         .ToList()
                     };

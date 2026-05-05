@@ -13,6 +13,8 @@ public class MarketplaceTripDetailsDto
 {
     public string Origin { get; set; } = string.Empty;
     public string Destination { get; set; } = string.Empty;
+    public string OriginGov { get; set; } = string.Empty;
+    public string DestinationGov { get; set; } = string.Empty;
     public DateTime Time { get; set; }
     public string Class { get; set; } = string.Empty;
 }

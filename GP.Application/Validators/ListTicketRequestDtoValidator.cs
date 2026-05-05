@@ -7,6 +7,10 @@ public class ListTicketRequestDtoValidator : AbstractValidator<ListTicketRequest
 {
     public ListTicketRequestDtoValidator()
     {
+        RuleFor(x => x.BookingId)
+            .GreaterThan(0)
+            .WithMessage("BookingId is required.");
+
         RuleFor(x => x.AskingPrice)
             .GreaterThan(0)
             .WithMessage("Asking price must be greater than zero.");

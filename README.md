@@ -335,9 +335,10 @@ These endpoints were added as part of the User Profile epic. They allow authenti
 
 | Method | Endpoint                           | Description                          | Auth Required |
 | ------ | ---------------------------------- | ------------------------------------ | ------------- |
-| `POST` | `/api/Marketplace/list`            | List a ticket for resale             | ✅             |
-| `POST` | `/api/Marketplace/buy/{listingId}` | Purchase a listed ticket             | ✅             |
+| `POST` | `/api/Marketplace/list`            | List a booking for resale            | ✅             |
+| `POST` | `/api/Marketplace/buy/{listingId}` | Purchase a listed booking            | ✅             |
 | `GET`  | `/api/Marketplace/active`          | Retrieve active marketplace listings | ❌             |
+| `POST` | `/api/Marketplace/cancel/{listingId}` | Delist a marketplace listing       | ✅             |
 
 ### 💳 Wallet (`/api/Wallet`)
 
