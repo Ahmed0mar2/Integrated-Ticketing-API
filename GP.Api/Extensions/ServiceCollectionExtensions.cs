@@ -16,6 +16,7 @@ using GP.Infrastructure.Identity;
 using GP.Infrastructure.Interfaces;
 using GP.Infrastructure.Repositories;
 using MediatR;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -57,7 +58,7 @@ public static class ServiceCollectionExtensions
         services.AddCorsServices();
 
         services.AddExceptionHandling();
-        
+
         return services;
     }
     //FluentValidation
@@ -72,7 +73,7 @@ public static class ServiceCollectionExtensions
         //Rate Limiting
         services.AddRateLimiter(options =>
         {
-            options.AddFixedWindowLimiter("fixed", limiterOptions => 
+            options.AddFixedWindowLimiter("fixed", limiterOptions =>
             {
                 limiterOptions.Window = TimeSpan.FromMinutes(1);
                 limiterOptions.PermitLimit = 10;
@@ -204,7 +205,10 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.AddMediatR(typeof(BookingCompletedEvent));
+        services.AddMediatR(cfg =>
+     {
+         cfg.RegisterServicesFromAssembly(typeof(BookingCompletedEvent).Assembly);
+     });
 
         // Auth Service
         services.AddScoped<IEmailService, EmailService>();

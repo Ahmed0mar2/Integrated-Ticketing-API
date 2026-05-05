@@ -380,6 +380,7 @@ namespace GP.Application.Services
 
                     int earnedPoints = (int)(finalPrice * earnRate * bonusMultiplier);
                     var departureDate = pendingBookings.Min(c => c.Occurrence.DepartureDateTime);
+                    var referenceBookingId = pendingBookings[0].BookingId;
 
                     var earnTransaction = new PointTransaction
                     {
@@ -391,6 +392,7 @@ namespace GP.Application.Services
                         Status = PointTransactionStatus.Pending,
                         CreatedAt = DateTime.UtcNow,
                         UnlocksAt = departureDate,
+                        BookingId = referenceBookingId,
                         ExpiresAt = departureDate.AddMonths(4)
                     };
                     _dbContext.PointTransactions.Add(earnTransaction);
@@ -636,7 +638,6 @@ namespace GP.Application.Services
             var nowUtc = DateTime.UtcNow;
 
             var pendingPoints = await _dbContext.PointTransactions
-                .Include(pt => pt.User)
                 .Where(pt => pt.Status == PointTransactionStatus.Pending
                              && pt.UnlocksAt.HasValue
                              && pt.UnlocksAt <= nowUtc)
@@ -645,7 +646,19 @@ namespace GP.Application.Services
             foreach (var pt in pendingPoints)
             {
                 pt.Status = PointTransactionStatus.Available;
-                pt.User.LoyaltyPointsBalance += pt.Amount;
+            }
+
+            var unlockedPointsByUser = pendingPoints
+                .GroupBy(pt => pt.UserId)
+                .Select(g => new { UserId = g.Key, TotalUnlocked = g.Sum(pt => pt.Amount) });
+
+            foreach (var userPoints in unlockedPointsByUser)
+            {
+                var user = await _dbContext.Users.FindAsync(new object[] { userPoints.UserId }, cancellationToken);
+                if (user != null)
+                {
+                    user.LoyaltyPointsBalance += userPoints.TotalUnlocked;
+                }
             }
 
             if (completedCandidates.Count == 0 && pendingPoints.Count == 0)
