@@ -335,6 +335,7 @@ public class MarketplaceService : IMarketplaceService
                 OriginalPrice = l.OriginalPrice,
                 AskingPrice = l.AskingPrice,
                 SellerName = BuildSellerFullName(l.Seller),
+                SeatsCount = booking.SeatsBooked,
                 TripDetails = new MarketplaceTripDetailsDto
                 {
                     Origin = booking.OriginStation.ArabicName,

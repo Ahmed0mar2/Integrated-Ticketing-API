@@ -1761,6 +1761,7 @@ Query string parameters:
         "originalPrice": 180.0,
         "askingPrice": 150.0,
         "sellerName": "Ahmed Hassan",
+        "seatsCount": 2,
         "tripDetails": {
           "origin": "Ramses",
           "destination": "Sidi Gaber",
@@ -1785,6 +1786,7 @@ Query string parameters:
 - If no listings exist, the message is "No active marketplace listings found." and items list is empty.
 - `tripDetails.time` is a schedule-local timestamp without timezone suffix.
 - `tripDetails.originGov` and `tripDetails.destinationGov` come from the normalized station governorate data.
+- `seatsCount` indicates the total number of seats included in the booking bundle offered for resale.
 - Filters are optional and combined with AND logic.
 - `travelDate` matches the schedule-local date portion of the trip departure.
 
