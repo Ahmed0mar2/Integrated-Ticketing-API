@@ -398,8 +398,6 @@ namespace GP.Application.Services
                     _dbContext.PointTransactions.Add(earnTransaction);
 
                     await _dbContext.SaveChangesAsync(cancellationToken);
-
-                    await _mediator.Publish(new BookingCompletedEvent(userId, distinctTrips, finalPrice), cancellationToken);
                     await transaction.CommitAsync(cancellationToken);
 
                     return $"Checkout successful. {finalPrice:0.00} was deducted from your wallet for {pendingBookings.Count} trip(s).";
@@ -657,7 +655,32 @@ namespace GP.Application.Services
                 var user = await _dbContext.Users.FindAsync(new object[] { userPoints.UserId }, cancellationToken);
                 if (user != null)
                 {
+                    // 1. Give them their earned points
                     user.LoyaltyPointsBalance += userPoints.TotalUnlocked;
+
+                    // 2. Calculate gamification metrics for the trips that just arrived
+                    var userFinishedTrips = pendingPoints
+                        .Where(p => p.UserId == userPoints.UserId && p.BookingId.HasValue)
+                        .ToList();
+
+                    if (userFinishedTrips.Count > 0)
+                    {
+                        int completedLegs = userFinishedTrips.Count;
+                        decimal totalSpendForTheseTrips = 0;
+
+                        foreach (var pt in userFinishedTrips)
+                        {
+                            var booking = await _dbContext.Bookings.FindAsync(new object[] { pt.BookingId!.Value }, cancellationToken);
+                            if (booking != null)
+                            {
+                                // Add the price to the gamification tracker
+                                totalSpendForTheseTrips += booking.TotalPrice;
+                            }
+                        }
+
+                        // 3. Fire the event safely! Progress is now strictly tied to arrival.
+                        await _mediator.Publish(new BookingCompletedEvent(user.UserId, completedLegs, totalSpendForTheseTrips), cancellationToken);
+                    }
                 }
             }
 
