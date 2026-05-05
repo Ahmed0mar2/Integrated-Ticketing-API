@@ -38,5 +38,7 @@ namespace GP.Domain.Entities
         public ICollection<Booking> Bookings { get; set; } = [];
         public Country Country { get; set; } = null!;
         public ICollection<WalletTransaction> WalletTransactions { get; set; } = [];
+        public ICollection<PointTransaction> PointTransactions { get; set; } = [];
+        public ICollection<UserChallenge> UserChallenges { get; set; } = [];
     }
 }

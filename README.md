@@ -23,6 +23,14 @@
 - **User Authentication** - Secure JWT-based authentication with email verification
 - **Role-based Access Control** - Admin, User, and Partner roles
 - **Booking Management** - Complete booking lifecycle with passenger management
+- **Loyalty & Gamification** - Points ledger, monthly challenges, and progress tracking
+
+### 🎯 Loyalty & Gamification Highlights
+
+- Points redemption is capped at 50% of the checkout total
+- Earned points remain pending until departure and expire 4 months later
+- Monthly challenges reset and reseed via the Jobs endpoints
+- Challenge types include TotalTrips, TotalSpend, RoundTrip, and MultiDestination
 
 ---
 
@@ -287,6 +295,9 @@ After running migrations, you can log in with the seeded admin account:
 | `POST` | `/api/Jobs/generate-occurrences?secret=<JobSecretKey>`    | Generate future occurrences (scheduler endpoint) | Secret query param |
 | `POST` | `/api/Jobs/process-completed-trips?secret=<JobSecretKey>` | Mark eligible trips as completed                 | Secret query param |
 | `POST` | `/api/Jobs/release-expired-holds?secret=<JobSecretKey>`   | Release expired holds and restore inventory      | Secret query param |
+| `POST` | `/api/Jobs/expire-points?secret=<JobSecretKey>`           | Expire old loyalty point transactions            | Secret query param |
+| `POST` | `/api/Jobs/reset-monthly-challenges?secret=<JobSecretKey>`| Reset and reassign monthly challenges            | Secret query param |
+| `POST` | `/api/Jobs/seed-challenges?secret=<JobSecretKey>`         | Seed the static monthly challenges               | Secret query param |
 
 ### 🛡️ Admin Users (`/api/admin/users`)
 
@@ -306,7 +317,7 @@ These endpoints were added as part of the User Profile epic. They allow authenti
 
 | Method | Endpoint                        | Auth Required | Description                                                                                                                                       |
 | ------ | ------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/users/me`                 | ✅             | Get current user's profile, gamification stats and wallet balance                                                                                 |
+| `GET`  | `/api/users/me`                 | ✅             | Get current user's profile, loyalty points, expiring points info, active challenges, and wallet balance                                             |
 | `PUT`  | `/api/users/me`                 | ✅             | Update current user's basic profile info (first/family/last name, email, phone). Email & phone uniqueness validated at domain and identity levels |
 | `POST` | `/api/users/me/profile-picture` | ✅             | Upload or replace user's profile picture (multipart file). Allowed extensions: `.jpg`, `.jpeg`, `.png`                                            |
 

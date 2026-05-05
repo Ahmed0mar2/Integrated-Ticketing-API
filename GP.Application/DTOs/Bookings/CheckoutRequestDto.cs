@@ -10,5 +10,6 @@ namespace GP.Application.DTOs.Bookings
     public class CheckoutRequestDto
     {
         public string PaymentMethod { get; set; } = string.Empty;
+        public int PointsToRedeem { get; set; }
     }
 }

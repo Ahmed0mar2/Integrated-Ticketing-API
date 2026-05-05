@@ -10,6 +10,10 @@ namespace GP.Application.Validators
             RuleFor(x => x.PaymentMethod)
                 .NotEmpty()
                 .WithMessage("Payment method is required.");
+
+            RuleFor(x => x.PointsToRedeem)
+                .GreaterThanOrEqualTo(0)
+                .WithMessage("Points to redeem must be zero or greater.");
         }
     }
 }

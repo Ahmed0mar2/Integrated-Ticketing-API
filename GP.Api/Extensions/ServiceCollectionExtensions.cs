@@ -6,6 +6,7 @@ using GP.API.Filters;
 using GP.API.Middleware;
 using GP.Application.Common;
 using GP.Application.DTOs.Bookings;
+using GP.Application.Events;
 using GP.Application.Interfaces;
 using GP.Application.Services;
 using GP.Application.Settings;
@@ -14,6 +15,7 @@ using GP.Infrastructure.Data;
 using GP.Infrastructure.Identity;
 using GP.Infrastructure.Interfaces;
 using GP.Infrastructure.Repositories;
+using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -202,6 +204,8 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        services.AddMediatR(typeof(BookingCompletedEvent));
+
         // Auth Service
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IAuthService, AuthenticationService>();
@@ -238,6 +242,9 @@ public static class ServiceCollectionExtensions
 
         // Wallet Service
         services.AddScoped<IWalletService, WalletService>();
+
+        // Loyalty Service
+        services.AddScoped<ILoyaltyService, LoyaltyService>();
 
         // Marketplace Service
         services.AddScoped<IMarketplaceService, MarketplaceService>();

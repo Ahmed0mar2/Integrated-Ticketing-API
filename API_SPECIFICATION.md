@@ -715,7 +715,7 @@ Base route: `/api/Users`
 ### Endpoint Overview
 - **Method:** `GET`
 - **URL:** `/api/Users/me`
-- **Business Use Case:** Returns authenticated user's profile, stats, and wallet.
+- **Business Use Case:** Returns authenticated user's profile, loyalty stats, active challenges, and wallet.
 ### Authentication / Authorization
 - **JWT Required:** Yes
 - **Role Required:** Authenticated user
@@ -738,7 +738,19 @@ No request body.
     "countryCode": "EG",
     "countryName": "Egypt",
     "totalTripsCount": 12,
-    "totalDistanceTraveled": 345.5,
+    "loyaltyPointsBalance": 480,
+    "expiringPointsAmount": 120,
+    "nextExpiryDate": "2026-05-31T00:00:00Z",
+    "activeChallenges": [
+      {
+        "challengeId": 1,
+        "title": "Frequent Traveler",
+        "type": 1,
+        "currentProgress": 2,
+        "goalValue": 4,
+        "rewardPoints": 400
+      }
+    ],
     "walletBalance": 50.0
   },
   "errors": null,
@@ -1290,17 +1302,22 @@ Base route: `/api/Bookings`
 ### Request Payload
 ```json
 {
-  "paymentMethod": "Wallet"
+  "paymentMethod": "Wallet",
+  "pointsToRedeem": 0
 }
 ```
 
 ### Request Field Reference
-| Field         | Type   | Required | Notes                                |
-| ------------- | ------ | -------- | ------------------------------------ |
-| paymentMethod | string | Yes      | Currently only `Wallet` is supported |
+| Field          | Type   | Required | Notes                                                    |
+| -------------- | ------ | -------- | -------------------------------------------------------- |
+| paymentMethod  | string | Yes      | Currently only `Wallet` is supported                     |
+| pointsToRedeem | int    | No       | Optional points redemption, capped at 50% of cart total  |
 
 ### Checkout Rules
 - Only `Wallet` payment is accepted (case-insensitive).
+- Points redemption is optional and capped at 50% of the cart total.
+- Final price after discount is at least 10.00 EGP.
+- Earned points are pending until departure and expire 4 months after departure.
 - Returns 400 if the cart is empty/expired or wallet balance is insufficient.
 - Returns 409 on seat concurrency conflicts.
 
@@ -1588,6 +1605,57 @@ Authentication model:
 }
 ```
 
+## 11.4 Expire Old Loyalty Points
+### Endpoint Overview
+- **Method:** `POST`
+- **URL:** `/api/Jobs/expire-points?secret=<JobSecretKey>`
+- **Business Use Case:** Expires old point transactions based on `ExpiresAt`.
+
+### Response Example (200 OK)
+```json
+{
+  "success": true,
+  "message": "Expired 0 point transaction(s).",
+  "data": null,
+  "errors": null,
+  "timestamp": "2026-04-18T17:00:00Z"
+}
+```
+
+## 11.5 Reset Monthly Challenges
+### Endpoint Overview
+- **Method:** `POST`
+- **URL:** `/api/Jobs/reset-monthly-challenges?secret=<JobSecretKey>`
+- **Business Use Case:** Clears old user challenges and assigns the active monthly set.
+
+### Response Example (200 OK)
+```json
+{
+  "success": true,
+  "message": "Reset complete. Assigned 4 challenges to 120 users.",
+  "data": null,
+  "errors": null,
+  "timestamp": "2026-04-18T17:00:00Z"
+}
+```
+
+## 11.6 Seed Challenges (One-Time)
+### Endpoint Overview
+- **Method:** `POST`
+- **URL:** `/api/Jobs/seed-challenges?secret=<JobSecretKey>`
+- **Business Use Case:** Seeds the static monthly challenge definitions (idempotent).
+
+### Response Example (200 OK)
+```json
+{
+  "success": true,
+  "message": "Challenges seeded successfully.",
+  "data": null,
+  "errors": null,
+  "timestamp": "2026-04-18T17:00:00Z"
+}
+```
+
 ---
 
 # 12. Marketplace API
@@ -1770,6 +1838,9 @@ Query string parameters:
 | `POST`   | `/api/Jobs/generate-occurrences`      | Secret query param | Generate future occurrences (scheduler endpoint)             |
 | `POST`   | `/api/Jobs/process-completed-trips`   | Secret query param | Mark eligible trips as completed                             |
 | `POST`   | `/api/Jobs/release-expired-holds`     | Secret query param | Release expired holds and restore inventory                  |
+| `POST`   | `/api/Jobs/expire-points`             | Secret query param | Expire old loyalty point transactions                        |
+| `POST`   | `/api/Jobs/reset-monthly-challenges`  | Secret query param | Reset and reassign monthly challenges                         |
+| `POST`   | `/api/Jobs/seed-challenges`           | Secret query param | Seed the static monthly challenges                             |
 | `GET`    | `/api/admin/users`                    |        Yes (Admin) | List all users                                               |
 | `GET`    | `/api/admin/users/{id}`               |        Yes (Admin) | Get user detail                                              |
 | `PATCH`  | `/api/admin/users/{id}/toggle-status` |        Yes (Admin) | Toggle user active status                                    |
