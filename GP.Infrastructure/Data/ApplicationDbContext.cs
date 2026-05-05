@@ -40,6 +40,10 @@ namespace GP.Infrastructure.Data
         public DbSet<TripFare> TripFares { get; set; }
         public DbSet<StopAgencyMapping> StopAgencyMappings { get; set; }
         public DbSet<WalletTransaction> WalletTransactions { get; set; }
+        public DbSet<PointTransaction> PointTransactions { get; set; }
+        public DbSet<DiscountRule> DiscountRules { get; set; }
+        public DbSet<Challenge> Challenges { get; set; }
+        public DbSet<UserChallenge> UserChallenges { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

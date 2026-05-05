@@ -1,6 +1,7 @@
 ﻿using GP.Application.DTOs.Profile;
 using GP.Application.Interfaces;
 using GP.Domain.Entities;
+using GP.Domain.Enums;
 using GP.Infrastructure.Data;
 using GP.Infrastructure.Identity;
 using Microsoft.AspNetCore.Http;
@@ -38,11 +39,37 @@ public class UserProfileService : IUserProfileService
     {
         var user = await _context.Users
             .AsNoTracking()
+            .Include(u => u.UserChallenges.Where(uc => !uc.IsCompleted))
+                .ThenInclude(uc => uc.Challenge)
             .Include(u => u.Country)
             .FirstOrDefaultAsync(u => u.UserId == userId, cancellationToken);
 
         if (user == null)
             return (false, null, "User not found.");
+
+        var availablePoints = await _context.PointTransactions
+            .AsNoTracking()
+            .Where(pt => pt.UserId == userId
+                         && pt.AvailableAmount > 0
+                         && pt.Status == PointTransactionStatus.Available
+                         && !pt.IsExpired
+                         && pt.ExpiresAt.HasValue)
+            .ToListAsync(cancellationToken);
+
+        DateTime? nextExpiry = null;
+        int expiringAmount = 0;
+
+        if (availablePoints.Count > 0)
+        {
+            nextExpiry = availablePoints.Min(pt => pt.ExpiresAt);
+
+            if (nextExpiry.HasValue)
+            {
+                expiringAmount = availablePoints
+                    .Where(pt => pt.ExpiresAt!.Value.Date == nextExpiry.Value.Date)
+                    .Sum(pt => pt.AvailableAmount);
+            }
+        }
 
         var dto = new UserProfileDto
         {
@@ -57,6 +84,18 @@ public class UserProfileService : IUserProfileService
             CountryCode = user.Country?.CountryCode ?? string.Empty,
             CountryName = user.Country?.CountryName ?? string.Empty,
             TotalTripsCount = user.TotalTripsCount,
+            LoyaltyPointsBalance = user.LoyaltyPointsBalance,
+            ActiveChallenges = user.UserChallenges.Select(uc => new ActiveChallengeDto
+            {
+                ChallengeId = uc.ChallengeId,
+                Title = uc.Challenge.Title,
+                Type = (int)uc.Challenge.Type,
+                CurrentProgress = uc.CurrentProgress,
+                GoalValue = uc.Challenge.GoalValue,
+                RewardPoints = uc.Challenge.RewardPoints
+            }).ToList(),
+            ExpiringPointsAmount = expiringAmount,
+            NextExpiryDate = nextExpiry,
             WalletBalance = user.WalletBalance
         };
 

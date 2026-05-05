@@ -1,21 +1,34 @@
 ﻿using GP.Application.Common;
 using GP.Application.DTOs.Bookings;
+using GP.Application.Events;
 using GP.Application.Interfaces;
 using GP.Domain.Entities;
 using GP.Domain.Enums;
 using GP.Infrastructure.Data;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Configuration;
 
 namespace GP.Application.Services
 {
     public class BookingService : IBookingService
     {
         private readonly ApplicationDbContext _dbContext;
+        private readonly ILoyaltyService _loyaltyService;
+        private readonly IMediator _mediator;
+        private readonly IConfiguration _configuration;
 
-        public BookingService(ApplicationDbContext dbContext)
+        public BookingService(
+            ApplicationDbContext dbContext,
+            ILoyaltyService loyaltyService,
+            IMediator mediator,
+            IConfiguration configuration)
         {
             _dbContext = dbContext;
+            _loyaltyService = loyaltyService;
+            _mediator = mediator;
+            _configuration = configuration;
         }
 
         public async Task<BookingCartResponseDto> AddToCartAsync(int userId, AddToCartRequestDto request, CancellationToken cancellationToken = default)
@@ -224,6 +237,10 @@ namespace GP.Application.Services
             if (!string.Equals(request.PaymentMethod?.Trim(), "Wallet", StringComparison.OrdinalIgnoreCase))
                 throw new CartValidationException("Unsupported payment method. Only Wallet payment is currently available.");
 
+            decimal pointToEgpValue = _configuration.GetValue<decimal>("LoyaltySettings:PointToEgpValue", 0.05m);
+            decimal maxDiscountPct = _configuration.GetValue<decimal>("LoyaltySettings:MaxDiscountPercentage", 0.50m);
+            decimal earnRate = _configuration.GetValue<decimal>("LoyaltySettings:EarnRatePercentage", 0.05m);
+
             var strategy = _dbContext.Database.CreateExecutionStrategy();
 
             return await strategy.ExecuteAsync(async () =>
@@ -240,6 +257,7 @@ namespace GP.Application.Services
 
                     var now = DateTime.UtcNow;
                     var pendingBookings = await QueryActivePendingBookingsForUser(userId, now)
+                        .Include(b => b.Occurrence)
                         .Include(b => b.BookingPassengers)
                         .OrderBy(b => b.BookingTime)
                         .ToListAsync(cancellationToken);
@@ -248,8 +266,44 @@ namespace GP.Application.Services
                         throw new CartValidationException("Cart is empty or all items have expired.");
 
                     var grandTotal = pendingBookings.Sum(b => b.TotalPrice);
-                    if (user.WalletBalance < grandTotal)
-                        throw new CartValidationException($"Insufficient funds. Your wallet balance is {user.WalletBalance:0.00}, but checkout total is {grandTotal:0.00}.");
+                    decimal discountEgp = 0m;
+                    if (request.PointsToRedeem > 0)
+                    {
+                        decimal requestedDiscount = request.PointsToRedeem * pointToEgpValue;
+                        decimal maxDiscount = grandTotal * maxDiscountPct;
+                        discountEgp = Math.Min(requestedDiscount, maxDiscount);
+
+                        int actualPointsToDeduct = (int)(discountEgp / pointToEgpValue);
+
+                        await _loyaltyService.DeductPointsFifoAsync(userId, actualPointsToDeduct, "Ticket Discount", null, cancellationToken);
+                    }
+
+                    decimal finalPrice = Math.Max(grandTotal - discountEgp, 10.00m);
+
+                    if (user.WalletBalance < finalPrice)
+                        throw new CartValidationException($"Insufficient funds. Your wallet balance is {user.WalletBalance:0.00}, but checkout total is {finalPrice:0.00}.");
+
+                    var appliedDiscount = grandTotal - finalPrice;
+                    if (appliedDiscount > 0m && grandTotal > 0m)
+                    {
+                        var remainingDiscount = appliedDiscount;
+
+                        for (var i = 0; i < pendingBookings.Count; i++)
+                        {
+                            var booking = pendingBookings[i];
+
+                            if (i == pendingBookings.Count - 1)
+                            {
+                                booking.TotalPrice = Math.Max(0m, booking.TotalPrice - remainingDiscount);
+                                break;
+                            }
+
+                            var proportional = Math.Round(booking.TotalPrice / grandTotal * appliedDiscount, 2, MidpointRounding.AwayFromZero);
+                            proportional = Math.Min(proportional, remainingDiscount);
+                            booking.TotalPrice = Math.Max(0m, booking.TotalPrice - proportional);
+                            remainingDiscount -= proportional;
+                        }
+                    }
 
                     var seatTracker = new Dictionary<(int OccurrenceId, int CoachClassId), HashSet<string>>();
 
@@ -306,20 +360,47 @@ namespace GP.Application.Services
                         booking.UpdatedAt = DateTime.UtcNow;
                     }
 
-                    user.WalletBalance -= grandTotal;
+                    user.WalletBalance -= finalPrice;
 
                     _dbContext.WalletTransactions.Add(new WalletTransaction
                     {
                         UserId = user.UserId,
-                        Amount = -grandTotal,
+                        Amount = -finalPrice,
                         Type = TransactionType.TicketPurchase,
                         Description = "Checkout for multiple trips."
                     });
 
+                    int distinctTrips = pendingBookings.Select(c => c.OccurrenceId).Distinct().Count();
+                    decimal bonusMultiplier = distinctTrips switch
+                    {
+                        >= 3 => 1.25m,
+                        2 => 1.15m,
+                        _ => 1.00m
+                    };
+
+                    int earnedPoints = (int)(finalPrice * earnRate * bonusMultiplier);
+                    var departureDate = pendingBookings.Min(c => c.Occurrence.DepartureDateTime);
+                    var referenceBookingId = pendingBookings[0].BookingId;
+
+                    var earnTransaction = new PointTransaction
+                    {
+                        UserId = userId,
+                        Amount = earnedPoints,
+                        AvailableAmount = earnedPoints,
+                        Description = $"Earned from {distinctTrips}-leg Booking",
+                        Source = PointSource.BookingEarned,
+                        Status = PointTransactionStatus.Pending,
+                        CreatedAt = DateTime.UtcNow,
+                        UnlocksAt = departureDate,
+                        BookingId = referenceBookingId,
+                        ExpiresAt = departureDate.AddMonths(4)
+                    };
+                    _dbContext.PointTransactions.Add(earnTransaction);
+
                     await _dbContext.SaveChangesAsync(cancellationToken);
                     await transaction.CommitAsync(cancellationToken);
 
-                    return $"Checkout successful. {grandTotal:0.00} was deducted from your wallet for {pendingBookings.Count} trip(s).";
+                    return $"Checkout successful. {finalPrice:0.00} was deducted from your wallet for {pendingBookings.Count} trip(s).";
                 }
                 catch (DbUpdateConcurrencyException ex)
                 {
@@ -542,9 +623,6 @@ namespace GP.Application.Services
                          && b.Occurrence.ArrivalDateTime <= now)
                 .ToListAsync(cancellationToken);
 
-            if (completedCandidates.Count == 0)
-                return;
-
             foreach (var booking in completedCandidates)
             {
                 booking.Status = BookingStatus.Completed;
@@ -554,6 +632,60 @@ namespace GP.Application.Services
                 booking.User.TotalTripsCount += 1;
                 booking.User.UpdatedAt = now;
             }
+
+            var nowUtc = DateTime.UtcNow;
+
+            var pendingPoints = await _dbContext.PointTransactions
+                .Where(pt => pt.Status == PointTransactionStatus.Pending
+                             && pt.UnlocksAt.HasValue
+                             && pt.UnlocksAt <= nowUtc)
+                .ToListAsync(cancellationToken);
+
+            foreach (var pt in pendingPoints)
+            {
+                pt.Status = PointTransactionStatus.Available;
+            }
+
+            var unlockedPointsByUser = pendingPoints
+                .GroupBy(pt => pt.UserId)
+                .Select(g => new { UserId = g.Key, TotalUnlocked = g.Sum(pt => pt.Amount) });
+
+            foreach (var userPoints in unlockedPointsByUser)
+            {
+                var user = await _dbContext.Users.FindAsync(new object[] { userPoints.UserId }, cancellationToken);
+                if (user != null)
+                {
+                    // 1. Give them their earned points
+                    user.LoyaltyPointsBalance += userPoints.TotalUnlocked;
+
+                    // 2. Calculate gamification metrics for the trips that just arrived
+                    var userFinishedTrips = pendingPoints
+                        .Where(p => p.UserId == userPoints.UserId && p.BookingId.HasValue)
+                        .ToList();
+
+                    if (userFinishedTrips.Count > 0)
+                    {
+                        int completedLegs = userFinishedTrips.Count;
+                        decimal totalSpendForTheseTrips = 0;
+
+                        foreach (var pt in userFinishedTrips)
+                        {
+                            var booking = await _dbContext.Bookings.FindAsync(new object[] { pt.BookingId!.Value }, cancellationToken);
+                            if (booking != null)
+                            {
+                                // Add the price to the gamification tracker
+                                totalSpendForTheseTrips += booking.TotalPrice;
+                            }
+                        }
+
+                        // 3. Fire the event safely! Progress is now strictly tied to arrival.
+                        await _mediator.Publish(new BookingCompletedEvent(user.UserId, completedLegs, totalSpendForTheseTrips), cancellationToken);
+                    }
+                }
+            }
+
+            if (completedCandidates.Count == 0 && pendingPoints.Count == 0)
+                return;
 
             await _dbContext.SaveChangesAsync(cancellationToken);
         }

@@ -4,6 +4,7 @@ using GP.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GP.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260505064218_AddPointTransactionParentLink")]
+    partial class AddPointTransactionParentLink
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -117,6 +120,9 @@ namespace GP.Infrastructure.Migrations
                         .HasPrecision(10, 2)
                         .HasColumnType("decimal(10,2)");
 
+                    b.Property<int?>("TripOccurrenceId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -136,6 +142,8 @@ namespace GP.Infrastructure.Migrations
                     b.HasIndex("PaymentStatus");
 
                     b.HasIndex("Status");
+
+                    b.HasIndex("TripOccurrenceId");
 
                     b.HasIndex("UserId");
 
@@ -1355,7 +1363,7 @@ namespace GP.Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("GP.Domain.Entities.TripOccurrence", "Occurrence")
-                        .WithMany("Bookings")
+                        .WithMany()
                         .HasForeignKey("OccurrenceId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -1365,6 +1373,10 @@ namespace GP.Infrastructure.Migrations
                         .HasForeignKey("OriginStationId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("GP.Domain.Entities.TripOccurrence", null)
+                        .WithMany("Bookings")
+                        .HasForeignKey("TripOccurrenceId");
 
                     b.HasOne("GP.Domain.Entities.User", "User")
                         .WithMany("Bookings")

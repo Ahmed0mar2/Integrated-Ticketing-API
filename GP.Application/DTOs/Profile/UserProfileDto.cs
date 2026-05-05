@@ -17,6 +17,10 @@ public class UserProfileDto
 
     // The Gamification Stats
     public int TotalTripsCount { get; set; }
+    public int LoyaltyPointsBalance { get; set; }
+    public List<ActiveChallengeDto> ActiveChallenges { get; set; } = new();
+    public int ExpiringPointsAmount { get; set; } = 0;
+    public DateTime? NextExpiryDate { get; set; }
 
     // The Digital Money Foundation
     public decimal WalletBalance { get; set; }

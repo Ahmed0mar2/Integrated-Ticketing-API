@@ -12,13 +12,13 @@ namespace GP.Domain.Entities
     {
         public int BookingId { get; set; }
         public int UserId { get; set; }
-        public int OccurrenceId { get; set; }  
+        public int OccurrenceId { get; set; }
         public int CoachClassId { get; set; }
         public int OriginStationId { get; set; }
         public int DestinationStationId { get; set; }
-        public int SeatsBooked { get; set; }  
-        public decimal TotalPrice { get; set; }  
-        public DateTime BookingTime { get; set; } 
+        public int SeatsBooked { get; set; }
+        public decimal TotalPrice { get; set; }
+        public DateTime BookingTime { get; set; }
         public BookingStatus Status { get; set; } = BookingStatus.Pending;
         public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
         public DateTime? HoldExpiresAt { get; set; }
@@ -35,5 +35,6 @@ namespace GP.Domain.Entities
         public Stop OriginStation { get; set; } = null!;
         public Stop DestinationStation { get; set; } = null!;
         public ICollection<WalletTransaction> WalletTransactions { get; set; } = [];
+        public ICollection<PointTransaction> PointTransactions { get; set; } = [];
     }
 }
