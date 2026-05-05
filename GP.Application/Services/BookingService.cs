@@ -654,12 +654,10 @@ namespace GP.Application.Services
                 booking.User.UpdatedAt = now;
             }
 
-            var nowUtc = DateTime.UtcNow;
-
             var pendingPoints = await _dbContext.PointTransactions
                 .Where(pt => pt.Status == PointTransactionStatus.Pending
                              && pt.UnlocksAt.HasValue
-                             && pt.UnlocksAt <= nowUtc)
+                             && pt.UnlocksAt <= now)
                 .ToListAsync(cancellationToken);
 
             foreach (var pt in pendingPoints)

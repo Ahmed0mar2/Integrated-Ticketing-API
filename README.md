@@ -34,6 +34,39 @@
 
 ---
 
+## ⏱️ Timing & Timezone Rules
+
+This project uses a unified timing wrapper: `GP.Application/Common/AppTime.cs`.
+
+### Standard
+
+- **Schedule-local business time (Egypt/Cairo):** Use `AppTime.GetScheduleNow()`.
+- **Absolute UTC instants:** Use `DateTime.UtcNow`.
+
+### When to Use Each
+
+- Use `AppTime.GetScheduleNow()` when comparing against timetable/business fields such as:
+  - `DepartureDateTime`
+  - `ArrivalDateTime`
+  - `UnlocksAt`
+  - `travelDate` boundaries
+- Use `DateTime.UtcNow` for cross-system absolute instants such as:
+  - API wrapper timestamps
+  - token/identity expiry and revocation times
+  - audit timestamps (`CreatedAt`, `UpdatedAt`)
+
+### Serialization Contract
+
+- UTC fields are serialized with `Z`.
+- Schedule-local timetable fields are serialized without timezone suffix.
+
+### Important Guardrail
+
+- Do not compare schedule-local database values directly with `DateTime.UtcNow`.
+- Convert "now" to schedule-local via `AppTime.GetScheduleNow()` first, then compare.
+
+---
+
 ## 🏗️ Architecture
 
 This solution follows **Clean Architecture** principles with clear separation of concerns:

@@ -51,6 +51,18 @@ Frontend integration guide for Flutter and Angular teams.
 - **Date window logic:**
   - `travelDate` validation and occurrence generation use the schedule-local date boundary (Egypt/Cairo schedule timezone), not UTC day rollover.
 
+### Backend Timing Standard (Implementation Rule)
+
+- Always use `AppTime` (`GP.Application/Common/AppTime.cs`) as the shared timing wrapper for business logic.
+- Use `AppTime.GetScheduleNow()` for schedule comparisons and lifecycle decisions tied to timetable values.
+  - Examples: comparing with `departureDateTime`, `arrivalDateTime`, `UnlocksAt`, and travel-date boundaries.
+- Use `DateTime.UtcNow` only for absolute/audit instants that must be globally unambiguous.
+  - Examples: API wrapper `timestamp`, security token expiry, `createdAt`/`updatedAt` audit fields, and hold expiration fields serialized with `Z`.
+- Normalize DTO timestamp shape at the API boundary:
+  - Use `AppTime.AsUtc(...)` for UTC fields returned with `Z`.
+  - Use `AppTime.AsSchedule(...)` for schedule-local timetable values returned without timezone suffix.
+- Do not compare schedule-local database columns to `DateTime.UtcNow` directly; convert to the schedule standard via `AppTime.GetScheduleNow()` first.
+
 ---
 
 # 1. Authentication API
