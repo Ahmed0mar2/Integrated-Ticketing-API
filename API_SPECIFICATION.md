@@ -51,6 +51,18 @@ Frontend integration guide for Flutter and Angular teams.
 - **Date window logic:**
   - `travelDate` validation and occurrence generation use the schedule-local date boundary (Egypt/Cairo schedule timezone), not UTC day rollover.
 
+### Backend Timing Standard (Implementation Rule)
+
+- Always use `AppTime` (`GP.Application/Common/AppTime.cs`) as the shared timing wrapper for business logic.
+- Use `AppTime.GetScheduleNow()` for schedule comparisons and lifecycle decisions tied to timetable values.
+  - Examples: comparing with `departureDateTime`, `arrivalDateTime`, `UnlocksAt`, and travel-date boundaries.
+- Use `DateTime.UtcNow` only for absolute/audit instants that must be globally unambiguous.
+  - Examples: API wrapper `timestamp`, security token expiry, `createdAt`/`updatedAt` audit fields, and hold expiration fields serialized with `Z`.
+- Normalize DTO timestamp shape at the API boundary:
+  - Use `AppTime.AsUtc(...)` for UTC fields returned with `Z`.
+  - Use `AppTime.AsSchedule(...)` for schedule-local timetable values returned without timezone suffix.
+- Do not compare schedule-local database columns to `DateTime.UtcNow` directly; convert to the schedule standard via `AppTime.GetScheduleNow()` first.
+
 ---
 
 # 1. Authentication API
@@ -1308,10 +1320,10 @@ Base route: `/api/Bookings`
 ```
 
 ### Request Field Reference
-| Field          | Type   | Required | Notes                                                    |
-| -------------- | ------ | -------- | -------------------------------------------------------- |
-| paymentMethod  | string | Yes      | Currently only `Wallet` is supported                     |
-| pointsToRedeem | int    | No       | Optional points redemption, capped at 50% of cart total  |
+| Field          | Type   | Required | Notes                                                   |
+| -------------- | ------ | -------- | ------------------------------------------------------- |
+| paymentMethod  | string | Yes      | Currently only `Wallet` is supported                    |
+| pointsToRedeem | int    | No       | Optional points redemption, capped at 50% of cart total |
 
 ### Checkout Rules
 - Only `Wallet` payment is accepted (case-insensitive).
@@ -1422,6 +1434,8 @@ No request body.
       "seatsBooked": 2,
       "bookingDate": "2026-03-31T00:02:00Z",
       "isMarketplacePurchase": false,
+      "activeListingId": null,
+      "isOfferedForResale": false,
       "agencyName": "GoBus",
       "className": "Business",
       "originStation": "رمسيس",
@@ -1433,15 +1447,13 @@ No request body.
           "passengerId": 5001,
           "name": "Ali Hassan",
           "idNumber": "29805151111121",
-          "seatNumber": "7",
-          "isOfferedForResale": false
+          "seatNumber": "7"
         },
         {
           "passengerId": 5002,
           "name": "Sara Mohamed",
           "idNumber": "A12345678",
-          "seatNumber": "8",
-          "isOfferedForResale": false
+          "seatNumber": "8"
         }
       ]
     }
@@ -1666,7 +1678,7 @@ Base route: `/api/Marketplace`
 ### Endpoint Overview
 - **Method:** `POST`
 - **URL:** `/api/Marketplace/list`
-- **Business Use Case:** Lists a single passenger ticket for resale.
+- **Business Use Case:** Lists an entire booking for resale (all passengers).
 
 ### Authentication / Authorization
 - **JWT Required:** Yes
@@ -1676,24 +1688,23 @@ Base route: `/api/Marketplace`
 ```json
 {
   "bookingId": 1024,
-  "passengerId": 5001,
   "askingPrice": 120.0
 }
 ```
 
 ### Request Field Reference
-| Field       | Type    | Required | Notes                                       |
-| ----------- | ------- | -------- | ------------------------------------------- |
-| bookingId   | int     | Yes      | Must be a confirmed booking                 |
-| passengerId | int     | Yes      | Passenger within booking                    |
-| askingPrice | decimal | Yes      | Must be > 0 and below original ticket price |
+| Field       | Type    | Required | Notes                                        |
+| ----------- | ------- | -------- | -------------------------------------------- |
+| bookingId   | int     | Yes      | Must be a confirmed booking                  |
+| askingPrice | decimal | Yes      | Must be > 0 and below original booking price |
 
 ### Listing Rules
 - Only the booking owner can list a ticket.
 - Booking must be `Confirmed` and trip departure must be in the future.
 - Booking must not have `IsMarketplacePurchase = true` (tickets purchased from the marketplace cannot be resold).
-- Passenger must exist and not be already offered for resale.
-- Asking price must be strictly less than the original ticket price.
+- Booking must not already have an active listing.
+- All passengers in the booking are offered for resale together.
+- Asking price must be strictly less than the original booking price.
 
 ### Response Example (200 OK)
 ```json
@@ -1704,7 +1715,7 @@ Base route: `/api/Marketplace`
 ### Endpoint Overview
 - **Method:** `POST`
 - **URL:** `/api/Marketplace/buy/{listingId}`
-- **Business Use Case:** Purchases a listed ticket and transfers ownership.
+- **Business Use Case:** Purchases a listed booking and transfers ownership of the entire booking.
 
 ### Authentication / Authorization
 - **JWT Required:** Yes
@@ -1720,6 +1731,7 @@ Base route: `/api/Marketplace`
 - Buyer cannot be the seller.
 - Trip departure must be in the future.
 - Buyer wallet balance must cover `askingPrice`.
+- The entire booking (all passengers) is transferred to the buyer.
 
 ### Response Example (200 OK)
 ```json
@@ -1761,9 +1773,12 @@ Query string parameters:
         "originalPrice": 180.0,
         "askingPrice": 150.0,
         "sellerName": "Ahmed Hassan",
+        "seatsCount": 2,
         "tripDetails": {
           "origin": "Ramses",
           "destination": "Sidi Gaber",
+          "originGov": "Cairo",
+          "destinationGov": "Alexandria",
           "time": "2026-04-02T07:20:00",
           "class": "GoBus - Business"
         }
@@ -1782,6 +1797,8 @@ Query string parameters:
 ### Notes
 - If no listings exist, the message is "No active marketplace listings found." and items list is empty.
 - `tripDetails.time` is a schedule-local timestamp without timezone suffix.
+- `tripDetails.originGov` and `tripDetails.destinationGov` come from the normalized station governorate data.
+- `seatsCount` indicates the total number of seats included in the booking bundle offered for resale.
 - Filters are optional and combined with AND logic.
 - `travelDate` matches the schedule-local date portion of the trip departure.
 
@@ -1803,7 +1820,7 @@ Query string parameters:
 ### Cancellation Rules
 - Listing must exist and belong to the authenticated user.
 - Listing must be in `Available` status.
-- The associated passenger ticket will have `IsOfferedForResale` set to `false`.
+- Listing status is set to `Cancelled` while the booking remains intact.
 
 ### Response Example (200 OK)
 ```json
@@ -1839,8 +1856,8 @@ Query string parameters:
 | `POST`   | `/api/Jobs/process-completed-trips`   | Secret query param | Mark eligible trips as completed                             |
 | `POST`   | `/api/Jobs/release-expired-holds`     | Secret query param | Release expired holds and restore inventory                  |
 | `POST`   | `/api/Jobs/expire-points`             | Secret query param | Expire old loyalty point transactions                        |
-| `POST`   | `/api/Jobs/reset-monthly-challenges`  | Secret query param | Reset and reassign monthly challenges                         |
-| `POST`   | `/api/Jobs/seed-challenges`           | Secret query param | Seed the static monthly challenges                             |
+| `POST`   | `/api/Jobs/reset-monthly-challenges`  | Secret query param | Reset and reassign monthly challenges                        |
+| `POST`   | `/api/Jobs/seed-challenges`           | Secret query param | Seed the static monthly challenges                           |
 | `GET`    | `/api/admin/users`                    |        Yes (Admin) | List all users                                               |
 | `GET`    | `/api/admin/users/{id}`               |        Yes (Admin) | Get user detail                                              |
 | `PATCH`  | `/api/admin/users/{id}/toggle-status` |        Yes (Admin) | Toggle user active status                                    |

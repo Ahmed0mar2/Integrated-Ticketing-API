@@ -87,29 +87,6 @@ namespace GP.Api.Controllers
             return Ok(result);
         }
 
-        [HttpPost("cancel-by-booking")]
-        [Authorize]
-        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
-        public async Task<IActionResult> CancelListingByBooking([FromBody] CancelByBookingRequest request, CancellationToken cancellationToken)
-        {
-            var userId = User.GetDomainUserId();
-            if (userId == null)
-            {
-                return Unauthorized(ApiResponse.ErrorResponse("Invalid token"));
-            }
-
-            var result = await _marketplaceService.CancelListingByBookingPassengerAsync(userId.Value, request.BookingId, request.PassengerId, cancellationToken);
-
-            if (!result.Success)
-            {
-                return BadRequest(result);
-            }
-
-            return Ok(result);
-        }
-
         [HttpGet("active")]
         [AllowAnonymous]
         [ProducesResponseType(typeof(ApiResponse<PagedResult<MarketplaceListingResponseDto>>), StatusCodes.Status200OK)]
@@ -137,8 +114,4 @@ namespace GP.Api.Controllers
     }
 }
 
-public class CancelByBookingRequest
-{
-    public int BookingId { get; set; }
-    public int PassengerId { get; set; }
-}
+

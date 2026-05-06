@@ -9,12 +9,14 @@ namespace GP.Application.DTOs.Bookings
     public class MyTicketResponseDto
     {
         public int BookingId { get; set; }
-        public string Status { get; set; } = string.Empty; 
+        public string Status { get; set; } = string.Empty;
         public string PaymentStatus { get; set; } = string.Empty;
         public decimal TotalPrice { get; set; }
         public int SeatsBooked { get; set; }
         public DateTime BookingDate { get; set; }
         public bool IsMarketplacePurchase { get; set; }
+        public int? ActiveListingId { get; set; }
+        public bool IsOfferedForResale { get; set; }
 
         // Trip Details
         public string AgencyName { get; set; } = string.Empty;
@@ -34,6 +36,5 @@ namespace GP.Application.DTOs.Bookings
         public string Name { get; set; } = string.Empty;
         public string? IdNumber { get; set; }
         public string SeatNumber { get; set; } = string.Empty;
-        public bool IsOfferedForResale { get; set; }
     }
 }
