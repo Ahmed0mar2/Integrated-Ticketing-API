@@ -22,7 +22,9 @@ namespace GP.Application.DTOs.Bookings
         public string AgencyName { get; set; } = string.Empty;
         public string ClassName { get; set; } = string.Empty;
         public string OriginStation { get; set; } = string.Empty;
+        public string OriginGov { get; set; } = string.Empty;
         public string DestinationStation { get; set; } = string.Empty;
+        public string DestinationGov { get; set; } = string.Empty;
         public DateTime BoardingTime { get; set; }
         public DateTime DropoffTime { get; set; }
 

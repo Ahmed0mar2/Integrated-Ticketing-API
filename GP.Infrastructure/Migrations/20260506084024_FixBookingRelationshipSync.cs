@@ -10,17 +10,17 @@ namespace GP.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Bookings_TripOccurrences_TripOccurrenceId",
-                table: "Bookings");
+            // migrationBuilder.DropForeignKey(
+            //     name: "FK_Bookings_TripOccurrences_TripOccurrenceId",
+            //     table: "Bookings");
 
-            migrationBuilder.DropIndex(
-                name: "IX_Bookings_TripOccurrenceId",
-                table: "Bookings");
+            // migrationBuilder.DropIndex(
+            //     name: "IX_Bookings_TripOccurrenceId",
+            //     table: "Bookings");
 
-            migrationBuilder.DropColumn(
-                name: "TripOccurrenceId",
-                table: "Bookings");
+            // migrationBuilder.DropColumn(
+            //     name: "TripOccurrenceId",
+            //     table: "Bookings");
         }
 
         /// <inheritdoc />

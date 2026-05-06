@@ -327,6 +327,7 @@ public class MarketplaceService : IMarketplaceService
             return new MarketplaceListingResponseDto
             {
                 ListingId = l.Id,
+                SellerId = l.SellerId,
                 OriginalPrice = l.OriginalPrice,
                 AskingPrice = l.AskingPrice,
                 SellerName = BuildSellerFullName(l.Seller),
@@ -337,6 +338,7 @@ public class MarketplaceService : IMarketplaceService
                     Destination = booking.DestinationStation.ArabicName,
                     OriginGov = booking.OriginStation.Governorate ?? "Unknown",
                     DestinationGov = booking.DestinationStation.Governorate ?? "Unknown",
+                    AgencyName = booking.Occurrence.Trip.Agency.AgencyName,
                     Time = boardingTime,
                     Class = $"{booking.Occurrence.Trip.Agency.AgencyName} - {booking.CoachClass.Name}"
                 }
