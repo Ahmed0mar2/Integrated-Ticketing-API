@@ -45,8 +45,9 @@ namespace GP.Infrastructure.Data.Configurations
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(b => b.Occurrence)
-                .WithMany()
+                .WithMany(o => o.Bookings)
                 .HasForeignKey(b => b.OccurrenceId)
+                .IsRequired()
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(b => b.CoachClass)

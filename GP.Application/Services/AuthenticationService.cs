@@ -133,8 +133,8 @@ namespace GP.Application.Services
                         NationalIdNumber = request.NationalIdNumber,
                         IsNationalIdVerified = !string.IsNullOrWhiteSpace(request.NationalIdNumber),
                         CountryId = country.CountryId,
-                        Nationality = country.NationalityName, 
-                        Country = country, 
+                        Nationality = country.NationalityName,
+                        Country = country,
                         TotalTripsCount = 0,
                         WalletBalance = 0m,
                         LoyaltyPointsBalance = 0,
@@ -143,6 +143,24 @@ namespace GP.Application.Services
 
                     _context.Users.Add(domainUser);
                     await _context.SaveChangesAsync();
+
+                    var defaultChallenges = await _context.Challenges
+                        .Where(c => c.IsActive)
+                        .ToListAsync();
+
+                    if (defaultChallenges.Count > 0)
+                    {
+                        var userChallenges = defaultChallenges.Select(c => new UserChallenge
+                        {
+                            UserId = domainUser.UserId,
+                            ChallengeId = c.Id,
+                            CurrentProgress = 0,
+                            IsCompleted = false
+                        }).ToList();
+
+                        _context.UserChallenges.AddRange(userChallenges);
+                        await _context.SaveChangesAsync();
+                    }
 
                     applicationUser.DomainUserId = domainUser.UserId;
                     applicationUser.LastLoginAt = DateTime.UtcNow;
@@ -365,7 +383,7 @@ namespace GP.Application.Services
 
         // PRIVATE HELPER METHODS
 
-        private async Task<(string Token, DateTime ExpiresAt)> GenerateAccessTokenAsync(ApplicationUser applicationUser,User domainUser)
+        private async Task<(string Token, DateTime ExpiresAt)> GenerateAccessTokenAsync(ApplicationUser applicationUser, User domainUser)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.UTF8.GetBytes(_jwtSettings.SecretKey);
