@@ -55,7 +55,7 @@ public class MarketplaceService : IMarketplaceService
             .AsNoTracking()
             .AnyAsync(l => l.BookingId == booking.BookingId && l.Status == ListingStatus.Available, cancellationToken);
 
-        if (existingListing || booking.BookingPassengers.Any(p => p.IsOfferedForResale))
+        if (existingListing)
             return ApiResponse.Fail("Booking is already listed on the marketplace.");
 
         var scheduleNow = AppTime.GetScheduleNow();
@@ -82,11 +82,6 @@ public class MarketplaceService : IMarketplaceService
         };
 
         _dbContext.MarketplaceListings.Add(listing);
-
-        foreach (var bookingPassenger in booking.BookingPassengers)
-        {
-            bookingPassenger.IsOfferedForResale = true;
-        }
 
         await _dbContext.SaveChangesAsync(cancellationToken);
 
