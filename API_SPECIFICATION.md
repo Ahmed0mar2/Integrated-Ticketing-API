@@ -1302,16 +1302,18 @@ Base route: `/api/Bookings`
   "data": {
     "items": [
       {
-        "bookingId": 1024,
-        "totalPrice": 360.0,
-        "seatsBooked": 2,
-        "holdExpiresAt": "2026-03-20T07:10:00Z",
-        "agencyName": "GoBus",
-        "className": "Business",
-        "origin": "رمسيس",
-        "destination": "سيدي جابر",
-        "boardingTime": "2026-03-20T07:20:00",
-        "dropoffTime": "2026-03-20T10:00:00",
+      "bookingId": 1024,
+      "totalPrice": 360.0,
+      "seatsBooked": 2,
+      "holdExpiresAt": "2026-03-20T07:10:00Z",
+      "agencyName": "GoBus",
+      "className": "Business",
+      "origin": "رمسيس",
+      "originGov": "Cairo",
+      "destination": "سيدي جابر",
+      "destinationGov": "Alexandria",
+      "boardingTime": "2026-03-20T07:20:00",
+      "dropoffTime": "2026-03-20T10:00:00",
         "passengers": [
           {
             "name": "Ali Hassan",
@@ -1404,7 +1406,9 @@ No request body.
         "agencyName": "GoBus",
         "className": "Business",
         "origin": "رمسيس",
+        "originGov": "Cairo",
         "destination": "سيدي جابر",
+        "destinationGov": "Alexandria",
         "boardingTime": "2026-04-02T07:20:00",
         "dropoffTime": "2026-04-02T10:00:00",
         "passengers": [

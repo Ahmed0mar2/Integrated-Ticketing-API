@@ -10,6 +10,8 @@ namespace GP.Application.DTOs.Bookings
         public string ClassName { get; set; } = string.Empty;
         public string Origin { get; set; } = string.Empty;
         public string Destination { get; set; } = string.Empty;
+        public string OriginGov { get; set; } = string.Empty;
+        public string DestinationGov { get; set; } = string.Empty;
         public DateTime BoardingTime { get; set; }
         public DateTime DropoffTime { get; set; }
         public List<TicketPassengerDto> Passengers { get; set; } = new();

@@ -481,7 +481,9 @@ namespace GP.Application.Services
                     AgencyName = b.Occurrence.Trip.Agency.AgencyName,
                     ClassName = b.CoachClass.Name,
                     Origin = b.OriginStation.ArabicName,
+                    OriginGov = b.OriginStation.Governorate ?? "Unknown",
                     Destination = b.DestinationStation.ArabicName,
+                    DestinationGov = b.DestinationStation.Governorate ?? "Unknown",
                     BoardingTime = boardingTime,
                     DropoffTime = dropoffTime,
                     Passengers = b.BookingPassengers
