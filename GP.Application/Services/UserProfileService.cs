@@ -89,7 +89,9 @@ public class UserProfileService : IUserProfileService
             {
                 ChallengeId = uc.ChallengeId,
                 Title = uc.Challenge.Title,
+                Description = uc.Challenge.Description,
                 Type = (int)uc.Challenge.Type,
+                Frequency = (int)uc.Challenge.Frequency,
                 CurrentProgress = uc.CurrentProgress,
                 GoalValue = uc.Challenge.GoalValue,
                 RewardPoints = uc.Challenge.RewardPoints

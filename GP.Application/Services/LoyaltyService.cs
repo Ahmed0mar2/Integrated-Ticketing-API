@@ -1,4 +1,5 @@
 using GP.Application.Common;
+using GP.Application.DTOs.Loyalty;
 using GP.Application.Interfaces;
 using GP.Domain.Entities;
 using GP.Domain.Enums;
@@ -96,7 +97,10 @@ namespace GP.Application.Services
 
         public async Task<ApiResponse> ResetMonthlyChallengesAsync(CancellationToken cancellationToken = default)
         {
-            var allOldChallenges = await _dbContext.UserChallenges.ToListAsync(cancellationToken);
+            // Remove old monthly challenge assignments, but preserve OneTime challenges
+            var allOldChallenges = await _dbContext.UserChallenges
+                .Where(uc => uc.Challenge.Frequency == ChallengeFrequency.Monthly)
+                .ToListAsync(cancellationToken);
 
             if (allOldChallenges.Count > 0)
             {
@@ -107,14 +111,15 @@ namespace GP.Application.Services
                 .Select(u => u.UserId)
                 .ToListAsync(cancellationToken);
 
-            var activeChallenges = await _dbContext.Challenges
-                .Where(c => c.IsActive)
+            // Only get active Monthly challenges for resetting
+            var activeMonthlyChallenge = await _dbContext.Challenges
+                .Where(c => c.IsActive && c.Frequency == ChallengeFrequency.Monthly)
                 .ToListAsync(cancellationToken);
 
-            var newAssignments = new List<UserChallenge>(users.Count * activeChallenges.Count);
+            var newAssignments = new List<UserChallenge>(users.Count * activeMonthlyChallenge.Count);
             foreach (var userId in users)
             {
-                foreach (var challenge in activeChallenges)
+                foreach (var challenge in activeMonthlyChallenge)
                 {
                     newAssignments.Add(new UserChallenge
                     {
@@ -133,7 +138,86 @@ namespace GP.Application.Services
 
             await _dbContext.SaveChangesAsync(cancellationToken);
 
-            return ApiResponse.Ok($"Reset complete. Assigned {activeChallenges.Count} challenges to {users.Count} users.");
+            return ApiResponse.Ok($"Reset complete. Assigned {activeMonthlyChallenge.Count} challenges to {users.Count} users.");
+        }
+
+        public async Task<PagedResult<PointTransactionHistoryDto>> GetUserPointHistoryAsync(int userId, int pageNumber, int pageSize, CancellationToken cancellationToken = default)
+        {
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
+            var query = _dbContext.PointTransactions
+                .Where(pt => pt.UserId == userId);
+
+            var totalCount = await query.CountAsync(cancellationToken);
+
+            var items = await query
+                .OrderByDescending(pt => pt.CreatedAt)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(pt => new PointTransactionHistoryDto
+                {
+                    TransactionId = pt.Id,
+                    Amount = pt.Amount,
+                    Description = pt.Description,
+                    Source = pt.Source.ToString(),
+                    Status = pt.Status.ToString(),
+                    CreatedAt = pt.CreatedAt
+                })
+                .ToListAsync(cancellationToken);
+
+            return new PagedResult<PointTransactionHistoryDto>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                PageSize = pageSize,
+                CurrentPage = pageNumber
+            };
+        }
+
+        public async Task<PagedResult<UserChallengeHistoryDto>> GetUserChallengesAsync(int userId, bool? isCompleted, int pageNumber, int pageSize, CancellationToken cancellationToken = default)
+        {
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
+            var query = _dbContext.UserChallenges
+                .Include(uc => uc.Challenge)
+                .Where(uc => uc.UserId == userId);
+
+            if (isCompleted.HasValue)
+            {
+                query = query.Where(uc => uc.IsCompleted == isCompleted.Value);
+            }
+
+            var totalCount = await query.CountAsync(cancellationToken);
+
+            var items = await query
+                .OrderBy(uc => uc.IsCompleted)
+                .ThenBy(uc => uc.Challenge.Frequency)
+                .ThenBy(uc => uc.ChallengeId)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(uc => new UserChallengeHistoryDto
+                {
+                    ChallengeId = uc.ChallengeId,
+                    Title = uc.Challenge.Title,
+                    Description = uc.Challenge.Description,
+                    Type = uc.Challenge.Type.ToString(),
+                    Frequency = uc.Challenge.Frequency.ToString(),
+                    CurrentProgress = uc.CurrentProgress,
+                    GoalValue = uc.Challenge.GoalValue,
+                    RewardPoints = uc.Challenge.RewardPoints,
+                    IsCompleted = uc.IsCompleted
+                })
+                .ToListAsync(cancellationToken);
+
+            return new PagedResult<UserChallengeHistoryDto>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                PageSize = pageSize,
+                CurrentPage = pageNumber
+            };
         }
     }
 }

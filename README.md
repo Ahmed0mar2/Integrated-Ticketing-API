@@ -354,6 +354,13 @@ These endpoints were added as part of the User Profile epic. They allow authenti
 | `PUT`  | `/api/users/me`                 | ✅             | Update current user's basic profile info (first/family/last name, email, phone). Email & phone uniqueness validated at domain and identity levels |
 | `POST` | `/api/users/me/profile-picture` | ✅             | Upload or replace user's profile picture (multipart file). Allowed extensions: `.jpg`, `.jpeg`, `.png`                                            |
 
+### 🎁 Loyalty (`/api/Loyalty`)
+
+| Method | Endpoint              | Description                                                        | Auth Required |
+| ------ | --------------------- | ------------------------------------------------------------------ | ------------- |
+| `GET`  | `/api/Loyalty/history` | Retrieve the user's loyalty point ledger history (latest first)   | ✅             |
+| `GET`  | `/api/Loyalty/challenges` | Retrieve paged active and completed challenge history            | ✅             |
+
 ### 🛒 Bookings (`/api/Bookings`)
 
 | Method | Endpoint                   | Description                                                                               | Auth Required |

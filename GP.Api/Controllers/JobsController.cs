@@ -179,10 +179,10 @@ namespace GP.API.Controllers
 
             var standardChallenges = new List<Challenge>
             {
-                new() { Title = "Frequent Traveler", Type = ChallengeType.TotalTrips, GoalValue = 4, RewardPoints = 400, IsActive = true },
-                new() { Title = "High Roller", Type = ChallengeType.TotalSpend, GoalValue = 1000, RewardPoints = 500, IsActive = true },
-                new() { Title = "The Getaway", Type = ChallengeType.RoundTrip, GoalValue = 1, RewardPoints = 300, IsActive = true },
-                new() { Title = "The Explorer", Type = ChallengeType.MultiDestination, GoalValue = 1, RewardPoints = 600, IsActive = true }
+               new() { Title = "Frequent Traveler", Description = "Take 4 trips this month to earn bonus points.", Type = ChallengeType.TotalTrips, GoalValue = 4, RewardPoints = 600, IsActive = true, Frequency = ChallengeFrequency.Monthly },
+               new() { Title = "High Roller", Description = "Spend 2,500 EGP this month to earn a massive bonus.", Type = ChallengeType.TotalSpend, GoalValue = 2500, RewardPoints = 1000, IsActive = true, Frequency = ChallengeFrequency.Monthly },
+               new() { Title = "The Getaway", Description = "Complete a round trip this month to earn points.", Type = ChallengeType.RoundTrip, GoalValue = 1, RewardPoints = 300, IsActive = true, Frequency = ChallengeFrequency.Monthly },
+               new() { Title = "The Explorer", Description = "Book a multi-destination trip this month to earn extra points.", Type = ChallengeType.MultiDestination, GoalValue = 1, RewardPoints = 500, IsActive = true, Frequency = ChallengeFrequency.Monthly }
             };
 
             _dbContext.Challenges.AddRange(standardChallenges);
