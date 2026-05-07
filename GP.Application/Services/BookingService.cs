@@ -232,6 +232,31 @@ namespace GP.Application.Services
             });
         }
 
+        public async Task CancelCartHoldAsync(int userId, int bookingId, CancellationToken cancellationToken = default)
+        {
+            var booking = await _dbContext.Bookings
+                .Include(b => b.BookingPassengers)
+                .FirstOrDefaultAsync(b => b.BookingId == bookingId && b.UserId == userId, cancellationToken);
+
+            if (booking == null || booking.Status != BookingStatus.Pending)
+                throw new CartValidationException("Pending booking was not found.");
+
+            var inventory = await _dbContext.TripOccurrenceClassInventories
+                .FirstOrDefaultAsync(i => i.TripOccurrenceId == booking.OccurrenceId
+                                       && i.CoachClassId == booking.CoachClassId, cancellationToken);
+
+            if (inventory != null)
+            {
+                inventory.RemainingSeats = Math.Min(
+                    inventory.TotalSeats,
+                    inventory.RemainingSeats + booking.BookingPassengers.Count);
+            }
+
+            _dbContext.Bookings.Remove(booking);
+
+            await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+
         public async Task<string> CheckoutAsync(int userId, CheckoutRequestDto request, CancellationToken cancellationToken = default)
         {
             if (!string.Equals(request.PaymentMethod?.Trim(), "Wallet", StringComparison.OrdinalIgnoreCase))
@@ -462,6 +487,7 @@ namespace GP.Application.Services
                     Passengers = b.BookingPassengers
                         .Select(p => new TicketPassengerDto
                         {
+                            PassengerId = p.PassengerId,
                             Name = p.Name,
                             IdNumber = p.IdNumber,
                             SeatNumber = p.SeatNumber

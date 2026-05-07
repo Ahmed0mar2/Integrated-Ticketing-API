@@ -79,6 +79,35 @@ namespace GP.Api.Controllers
             return Ok(ApiResponse<BookingCartResponseDto?>.SuccessResponse(cart, "Active cart retrieved successfully."));
         }
 
+        [HttpDelete("bookings/{bookingId}")]
+        [ProducesResponseType(typeof(ApiResponse<object?>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<object?>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> CancelCartHold([FromRoute] int bookingId, CancellationToken cancellationToken)
+        {
+            var userId = User.GetDomainUserId();
+            if (userId == null)
+            {
+                return Unauthorized(ApiResponse.ErrorResponse("Invalid token"));
+            }
+
+            try
+            {
+                await _bookingService.CancelCartHoldAsync(userId.Value, bookingId, cancellationToken);
+                return Ok(ApiResponse<object?>.SuccessResponse(null, "Cart hold cancelled successfully."));
+            }
+            catch (CartValidationException ex)
+            {
+                return BadRequest(ApiResponse<object?>.ErrorResponse(ex.Message));
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    ApiResponse.ErrorResponse("An unexpected error occurred while cancelling cart hold."));
+            }
+        }
+
         [HttpGet("my-tickets")]
         [ProducesResponseType(typeof(ApiResponse<List<MyTicketResponseDto>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]

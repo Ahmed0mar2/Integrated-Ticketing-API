@@ -1409,7 +1409,47 @@ No request body.
 }
 ```
 
-## 9.4 Get My Tickets
+## 9.4 Cancel Cart Hold
+### Endpoint Overview
+- **Method:** `DELETE`
+- **URL:** `/api/Bookings/bookings/{bookingId}`
+- **Business Use Case:** Cancels the full pending booking hold regardless of passenger count.
+
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** Any logged-in User
+
+### Request Payload
+No request body.
+
+### Path Parameters
+| Field     | Type | Required | Notes                                                         |
+| --------- | ---- | -------- | ------------------------------------------------------------- |
+| bookingId | int  | Yes      | Pending booking identifier that belongs to authenticated user |
+
+### Cancellation Rules
+- Booking must exist for authenticated user and be in `Pending` status.
+- The full booking hold is deleted (all passengers under that hold are removed via booking delete).
+- Inventory is restored by the number of passengers in the cancelled booking.
+
+### Response Example (200 OK)
+```json
+{
+  "success": true,
+  "message": "Cart hold cancelled successfully.",
+  "data": null,
+  "errors": null,
+  "timestamp": "2026-05-07T10:30:00Z"
+}
+```
+
+### Response Statuses
+- **200 OK**: Cart hold cancelled successfully.
+- **400 Bad Request**: Booking validation failed.
+- **401 Unauthorized**: Missing or invalid JWT.
+- **500 Internal Server Error**: Unexpected server-side error.
+
+## 9.5 Get My Tickets
 ### Endpoint Overview
 - **Method:** `GET`
 - **URL:** `/api/Bookings/my-tickets`
@@ -1623,11 +1663,11 @@ Base route: `/api/Loyalty`
 - **Role Required:** Authenticated user
 
 ### Query Parameters
-| Parameter   | Type | Required | Description                                             |
-| ----------- | ---- | -------- | ------------------------------------------------------- |
-| isCompleted | bool | No       | Optional filter for completed state                     |
-| pageNumber  | int  | No       | Page number to retrieve, default is `1`                 |
-| pageSize    | int  | No       | Number of records per page, default is `10`             |
+| Parameter   | Type | Required | Description                                 |
+| ----------- | ---- | -------- | ------------------------------------------- |
+| isCompleted | bool | No       | Optional filter for completed state         |
+| pageNumber  | int  | No       | Page number to retrieve, default is `1`     |
+| pageSize    | int  | No       | Number of records per page, default is `10` |
 
 ### Response Example (200 OK)
 ```json
@@ -1982,7 +2022,7 @@ Query string parameters:
 | `PUT`    | `/api/Users/me`                       |                Yes | Update profile                                               |
 | `POST`   | `/api/Users/me/profile-picture`       |                Yes | Upload profile picture                                       |
 | `GET`    | `/api/Loyalty/history`                |                Yes | Retrieve loyalty point ledger history (latest first)         |
-| `GET`    | `/api/Loyalty/challenges`             |                Yes | Retrieve paged active and completed challenge history         |
+| `GET`    | `/api/Loyalty/challenges`             |                Yes | Retrieve paged active and completed challenge history        |
 | `GET`    | `/api/Stations`                       |                 No | Get grouped stations                                         |
 | `GET`    | `/api/trips/search`                   |                 No | Preferred paginated direct-trip search route                 |
 | `GET`    | `/api/Search`                         |                 No | Backward-compatible alias for direct-trip search             |

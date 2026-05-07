@@ -368,6 +368,7 @@ These endpoints were added as part of the User Profile epic. They allow authenti
 | `POST` | `/api/Bookings/cart`       | Add trip to cart with 10-minute seat soft-lock (one passenger ↔ one required seat number) | ✅             |
 | `POST` | `/api/Bookings/cart/add`   | Backward-compatible add-to-cart alias                                                     | ✅             |
 | `GET`  | `/api/Bookings/cart`       | Get current active cart (pending + not expired)                                           | ✅             |
+| `DELETE` | `/api/Bookings/bookings/{bookingId}` | Cancel an entire pending booking hold and release all held seats | ✅             |
 | `POST` | `/api/Bookings/checkout`   | Checkout all pending cart items with one wallet charge                                    | ✅             |
 | `GET`  | `/api/Bookings/my-tickets` | Get user's ticket history (non-pending bookings)                                          | ✅             |
 

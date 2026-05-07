@@ -12,6 +12,7 @@ namespace GP.Application.Interfaces
         Task<BookingCartResponseDto> AddToCartAsync(int userId, AddToCartRequestDto request, CancellationToken cancellationToken = default);
         Task<string> CheckoutAsync(int userId, CheckoutRequestDto request, CancellationToken cancellationToken = default);
         Task<BookingCartResponseDto?> GetActiveCartAsync(int userId, CancellationToken cancellationToken = default);
+        Task CancelCartHoldAsync(int userId, int bookingId, CancellationToken cancellationToken = default);
         Task<List<MyTicketResponseDto>> GetMyTicketsAsync(int userId, CancellationToken cancellationToken = default);
         Task ReleaseExpiredHoldsAsync(CancellationToken cancellationToken = default);
         Task ProcessCompletedTripsAsync(CancellationToken cancellationToken = default);
