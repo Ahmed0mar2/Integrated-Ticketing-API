@@ -29,6 +29,9 @@ namespace GP.Infrastructure.Services
             // Seed roles
             await SeedRolesAsync(roleManager);
 
+            // Seed challenges
+            await SeedChallengesAsync(context);
+
             // Seed admin user
             await SeedAdminUserAsync(userManager, context);
         }
@@ -45,6 +48,30 @@ namespace GP.Infrastructure.Services
                     Console.WriteLine($"Role '{role}' created");
                 }
             }
+        }
+
+        private static async Task SeedChallengesAsync(ApplicationDbContext context)
+        {
+            // Only skip if we already have OneTime challenges seeded
+            if (await context.Challenges.AnyAsync(c => c.Frequency == ChallengeFrequency.OneTime))
+            {
+                Console.WriteLine("ℹ️  Welcome Quests already exist");
+                return;
+            }
+
+            var welcomeQuests = new List<Challenge>
+            {
+                new Challenge { Title = "Complete your first booking", Description = "Complete your first booking to unlock your onboarding reward.", Type = ChallengeType.TotalTrips, GoalValue = 1, RewardPoints = 400, IsActive = true, Frequency = ChallengeFrequency.OneTime },
+                new Challenge { Title = "Complete 3 bookings", Description = "Complete 3 bookings to build your momentum.", Type = ChallengeType.TotalTrips, GoalValue = 3, RewardPoints = 600, IsActive = true, Frequency = ChallengeFrequency.OneTime },
+                new Challenge { Title = "Try a round trip", Description = "Book and complete a round trip to earn this quest reward.", Type = ChallengeType.RoundTrip, GoalValue = 1, RewardPoints = 500, IsActive = true, Frequency = ChallengeFrequency.OneTime },
+                new Challenge { Title = "Master the system", Description = "Book a multi-destination trip to prove you're a travel pro.", Type = ChallengeType.MultiDestination, GoalValue = 1, RewardPoints = 800, IsActive = true, Frequency = ChallengeFrequency.OneTime },
+                new Challenge { Title = "Big Spender", Description = "Spend a total of 1,500 EGP to unlock this lifetime badge.", Type = ChallengeType.TotalSpend, GoalValue = 1500, RewardPoints = 800, IsActive = true, Frequency = ChallengeFrequency.OneTime }
+            };
+
+            context.Challenges.AddRange(welcomeQuests);
+            await context.SaveChangesAsync();
+
+            Console.WriteLine($"✅ {welcomeQuests.Count} Welcome Quests (OneTime challenges) created successfully!");
         }
 
         private static async Task SeedAdminUserAsync(UserManager<ApplicationUser> userManager, ApplicationDbContext context)

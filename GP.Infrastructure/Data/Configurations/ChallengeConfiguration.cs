@@ -1,4 +1,5 @@
 using GP.Domain.Entities;
+using GP.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -29,7 +30,13 @@ namespace GP.Infrastructure.Data.Configurations
                 .IsRequired()
                 .HasDefaultValue(true);
 
+            builder.Property(x => x.Frequency)
+                .IsRequired()
+                .HasDefaultValue(ChallengeFrequency.Monthly);
+
             builder.HasIndex(x => x.IsActive);
+            builder.HasIndex(x => x.Frequency);
         }
     }
 }
+
