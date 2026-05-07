@@ -1,6 +1,7 @@
 ﻿using GP.Application.Common;
 using GP.Application.DTOs.Search;
 using GP.Application.Interfaces;
+using GP.Domain.Entities;
 using GP.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,6 +18,8 @@ namespace GP.Application.Services
 
         public async Task<PagedResult<TripSearchResponseDto>> SearchTripsAsync(TripSearchRequestDto request, CancellationToken cancellationToken = default)
         {
+            await LogRouteSearchAsync(request, cancellationToken);
+
             var originIds = await ResolveStationIdsAsync(request.FromStationId, request.FromGovernorate, cancellationToken);
             var destIds = await ResolveStationIdsAsync(request.ToStationId, request.ToGovernorate, cancellationToken);
 
@@ -39,6 +42,8 @@ namespace GP.Application.Services
 
         public async Task<PagedResult<IndirectTripResponseDto>> SearchIndirectTripsAsync(TripSearchRequestDto request, CancellationToken cancellationToken = default)
         {
+            await LogRouteSearchAsync(request, cancellationToken);
+
             var pageNumber = Math.Max(1, request.PageNumber);
             var pageSize = Math.Max(1, request.PageSize);
 
@@ -176,6 +181,26 @@ namespace GP.Application.Services
                 CurrentPage = pageNumber,
                 PageSize = pageSize
             };
+        }
+
+        public async Task<List<PopularRouteDto>> GetPopularRoutesAsync(CancellationToken cancellationToken = default)
+        {
+            var cutoff = DateTime.UtcNow.AddDays(-7);
+
+            return await _dbContext.RouteSearchLogs
+                .AsNoTracking()
+                .Where(log => log.SearchedAt >= cutoff)
+                .GroupBy(log => new { log.OriginGov, log.DestinationGov })
+                .OrderByDescending(group => group.Count())
+                .ThenBy(group => group.Key.OriginGov)
+                .ThenBy(group => group.Key.DestinationGov)
+                .Take(3)
+                .Select(group => new PopularRouteDto
+                {
+                    OriginGov = group.Key.OriginGov,
+                    DestinationGov = group.Key.DestinationGov
+                })
+                .ToListAsync(cancellationToken);
         }
 
         private async Task<PagedResult<TripSearchResponseDto>> SearchDirectCoreAsync(
@@ -359,6 +384,28 @@ namespace GP.Application.Services
                 offset = offset.Add(TimeSpan.FromDays(1));
 
             return occurrenceStart.Add(offset);
+        }
+
+        private async Task LogRouteSearchAsync(TripSearchRequestDto request, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(request.FromGovernorate) || string.IsNullOrWhiteSpace(request.ToGovernorate))
+                return;
+
+            try
+            {
+                _dbContext.RouteSearchLogs.Add(new RouteSearchLog
+                {
+                    OriginGov = request.FromGovernorate.Trim(),
+                    DestinationGov = request.ToGovernorate.Trim(),
+                    SearchedAt = AppTime.GetScheduleNow()
+                });
+
+                await _dbContext.SaveChangesAsync(cancellationToken);
+            }
+            catch
+            {
+                // Analytics must never block or fail the user's search.
+            }
         }
 
         private async Task<List<int>> ResolveStationIdsAsync(int? stationId, string? governorate, CancellationToken ct)

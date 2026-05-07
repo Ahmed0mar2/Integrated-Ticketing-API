@@ -5,6 +5,7 @@ using GP.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,10 +18,12 @@ namespace GP.Api.Controllers
     public class SearchController : ControllerBase
     {
         private readonly ISearchService _searchService;
+        private readonly IMemoryCache _memoryCache;
 
-        public SearchController(ISearchService searchService)
+        public SearchController(ISearchService searchService, IMemoryCache memoryCache)
         {
             _searchService = searchService;
+            _memoryCache = memoryCache;
         }
 
         /// <summary>
@@ -62,6 +65,28 @@ namespace GP.Api.Controllers
                 return Ok(ApiResponse<PagedResult<IndirectTripResponseDto>>.SuccessResponse(results, "No indirect routes found."));
 
             return Ok(ApiResponse<PagedResult<IndirectTripResponseDto>>.SuccessResponse(results, $"Found {results.TotalCount} indirect routes."));
+        }
+
+        [HttpGet("popular-routes")]
+        [ProducesResponseType(typeof(ApiResponse<List<PopularRouteDto>>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetPopularRoutes(CancellationToken cancellationToken)
+        {
+            const string cacheKey = "PopularRoutes";
+
+            if (!_memoryCache.TryGetValue(cacheKey, out List<PopularRouteDto>? popularRoutes) || popularRoutes == null)
+            {
+                popularRoutes = await _searchService.GetPopularRoutesAsync(cancellationToken);
+
+                _memoryCache.Set(
+                    cacheKey,
+                    popularRoutes,
+                    new MemoryCacheEntryOptions
+                    {
+                        AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1)
+                    });
+            }
+
+            return Ok(ApiResponse<List<PopularRouteDto>>.SuccessResponse(popularRoutes, "Popular routes retrieved successfully."));
         }
     }
 }

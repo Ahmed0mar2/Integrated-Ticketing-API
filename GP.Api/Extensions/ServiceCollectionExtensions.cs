@@ -39,6 +39,7 @@ public static class ServiceCollectionExtensions
             options.Filters.Add<ValidationFilter>();
         });
         services.AddEndpointsApiExplorer();
+        services.AddMemoryCache();
 
         // Database
         services.AddDatabaseServices(configuration);

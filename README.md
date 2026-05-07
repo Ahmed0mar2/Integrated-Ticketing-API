@@ -296,6 +296,7 @@ After running migrations, you can log in with the seeded admin account:
 | `GET`  | `/api/Search`                | Backward-compatible direct-trip search alias                               | ❌             |
 | `GET`  | `/api/trips/search/indirect` | Preferred 1-stop indirect search route                                     | ❌             |
 | `GET`  | `/api/Search/indirect`       | Backward-compatible indirect search alias                                  | ❌             |
+| `GET`  | `/api/trips/popular-routes`  | Top 3 governorate-to-governorate routes from the last 7 days (cached 1h)   | ❌             |
 
 ### 🪑 Occurrence Seat Map (`/api/occurrences`)
 

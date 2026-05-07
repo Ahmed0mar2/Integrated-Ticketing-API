@@ -12,5 +12,6 @@ namespace GP.Application.Interfaces
     {
         Task<PagedResult<TripSearchResponseDto>> SearchTripsAsync(TripSearchRequestDto request, CancellationToken cancellationToken = default);
         Task<PagedResult<IndirectTripResponseDto>> SearchIndirectTripsAsync(TripSearchRequestDto request, CancellationToken cancellationToken = default);
+        Task<List<PopularRouteDto>> GetPopularRoutesAsync(CancellationToken cancellationToken = default);
     }
 }

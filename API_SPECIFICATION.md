@@ -1041,6 +1041,36 @@ Query string parameters:
 - Indirect routes are returned only when direct routes do not exist for the same request criteria.
 - Routes are evaluated with layover window constraints (minimum 1 hour, maximum 6 hours).
 
+## 7.3 Popular Routes
+
+### Endpoint Overview
+- **Method:** `GET`
+- **URL:** `/api/trips/popular-routes`
+- **Business Use Case:** Returns the top 3 most frequently searched governorate-to-governorate routes from the last 7 days.
+
+### Authentication / Authorization
+- **JWT Required:** No
+- **Role Required:** None
+
+### Caching
+- Results are cached in memory under the `PopularRoutes` cache key.
+- Cache expiration is absolute after 1 hour.
+
+### Response Example (200 OK)
+```json
+{
+  "success": true,
+  "message": "Popular routes retrieved successfully.",
+  "data": [
+    { "originGov": "Cairo", "destinationGov": "Alexandria" },
+    { "originGov": "Giza", "destinationGov": "Cairo" },
+    { "originGov": "Beheira", "destinationGov": "Alexandria" }
+  ],
+  "errors": null,
+  "timestamp": "2026-05-07T10:30:00Z"
+}
+```
+
 ### Response Example (200 OK)
 ```json
 {
