@@ -1,3 +1,4 @@
+using GP.Application.Common;
 using GP.Application.Events;
 using GP.Domain.Entities;
 using GP.Domain.Enums;
@@ -18,6 +19,8 @@ namespace GP.Application.Features.Events
 
         public async Task Handle(BookingCompletedEvent notification, CancellationToken cancellationToken)
         {
+            var now = AppTime.GetScheduleNow();
+
             var activeChallenges = await _dbContext.UserChallenges
                 .Include(uc => uc.Challenge)
                 .Include(uc => uc.User)
@@ -48,7 +51,7 @@ namespace GP.Application.Features.Events
                 {
                     uc.CurrentProgress = uc.Challenge.GoalValue; // Cap at goal
                     uc.IsCompleted = true;
-                    uc.CompletedAt = DateTime.UtcNow;
+                    uc.CompletedAt = now;
 
                     // Award Challenge Points (Available immediately, expires in 4 months per rules)
                     var rewardTransaction = new PointTransaction
@@ -59,8 +62,8 @@ namespace GP.Application.Features.Events
                         Description = $"Completed Challenge: {uc.Challenge.Title}",
                         Source = PointSource.ChallengeReward,
                         Status = PointTransactionStatus.Available,
-                        CreatedAt = DateTime.UtcNow,
-                        ExpiresAt = DateTime.UtcNow.AddMonths(4)
+                        CreatedAt = now,
+                        ExpiresAt = now.AddMonths(4)
                     };
 
                     _dbContext.PointTransactions.Add(rewardTransaction);

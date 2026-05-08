@@ -185,7 +185,7 @@ namespace GP.Application.Services
 
         public async Task<List<PopularRouteDto>> GetPopularRoutesAsync(CancellationToken cancellationToken = default)
         {
-            var cutoff = DateTime.UtcNow.AddDays(-7);
+            var cutoff = AppTime.GetScheduleNow().AddDays(-7);
 
             return await _dbContext.RouteSearchLogs
                 .AsNoTracking()

@@ -121,6 +121,8 @@ namespace GP.Application.Services
                         return;
                     }
 
+                    var now = AppTime.GetScheduleNow();
+
                     var domainUser = new User
                     {
                         Email = request.Email,
@@ -138,7 +140,7 @@ namespace GP.Application.Services
                         TotalTripsCount = 0,
                         WalletBalance = 0m,
                         LoyaltyPointsBalance = 0,
-                        CreatedAt = DateTime.UtcNow
+                        CreatedAt = now
                     };
 
                     _context.Users.Add(domainUser);
@@ -163,7 +165,7 @@ namespace GP.Application.Services
                     }
 
                     applicationUser.DomainUserId = domainUser.UserId;
-                    applicationUser.LastLoginAt = DateTime.UtcNow;
+                    applicationUser.LastLoginAt = now;
                     await _userManager.UpdateAsync(applicationUser);
 
                     var accessToken = await GenerateAccessTokenAsync(applicationUser, domainUser);
@@ -237,7 +239,8 @@ namespace GP.Application.Services
                 }
 
                 // Update last login
-                applicationUser.LastLoginAt = DateTime.UtcNow;
+                var now = AppTime.GetScheduleNow();
+                applicationUser.LastLoginAt = now;
                 await _userManager.UpdateAsync(applicationUser);
 
                 // Generate tokens
@@ -299,7 +302,8 @@ namespace GP.Application.Services
 
                 // Revoke old refresh token
                 refreshToken.IsRevoked = true;
-                refreshToken.RevokedAt = DateTime.UtcNow;
+                var now = AppTime.GetScheduleNow();
+                refreshToken.RevokedAt = now;
                 refreshToken.RevokedByIp = ipAddress;
 
                 // Generate new tokens
@@ -344,7 +348,7 @@ namespace GP.Application.Services
 
                 // Revoke token
                 refreshToken.IsRevoked = true;
-                refreshToken.RevokedAt = DateTime.UtcNow;
+                refreshToken.RevokedAt = AppTime.GetScheduleNow();
                 refreshToken.RevokedByIp = ipAddress;
 
                 await _context.SaveChangesAsync();
@@ -368,7 +372,7 @@ namespace GP.Application.Services
                 foreach (var token in tokens)
                 {
                     token.IsRevoked = true;
-                    token.RevokedAt = DateTime.UtcNow;
+                    token.RevokedAt = AppTime.GetScheduleNow();
                 }
 
                 await _context.SaveChangesAsync();
@@ -388,7 +392,8 @@ namespace GP.Application.Services
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.UTF8.GetBytes(_jwtSettings.SecretKey);
 
-            var expiresAt = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpirationMinutes);
+            var now = AppTime.GetScheduleNow();
+            var expiresAt = now.AddMinutes(_jwtSettings.ExpirationMinutes);
 
             // Get user roles
             var roles = await _userManager.GetRolesAsync(applicationUser);
@@ -430,6 +435,7 @@ namespace GP.Application.Services
             string? ipAddress = null,
             string? deviceInfo = null)
         {
+            var now = AppTime.GetScheduleNow();
             // Generate random token
             var randomBytes = new byte[64];
             using var rng = RandomNumberGenerator.Create();
@@ -452,8 +458,8 @@ namespace GP.Application.Services
                 TokenHash = tokenHash,
                 DeviceInfo = deviceInfo,
                 IpAddress = ipAddress,
-                CreatedAt = DateTime.UtcNow,
-                ExpiresAt = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays),
+                CreatedAt = now,
+                ExpiresAt = now.AddDays(_jwtSettings.RefreshTokenExpirationDays),
                 IsRevoked = false
             };
 

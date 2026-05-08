@@ -78,7 +78,7 @@ public class MarketplaceService : IMarketplaceService
             OriginalPrice = originalPrice,
             AskingPrice = request.AskingPrice,
             Status = ListingStatus.Available,
-            ListedAt = DateTime.UtcNow
+            ListedAt = scheduleNow
         };
 
         _dbContext.MarketplaceListings.Add(listing);
@@ -94,7 +94,7 @@ public class MarketplaceService : IMarketplaceService
     public async Task<ApiResponse> BuyTicketAsync(int buyerUserId, int listingId, CancellationToken cancellationToken = default)
     {
         var strategy = _dbContext.Database.CreateExecutionStrategy();
-
+        var scheduleNow = AppTime.GetScheduleNow();
         return await strategy.ExecuteAsync(async () =>
         {
             using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
@@ -169,7 +169,7 @@ public class MarketplaceService : IMarketplaceService
                 booking.ContactName = $"{buyer.FirstName} {buyer.LastName}".Trim();
                 booking.ContactEmail = buyer.Email;
                 booking.ContactPhone = buyer.Phone ?? "N/A";
-                booking.UpdatedAt = DateTime.UtcNow;
+                booking.UpdatedAt = scheduleNow;
 
                 foreach (var passenger in booking.BookingPassengers)
                 {
@@ -177,7 +177,7 @@ public class MarketplaceService : IMarketplaceService
                 }
 
                 listing.Status = ListingStatus.Sold;
-                listing.SoldAt = DateTime.UtcNow;
+                listing.SoldAt = scheduleNow;
 
                 await _dbContext.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);

@@ -1,4 +1,5 @@
-﻿using GP.Domain.Entities;
+﻿using GP.Domain.Common;
+using GP.Domain.Entities;
 using GP.Domain.Enums;
 using GP.Infrastructure.Data;
 using GP.Infrastructure.Identity;
@@ -126,7 +127,7 @@ namespace GP.Infrastructure.Services
                 TotalTripsCount = 0,
                 WalletBalance = 0m,
                 LoyaltyPointsBalance = 0,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = AppTime.GetScheduleNow()
             };
 
             context.Users.Add(domainUser);

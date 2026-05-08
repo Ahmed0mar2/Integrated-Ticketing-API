@@ -184,9 +184,9 @@ public class AdminUserService : IAdminUserService
             Phone = domainUser.Phone,
             NationalIdNumber = domainUser.NationalIdNumber,
             TotalTripsCount = domainUser.TotalTripsCount,
-            CreatedAt = AppTime.AsUtc(domainUser.CreatedAt),
+            CreatedAt = AppTime.AsSchedule(domainUser.CreatedAt),
             LastLoginAt = identityUser.LastLoginAt.HasValue
-                ? AppTime.AsUtc(identityUser.LastLoginAt.Value)
+                ? AppTime.AsSchedule(identityUser.LastLoginAt.Value)
                 : null,
             IsActive = identityUser.IsActive,
             CountryCode = domainUser.Country?.CountryCode ?? string.Empty,

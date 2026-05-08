@@ -6,7 +6,7 @@
         public string Message { get; set; } = null!;
         public T? Data { get; set; }
         public List<string>? Errors { get; set; }
-        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+        public DateTime Timestamp { get; set; } = AppTime.GetScheduleNow();
 
         public static ApiResponse<T> SuccessResponse(
             T data,

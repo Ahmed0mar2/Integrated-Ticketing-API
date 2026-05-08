@@ -1,10 +1,5 @@
 ﻿using GP.Domain.Common;
 using GP.Domain.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GP.Domain.Entities
 {
@@ -25,7 +20,7 @@ namespace GP.Domain.Entities
         public decimal AskingPrice { get; set; }
 
         public ListingStatus Status { get; set; } = ListingStatus.Available;
-        public DateTime ListedAt { get; set; } = DateTime.UtcNow;
+        public DateTime ListedAt { get; set; } = AppTime.GetScheduleNow();
         public DateTime? SoldAt { get; set; }
     }
 }

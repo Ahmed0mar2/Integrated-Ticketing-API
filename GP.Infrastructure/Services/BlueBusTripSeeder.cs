@@ -1,5 +1,6 @@
 ﻿using GP.Domain.Entities;
 using GP.Infrastructure.Data;
+using GP.Domain.Common;
 using GP.Infrastructure.Data.SeedData.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -322,6 +323,8 @@ namespace GP.Infrastructure.Services
             if (calendar == null)
             {
                 Console.WriteLine("Creating default 'Runs Every Day' Calendar...");
+                var currentYear = AppTime.GetScheduleNow().Year;
+
                 calendar = new Calendar
                 {
                     Monday = true,
@@ -331,8 +334,8 @@ namespace GP.Infrastructure.Services
                     Friday = true,
                     Saturday = true,
                     Sunday = true,
-                    StartDate = new DateOnly(DateTime.UtcNow.Year, 1, 1),
-                    EndDate = new DateOnly(DateTime.UtcNow.Year + 2, 12, 31)
+                    StartDate = new DateOnly(currentYear, 1, 1),
+                    EndDate = new DateOnly(currentYear + 2, 12, 31)
                 };
 
                 _context.Set<Calendar>().Add(calendar);

@@ -84,7 +84,7 @@ namespace GP.Application.Services
                     if (inventory.RemainingSeats < requestedSeats)
                         throw new CartValidationException("Not enough capacity.");
 
-                    var now = DateTime.UtcNow;
+                    var now = AppTime.GetScheduleNow();
 
                     List<string> resolvedSeatNumbers;
                     var parsedPassengerIdTypes = new List<IdType>();
@@ -193,7 +193,7 @@ namespace GP.Application.Services
                         TotalPrice = fare.Price * requestedSeats,
                         Status = BookingStatus.Pending,
                         PaymentStatus = PaymentStatus.Pending,
-                        HoldExpiresAt = DateTime.UtcNow.AddMinutes(10),
+                        HoldExpiresAt = now.AddMinutes(10),
                         ContactName = normalizedContactName,
                         ContactPhone = normalizedContactPhone,
                         ContactEmail = normalizedContactEmail,
@@ -280,7 +280,7 @@ namespace GP.Application.Services
                     if (user == null)
                         throw new CartValidationException("User not found.");
 
-                    var now = DateTime.UtcNow;
+                    var now = AppTime.GetScheduleNow();
                     var pendingBookings = await QueryActivePendingBookingsForUser(userId, now)
                         .Include(b => b.Occurrence)
                         .Include(b => b.BookingPassengers)
@@ -382,7 +382,7 @@ namespace GP.Application.Services
                         booking.Status = BookingStatus.Confirmed;
                         booking.PaymentStatus = PaymentStatus.Paid;
                         booking.HoldExpiresAt = null;
-                        booking.UpdatedAt = DateTime.UtcNow;
+                        booking.UpdatedAt = now;
                     }
 
                     user.WalletBalance -= finalPrice;
@@ -415,7 +415,7 @@ namespace GP.Application.Services
                         Description = $"Earned from {distinctTrips}-leg Booking",
                         Source = PointSource.BookingEarned,
                         Status = PointTransactionStatus.Pending,
-                        CreatedAt = DateTime.UtcNow,
+                        CreatedAt = now,
                         UnlocksAt = departureDate,
                         BookingId = referenceBookingId,
                         ExpiresAt = departureDate.AddMonths(4)
@@ -447,7 +447,7 @@ namespace GP.Application.Services
 
         public async Task<BookingCartResponseDto?> GetActiveCartAsync(int userId, CancellationToken cancellationToken = default)
         {
-            var now = DateTime.UtcNow;
+            var now = AppTime.GetScheduleNow();
 
             var bookings = await QueryActivePendingBookingsForUser(userId, now)
                 .AsNoTracking()
@@ -477,7 +477,7 @@ namespace GP.Application.Services
                     BookingId = b.BookingId,
                     TotalPrice = b.TotalPrice,
                     SeatsBooked = b.SeatsBooked,
-                    HoldExpiresAt = AppTime.AsUtc(b.HoldExpiresAt!.Value),
+                    HoldExpiresAt = AppTime.AsSchedule(b.HoldExpiresAt!.Value),
                     AgencyName = b.Occurrence.Trip.Agency.AgencyName,
                     ClassName = b.CoachClass.Name,
                     Origin = b.OriginStation.ArabicName,
@@ -555,7 +555,7 @@ namespace GP.Application.Services
                         PaymentStatus = b.PaymentStatus.ToString(),
                         TotalPrice = b.TotalPrice,
                         SeatsBooked = b.SeatsBooked,
-                        BookingDate = AppTime.AsUtc(b.BookingTime),
+                        BookingDate = AppTime.AsSchedule(b.BookingTime),
                         IsMarketplacePurchase = b.IsMarketplacePurchase,
                         ActiveListingId = activeListingId,
                         IsOfferedForResale = activeListingId.HasValue,
@@ -591,7 +591,7 @@ namespace GP.Application.Services
 
                 try
                 {
-                    var now = DateTime.UtcNow;
+                    var now = AppTime.GetScheduleNow();
 
                     var expiredBookings = await _dbContext.Bookings
                         .Include(b => b.BookingPassengers)

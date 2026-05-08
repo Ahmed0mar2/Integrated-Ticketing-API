@@ -19,7 +19,7 @@ namespace GP.Application.Services
 
         public async Task<ApiResponse> ExpireOldPointsAsync(CancellationToken cancellationToken = default)
         {
-            var now = DateTime.UtcNow;
+            var now = AppTime.GetScheduleNow();
 
             var expiring = await _dbContext.PointTransactions
                 .Where(p => !p.IsExpired && p.ExpiresAt != null && p.ExpiresAt <= now)
@@ -42,6 +42,7 @@ namespace GP.Application.Services
 
         public async Task<bool> DeductPointsFifoAsync(int userId, int pointsToDeduct, string description, int? bookingId = null, CancellationToken cancellationToken = default)
         {
+            var now = AppTime.GetScheduleNow();
             var earnTransactions = await _dbContext.PointTransactions
                 .Where(pt => pt.UserId == userId
                              && pt.Amount > 0
@@ -78,7 +79,7 @@ namespace GP.Application.Services
                     ParentTransactionId = transaction.Id,
                     Status = PointTransactionStatus.Spent,
                     Source = PointSource.Redemption,
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = now
                 };
 
                 _dbContext.PointTransactions.Add(spendTransaction);

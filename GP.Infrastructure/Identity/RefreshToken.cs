@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GP.Domain.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,7 +24,7 @@ namespace GP.Infrastructure.Identity
         public ApplicationUser ApplicationUser { get; set; } = null!;
 
         // Helper properties
-        public bool IsExpired => DateTime.UtcNow >= ExpiresAt;
+        public bool IsExpired => AppTime.GetScheduleNow() >= ExpiresAt;
         public bool IsActive => !IsRevoked && !IsExpired;
     }
 }

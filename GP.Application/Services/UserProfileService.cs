@@ -1,4 +1,5 @@
 ﻿using GP.Application.DTOs.Profile;
+using GP.Application.Common;
 using GP.Application.Interfaces;
 using GP.Domain.Entities;
 using GP.Domain.Enums;
@@ -245,7 +246,7 @@ public class UserProfileService : IUserProfileService
                     user.Email = dto.Email;
                 }
 
-                user.UpdatedAt = DateTime.UtcNow;
+                user.UpdatedAt = AppTime.GetScheduleNow();
 
                 await _context.SaveChangesAsync(cancellationToken);
 
@@ -309,7 +310,7 @@ public class UserProfileService : IUserProfileService
             }
 
             user.ProfilePictureUrl = newImageUrl;
-            user.UpdatedAt = DateTime.UtcNow;
+            user.UpdatedAt = AppTime.GetScheduleNow();
 
             await _context.SaveChangesAsync(cancellationToken);
 

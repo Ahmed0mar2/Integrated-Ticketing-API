@@ -1,4 +1,5 @@
 using FluentValidation;
+using GP.Application.Common;
 using GP.Application.DTOs.Wallet;
 
 namespace GP.Application.Validators
@@ -34,8 +35,8 @@ namespace GP.Application.Validators
             if (int.TryParse(expiryDate.Substring(0, 2), out int month) &&
                 int.TryParse(expiryDate.Substring(3, 2), out int year))
             {
-                var expiry = new DateTime(2000 + year, month, 1).AddMonths(1).AddDays(-1); 
-                return expiry >= DateTime.UtcNow.Date;
+                var expiry = new DateTime(2000 + year, month, 1).AddMonths(1).AddDays(-1);
+                return expiry >= AppTime.GetScheduleNow().Date;
             }
             return false;
         }

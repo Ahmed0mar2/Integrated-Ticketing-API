@@ -1,5 +1,5 @@
+using GP.Domain.Common;
 using GP.Domain.Enums;
-using System;
 
 namespace GP.Domain.Entities
 {
@@ -25,7 +25,7 @@ namespace GP.Domain.Entities
         public PointSource Source { get; set; }
         public PointTransactionStatus Status { get; set; }
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = AppTime.GetScheduleNow();
         public DateTime? UnlocksAt { get; set; } // The Trip's DepartureDateTime
         public DateTime? ExpiresAt { get; set; }
         public bool IsExpired { get; set; } = false;

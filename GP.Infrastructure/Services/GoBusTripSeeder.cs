@@ -1,4 +1,5 @@
 ﻿using GP.Domain.Entities;
+using GP.Domain.Common;
 using GP.Infrastructure.Data;
 using GP.Infrastructure.Data.SeedData.Models;
 using Microsoft.EntityFrameworkCore;
@@ -46,13 +47,14 @@ namespace GP.Infrastructure.Services
             // 2. EXTRACT UNIQUE BLUEPRINTS
             // Origin + Dest + TimeOnly
             var uniqueBlueprints = rawTrips
-                .GroupBy(t => new {
+                .GroupBy(t => new
+                {
                     t.FromStationId,
                     t.ToStationId,
                     Time = TimeOnly.FromDateTime(t.TripDateTime),
                     t.ServiceClass
                 })
-                .Select(g => g.First()) 
+                .Select(g => g.First())
                 .ToList();
 
             Console.WriteLine($"Found {uniqueBlueprints.Count} unique GoBus blueprints. Importing...");
@@ -67,7 +69,7 @@ namespace GP.Infrastructure.Services
                 if (!stationMappings.TryGetValue(externalOrigin, out int originId) ||
                     !stationMappings.TryGetValue(externalDest, out int destId))
                 {
-                    continue; 
+                    continue;
                 }
 
                 // Create a synthetic TripCode 
@@ -120,6 +122,8 @@ namespace GP.Infrastructure.Services
             if (calendar == null)
             {
                 Console.WriteLine("Creating default 'Runs Every Day' Calendar...");
+                var currentYear = AppTime.GetScheduleNow().Year;
+
                 calendar = new Calendar
                 {
                     Monday = true,
@@ -129,12 +133,12 @@ namespace GP.Infrastructure.Services
                     Friday = true,
                     Saturday = true,
                     Sunday = true,
-                    StartDate = new DateOnly(DateTime.UtcNow.Year, 1, 1),      // Start of this year
-                    EndDate = new DateOnly(DateTime.UtcNow.Year + 2, 12, 31)   // Valid for the next 2 years
+                    StartDate = new DateOnly(currentYear, 1, 1),      // Start of this year
+                    EndDate = new DateOnly(currentYear + 2, 12, 31)   // Valid for the next 2 years
                 };
 
                 _context.Set<Calendar>().Add(calendar);
-                await _context.SaveChangesAsync(); 
+                await _context.SaveChangesAsync();
             }
 
             return calendar;

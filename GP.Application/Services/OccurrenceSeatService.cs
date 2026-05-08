@@ -27,7 +27,7 @@ public class OccurrenceSeatService : IOccurrenceSeatService
         if (occurrence == null)
             return null;
 
-        var now = DateTime.UtcNow;
+        var now = AppTime.GetScheduleNow();
 
         var seatLocks = await _dbContext.BookingPassengers
             .AsNoTracking()
@@ -85,7 +85,7 @@ public class OccurrenceSeatService : IOccurrenceSeatService
                     Status = status,
                     BookingId = seatLock.BookingId,
                     HoldExpiresAt = status == "Pending" && seatLock.HoldExpiresAt.HasValue
-                        ? AppTime.AsUtc(seatLock.HoldExpiresAt.Value)
+                        ? AppTime.AsSchedule(seatLock.HoldExpiresAt.Value)
                         : null
                 };
             }

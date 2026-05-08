@@ -1,4 +1,5 @@
-﻿using GP.Domain.Enums;
+﻿using GP.Domain.Common;
+using GP.Domain.Enums;
 
 namespace GP.Domain.Entities
 {
@@ -31,7 +32,7 @@ namespace GP.Domain.Entities
 
         // Account
         public string? ProfilePictureUrl { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = AppTime.GetScheduleNow();
         public DateTime? UpdatedAt { get; set; }
 
         // Navigation properties
