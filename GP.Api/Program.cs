@@ -1,4 +1,6 @@
 using GP.API.Extensions;
+using GP.Infrastructure.Hubs;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
@@ -6,6 +8,19 @@ using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddApplicationServices(builder.Configuration);
+builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
+builder.Services.AddSignalR();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("SignalRCorsPolicy", policy =>
+    {
+        policy.SetIsOriginAllowed(origin => true) 
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials(); 
+    });
+});
 
 // Configure OpenAPI/Swagger with JWT support
 builder.Services.AddOpenApi(options =>
@@ -83,8 +98,9 @@ app.UseRateLimiter();
 app.UseExceptionHandler();
 //app.UseHttpsRedirection();
 app.UseStaticFiles();
-app.UseCors("AllowAll"); //Todo: Change to "Production" for production
+app.UseCors("SignalRCorsPolicy"); //Todo: Change to "Production" for production
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<NotificationHub>("/hubs/notifications");
 app.Run();

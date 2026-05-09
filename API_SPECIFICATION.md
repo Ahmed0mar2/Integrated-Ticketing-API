@@ -1045,7 +1045,7 @@ Query string parameters:
 
 ### Endpoint Overview
 - **Method:** `GET`
-- **URL:** `/api/trips/popular-routes`
+- **URL:** `/api/Search/popular-routes`
 - **Business Use Case:** Returns the top 3 most frequently searched governorate-to-governorate routes from the last 7 days.
 
 ### Authentication / Authorization
@@ -1446,7 +1446,7 @@ No request body.
 ## 9.4 Cancel Cart Hold
 ### Endpoint Overview
 - **Method:** `DELETE`
-- **URL:** `/api/Bookings/bookings/{bookingId}`
+- **URL:** `/api/Bookings/{bookingId}`
 - **Business Use Case:** Cancels the full pending booking hold regardless of passenger count.
 
 ### Authentication / Authorization
@@ -1806,7 +1806,23 @@ Authentication model:
 }
 ```
 
-## 12.4 Expire Old Loyalty Points
+## 12.4 Process Upcoming Boarding Alerts
+### Endpoint Overview
+- **Method:** `POST`
+- **URL:** `/api/Jobs/process-boarding-alerts?secret=<JobSecretKey>`
+- **Business Use Case:** Sends one-time real-time boarding alerts for confirmed bookings that are boarding within the next 15 minutes.
+
+### Response Example (200 OK)
+```json
+"Boarding alerts processed successfully."
+```
+
+### Notes
+- Uses a 15-minute lookahead window based on schedule-local now (`AppTime.GetScheduleNow()`).
+- Persists a user inbox notification and pushes it live via SignalR with title `Boarding Soon!`.
+- Marks each notified booking with `IsBoardingAlertSent = true` to prevent duplicate alerts.
+
+## 12.5 Expire Old Loyalty Points
 ### Endpoint Overview
 - **Method:** `POST`
 - **URL:** `/api/Jobs/expire-points?secret=<JobSecretKey>`
@@ -1823,7 +1839,7 @@ Authentication model:
 }
 ```
 
-## 12.5 Reset Monthly Challenges
+## 12.6 Reset Monthly Challenges
 ### Endpoint Overview
 - **Method:** `POST`
 - **URL:** `/api/Jobs/reset-monthly-challenges?secret=<JobSecretKey>`
@@ -1840,7 +1856,7 @@ Authentication model:
 }
 ```
 
-## 12.6 Seed Challenges (One-Time)
+## 12.7 Seed Challenges (One-Time)
 ### Endpoint Overview
 - **Method:** `POST`
 - **URL:** `/api/Jobs/seed-challenges?secret=<JobSecretKey>`
@@ -1926,6 +1942,11 @@ Base route: `/api/Marketplace`
 ```json
 { "success": true, "message": "Ticket purchased successfully.", "data": null, "errors": null, "timestamp": "2026-03-06T12:00:00Z" }
 ```
+
+### Notification Side Effect
+- On successful purchase, the seller receives a SignalR notification:
+  - Title: `Ticket Sold!`
+  - Type: `Marketplace`
 
 ## 13.3 Get Active Listings
 ### Endpoint Overview
@@ -2018,59 +2039,187 @@ Query string parameters:
 
 ---
 
+# 14. Notifications API (Inbox)
+
+Base route: `/api/Notifications`
+
+All endpoints require authenticated JWT user context.
+
+## 14.1 Get My Notifications
+### Endpoint Overview
+- **Method:** `GET`
+- **URL:** `/api/Notifications?limit=50`
+- **Business Use Case:** Returns the authenticated user's latest inbox notifications ordered by newest first.
+
+### Request Query Parameters
+| Field | Type | Required | Notes      |
+| ----- | ---- | -------- | ---------- |
+| limit | int  | No       | Default 50 |
+
+### Response Example (200 OK)
+```json
+{
+  "success": true,
+  "message": "Notifications retrieved successfully.",
+  "data": [
+    {
+      "id": 102,
+      "title": "Boarding Soon!",
+      "message": "Your bus boards at 07:45 PM from Ramses.",
+      "type": "Boarding",
+      "isRead": false,
+      "createdAt": "2026-05-09T19:30:00"
+    },
+    {
+      "id": 101,
+      "title": "Points Earned! 🎉",
+      "message": "You just earned 25 points for Earned from 1-leg Booking!",
+      "type": "Gamification",
+      "isRead": true,
+      "createdAt": "2026-05-09T11:15:00"
+    }
+  ],
+  "errors": null,
+  "timestamp": "2026-05-09T19:30:10Z"
+}
+```
+
+## 14.2 Mark One Notification As Read
+### Endpoint Overview
+- **Method:** `PATCH`
+- **URL:** `/api/Notifications/{id}/read`
+- **Business Use Case:** Marks one notification as read for the authenticated user.
+
+### Response Example (200 OK)
+```json
+{
+  "success": true,
+  "message": "Notification marked as read.",
+  "data": null,
+  "errors": null,
+  "timestamp": "2026-05-09T19:31:00Z"
+}
+```
+
+## 14.3 Mark All Notifications As Read
+### Endpoint Overview
+- **Method:** `PATCH`
+- **URL:** `/api/Notifications/read-all`
+- **Business Use Case:** Marks all unread notifications as read for the authenticated user.
+
+### Response Example (200 OK)
+```json
+{
+  "success": true,
+  "message": "All notifications marked as read.",
+  "data": null,
+  "errors": null,
+  "timestamp": "2026-05-09T19:31:00Z"
+}
+```
+
+---
+
+# 15. Real-Time Notifications (SignalR)
+
+Hub route: `/hubs/notifications`
+
+Delivery model:
+- Notifications are persisted to the inbox first.
+- Then pushed live to online clients through SignalR.
+
+### Authentication
+- Connection requires authenticated JWT user context.
+- User routing is based on the `domain_user_id` claim so server-side calls can target `Clients.User("<userId>")`.
+
+### Client Event Contract
+Server sends:
+
+```json
+{
+  "title": "string",
+  "message": "string",
+  "type": "string"
+}
+```
+
+Client method name:
+- `ReceiveNotification(title, message, type)`
+
+### Current Notification Types
+- `Marketplace`
+  - Trigger: seller ticket sold in marketplace buy flow.
+  - Sample title: `Ticket Sold!`
+- `Gamification`
+  - Trigger 1: checkout points earned.
+  - Trigger 2: challenge completion reward granted.
+  - Sample title: `Points Earned! 🎉`
+- `Boarding`
+  - Trigger: jobs endpoint processing bookings boarding in the next 15 minutes.
+  - Sample title: `Boarding Soon!`
+
+---
+
 # Quick Endpoint Index
 
-| Method   | URL                                   |               Auth | Description                                                  |
-| -------- | ------------------------------------- | -----------------: | ------------------------------------------------------------ |
-| `POST`   | `/api/Auth/register`                  |                 No | Register user and return tokens                              |
-| `POST`   | `/api/Auth/login`                     |                 No | Login and return tokens                                      |
-| `POST`   | `/api/Auth/refresh`                   |                 No | Refresh access token                                         |
-| `POST`   | `/api/Auth/revoke`                    |                 No | Revoke one refresh token                                     |
-| `POST`   | `/api/Auth/revoke-all`                |                Yes | Revoke all active refresh tokens                             |
-| `GET`    | `/api/Auth/me`                        |                Yes | Return current JWT claim info                                |
-| `POST`   | `/api/Auth/send-verification-email`   |                 No | Send verification email                                      |
-| `POST`   | `/api/Auth/verify-email`              |                 No | Confirm email token                                          |
-| `POST`   | `/api/Auth/forgot-password`           |                 No | Send reset link                                              |
-| `POST`   | `/api/Auth/reset-password`            |                 No | Reset password                                               |
-| `POST`   | `/api/Auth/change-password`           |                Yes | Change password                                              |
-| `GET`    | `/api/Countries`                      |                 No | List countries                                               |
-| `POST`   | `/api/Seed/init-identity`             |     No (currently) | Initialize identity roles/admin                              |
-| `POST`   | `/api/Seed/import-master-stations`    |     No (currently) | Import master stations                                       |
-| `POST`   | `/api/Seed/import-horus`              |     No (currently) | Import Horus trips                                           |
-| `POST`   | `/api/Seed/import-gobus`              |     No (currently) | Import GoBus trips                                           |
-| `POST`   | `/api/Seed/import-bluebus`            |     No (currently) | Import BlueBus trips                                         |
-| `POST`   | `/api/Seed/import-trains`             |     No (currently) | Import train trips                                           |
-| `POST`   | `/api/Seed/generate-occurrences`      |     No (currently) | Generate future occurrences                                  |
-| `POST`   | `/api/Jobs/generate-occurrences`      | Secret query param | Generate future occurrences (scheduler endpoint)             |
-| `POST`   | `/api/Jobs/process-completed-trips`   | Secret query param | Mark eligible trips as completed                             |
-| `POST`   | `/api/Jobs/release-expired-holds`     | Secret query param | Release expired holds and restore inventory                  |
-| `POST`   | `/api/Jobs/expire-points`             | Secret query param | Expire old loyalty point transactions                        |
-| `POST`   | `/api/Jobs/reset-monthly-challenges`  | Secret query param | Reset and reassign monthly challenges                        |
-| `POST`   | `/api/Jobs/seed-challenges`           | Secret query param | Seed the static monthly challenges                           |
-| `GET`    | `/api/admin/users`                    |        Yes (Admin) | List all users                                               |
-| `GET`    | `/api/admin/users/{id}`               |        Yes (Admin) | Get user detail                                              |
-| `PATCH`  | `/api/admin/users/{id}/toggle-status` |        Yes (Admin) | Toggle user active status                                    |
-| `POST`   | `/api/admin/users/{id}/roles`         |        Yes (Admin) | Assign role                                                  |
-| `DELETE` | `/api/admin/users/{id}`               |        Yes (Admin) | Delete user                                                  |
-| `GET`    | `/api/Users/me`                       |                Yes | Get profile with loyalty stats and active challenges         |
-| `PUT`    | `/api/Users/me`                       |                Yes | Update profile                                               |
-| `POST`   | `/api/Users/me/profile-picture`       |                Yes | Upload profile picture                                       |
-| `GET`    | `/api/Loyalty/history`                |                Yes | Retrieve loyalty point ledger history (latest first)         |
-| `GET`    | `/api/Loyalty/challenges`             |                Yes | Retrieve paged active and completed challenge history        |
-| `GET`    | `/api/Stations`                       |                 No | Get grouped stations                                         |
-| `GET`    | `/api/trips/search`                   |                 No | Preferred paginated direct-trip search route                 |
-| `GET`    | `/api/Search`                         |                 No | Backward-compatible alias for direct-trip search             |
-| `GET`    | `/api/trips/search/indirect`          |                 No | Preferred 1-stop indirect search route                       |
-| `GET`    | `/api/Search/indirect`                |                 No | Backward-compatible alias for indirect search                |
-| `GET`    | `/api/occurrences/{id}/seats`         |                 No | Get real-time seat map with available/pending/booked states  |
-| `POST`   | `/api/Bookings/cart`                  |                Yes | Add trip to cart with 10-minute seat soft-lock               |
-| `POST`   | `/api/Bookings/cart/add`              |                Yes | Backward-compatible add-to-cart alias                        |
-| `GET`    | `/api/Bookings/cart`                  |                Yes | Retrieve current active cart                                 |
-| `POST`   | `/api/Bookings/checkout`              |                Yes | Checkout all valid pending cart items with one wallet charge |
-| `GET`    | `/api/Bookings/my-tickets`            |                Yes | Retrieve user's ticket history (non-pending bookings)        |
-| `POST`   | `/api/Marketplace/list`               |                Yes | List ticket for resale                                       |
-| `POST`   | `/api/Marketplace/buy/{listingId}`    |                Yes | Purchase listed ticket                                       |
-| `GET`    | `/api/Marketplace/active`             |                 No | Retrieve paged active marketplace listings                   |
-| `POST`   | `/api/Marketplace/cancel/{listingId}` |                Yes | Cancel an active marketplace listing                         |
-| `POST`   | `/api/Wallet/deposit`                 |                Yes | Deposit wallet funds and write ledger entry                  |
-| `GET`    | `/api/Wallet/history`                 |                Yes | Retrieve wallet transaction history (newest first)           |
+| Method   | URL                                   |               Auth | Description                                                    |
+| -------- | ------------------------------------- | -----------------: | -------------------------------------------------------------- |
+| `POST`   | `/api/Auth/register`                  |                 No | Register user and return tokens                                |
+| `POST`   | `/api/Auth/login`                     |                 No | Login and return tokens                                        |
+| `POST`   | `/api/Auth/refresh`                   |                 No | Refresh access token                                           |
+| `POST`   | `/api/Auth/revoke`                    |                 No | Revoke one refresh token                                       |
+| `POST`   | `/api/Auth/revoke-all`                |                Yes | Revoke all active refresh tokens                               |
+| `GET`    | `/api/Auth/me`                        |                Yes | Return current JWT claim info                                  |
+| `POST`   | `/api/Auth/send-verification-email`   |                 No | Send verification email                                        |
+| `POST`   | `/api/Auth/verify-email`              |                 No | Confirm email token                                            |
+| `POST`   | `/api/Auth/forgot-password`           |                 No | Send reset link                                                |
+| `POST`   | `/api/Auth/reset-password`            |                 No | Reset password                                                 |
+| `POST`   | `/api/Auth/change-password`           |                Yes | Change password                                                |
+| `GET`    | `/api/Countries`                      |                 No | List countries                                                 |
+| `POST`   | `/api/Seed/init-identity`             |     No (currently) | Initialize identity roles/admin                                |
+| `POST`   | `/api/Seed/import-master-stations`    |     No (currently) | Import master stations                                         |
+| `POST`   | `/api/Seed/import-horus`              |     No (currently) | Import Horus trips                                             |
+| `POST`   | `/api/Seed/import-gobus`              |     No (currently) | Import GoBus trips                                             |
+| `POST`   | `/api/Seed/import-bluebus`            |     No (currently) | Import BlueBus trips                                           |
+| `POST`   | `/api/Seed/import-trains`             |     No (currently) | Import train trips                                             |
+| `POST`   | `/api/Seed/generate-occurrences`      |     No (currently) | Generate future occurrences                                    |
+| `POST`   | `/api/Jobs/generate-occurrences`      | Secret query param | Generate future occurrences (scheduler endpoint)               |
+| `POST`   | `/api/Jobs/process-completed-trips`   | Secret query param | Mark eligible trips as completed                               |
+| `POST`   | `/api/Jobs/release-expired-holds`     | Secret query param | Release expired holds and restore inventory                    |
+| `POST`   | `/api/Jobs/process-boarding-alerts`   | Secret query param | Send one-time boarding alerts for trips boarding soon          |
+| `POST`   | `/api/Jobs/expire-points`             | Secret query param | Expire old loyalty point transactions                          |
+| `POST`   | `/api/Jobs/reset-monthly-challenges`  | Secret query param | Reset and reassign monthly challenges                          |
+| `POST`   | `/api/Jobs/seed-challenges`           | Secret query param | Seed the static monthly challenges                             |
+| `GET`    | `/api/Notifications`                  |                Yes | Retrieve latest notifications inbox entries                    |
+| `PATCH`  | `/api/Notifications/{id}/read`        |                Yes | Mark one notification as read                                  |
+| `PATCH`  | `/api/Notifications/read-all`         |                Yes | Mark all unread notifications as read                          |
+| `WS`     | `/hubs/notifications`                 |          JWT (Hub) | Subscribe to real-time notifications via `ReceiveNotification` |
+| `GET`    | `/api/admin/users`                    |        Yes (Admin) | List all users                                                 |
+| `GET`    | `/api/admin/users/{id}`               |        Yes (Admin) | Get user detail                                                |
+| `PATCH`  | `/api/admin/users/{id}/toggle-status` |        Yes (Admin) | Toggle user active status                                      |
+| `POST`   | `/api/admin/users/{id}/roles`         |        Yes (Admin) | Assign role                                                    |
+| `DELETE` | `/api/admin/users/{id}`               |        Yes (Admin) | Delete user                                                    |
+| `GET`    | `/api/Users/me`                       |                Yes | Get profile with loyalty stats and active challenges           |
+| `PUT`    | `/api/Users/me`                       |                Yes | Update profile                                                 |
+| `POST`   | `/api/Users/me/profile-picture`       |                Yes | Upload profile picture                                         |
+| `GET`    | `/api/Loyalty/history`                |                Yes | Retrieve loyalty point ledger history (latest first)           |
+| `GET`    | `/api/Loyalty/challenges`             |                Yes | Retrieve paged active and completed challenge history          |
+| `GET`    | `/api/Stations`                       |                 No | Get grouped stations                                           |
+| `GET`    | `/api/trips/search`                   |                 No | Preferred paginated direct-trip search route                   |
+| `GET`    | `/api/Search`                         |                 No | Backward-compatible alias for direct-trip search               |
+| `GET`    | `/api/trips/search/indirect`          |                 No | Preferred 1-stop indirect search route                         |
+| `GET`    | `/api/Search/indirect`                |                 No | Backward-compatible alias for indirect search                  |
+| `GET`    | `/api/Search/popular-routes`          |                 No | Retrieve top 3 popular governorate routes (cached 1h)          |
+| `GET`    | `/api/occurrences/{id}/seats`         |                 No | Get real-time seat map with available/pending/booked states    |
+| `POST`   | `/api/Bookings/cart`                  |                Yes | Add trip to cart with 10-minute seat soft-lock                 |
+| `POST`   | `/api/Bookings/cart/add`              |                Yes | Backward-compatible add-to-cart alias                          |
+| `GET`    | `/api/Bookings/cart`                  |                Yes | Retrieve current active cart                                   |
+| `DELETE` | `/api/Bookings/{bookingId}`           |                Yes | Cancel a pending booking hold and release held seats           |
+| `POST`   | `/api/Bookings/checkout`              |                Yes | Checkout all valid pending cart items with one wallet charge   |
+| `GET`    | `/api/Bookings/my-tickets`            |                Yes | Retrieve user's ticket history (non-pending bookings)          |
+| `POST`   | `/api/Marketplace/list`               |                Yes | List ticket for resale                                         |
+| `POST`   | `/api/Marketplace/buy/{listingId}`    |                Yes | Purchase listed ticket                                         |
+| `GET`    | `/api/Marketplace/active`             |                 No | Retrieve paged active marketplace listings                     |
+| `POST`   | `/api/Marketplace/cancel/{listingId}` |                Yes | Cancel an active marketplace listing                           |
+| `POST`   | `/api/Wallet/deposit`                 |                Yes | Deposit wallet funds and write ledger entry                    |
+| `GET`    | `/api/Wallet/history`                 |                Yes | Retrieve wallet transaction history (newest first)             |
