@@ -79,7 +79,7 @@ namespace GP.Api.Controllers
             return Ok(ApiResponse<BookingCartResponseDto?>.SuccessResponse(cart, "Active cart retrieved successfully."));
         }
 
-        [HttpDelete("bookings/{bookingId}")]
+        [HttpDelete("{bookingId}")]
         [ProducesResponseType(typeof(ApiResponse<object?>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse<object?>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]

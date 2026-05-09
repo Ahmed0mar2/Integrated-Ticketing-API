@@ -18,17 +18,20 @@ namespace GP.Application.Services
         private readonly ILoyaltyService _loyaltyService;
         private readonly IMediator _mediator;
         private readonly IConfiguration _configuration;
+        private readonly INotificationService _notificationService;
 
         public BookingService(
             ApplicationDbContext dbContext,
             ILoyaltyService loyaltyService,
             IMediator mediator,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            INotificationService notificationService)
         {
             _dbContext = dbContext;
             _loyaltyService = loyaltyService;
             _mediator = mediator;
             _configuration = configuration;
+            _notificationService = notificationService;
         }
 
         public async Task<BookingCartResponseDto> AddToCartAsync(int userId, AddToCartRequestDto request, CancellationToken cancellationToken = default)
@@ -423,6 +426,14 @@ namespace GP.Application.Services
                     _dbContext.PointTransactions.Add(earnTransaction);
 
                     await _dbContext.SaveChangesAsync(cancellationToken);
+
+                    await _notificationService.SendNotificationAsync(
+                        userId,
+                            "Points Earned! 🎉",
+                            $"You just earned {earnedPoints} points for {earnTransaction.Description}!",
+                            "Gamification",
+                            cancellationToken);
+
                     await transaction.CommitAsync(cancellationToken);
 
                     return $"Checkout successful. {finalPrice:0.00} was deducted from your wallet for {pendingBookings.Count} trip(s).";
@@ -735,6 +746,42 @@ namespace GP.Application.Services
 
             if (completedCandidates.Count == 0 && pendingPoints.Count == 0)
                 return;
+
+            await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+
+        public async Task ProcessUpcomingBoardingAlertsAsync(CancellationToken cancellationToken = default)
+        {
+            var now = AppTime.GetScheduleNow();
+            var lookAheadTime = now.AddMinutes(15);
+
+            var upcomingBookings = await _dbContext.Bookings
+                .Include(b => b.Occurrence)
+                    .ThenInclude(o => o.Trip)
+                        .ThenInclude(t => t.TripStopTimes)
+                .Include(b => b.OriginStation)
+                .Where(b => b.Status == BookingStatus.Confirmed && !b.IsBoardingAlertSent && b.Occurrence.DepartureDateTime <= now.AddDays(1))
+                .ToListAsync(cancellationToken);
+
+            if (upcomingBookings.Count == 0)
+                return;
+
+            foreach (var booking in upcomingBookings)
+            {
+                var (boardingTime, _) = ResolvePassengerLocalTimes(booking);
+
+                if (boardingTime <= now || boardingTime > lookAheadTime)
+                    continue;
+
+                await _notificationService.SendNotificationAsync(
+                    booking.UserId,
+                        "Boarding Soon!",
+                        $"Your bus boards at {boardingTime:hh:mm tt} from {booking.OriginStation.ArabicName}.",
+                        "Boarding",
+                        cancellationToken);
+
+                booking.IsBoardingAlertSent = true;
+            }
 
             await _dbContext.SaveChangesAsync(cancellationToken);
         }

@@ -105,7 +105,31 @@ namespace GP.API.Controllers
             return Ok(ApiResponse.Ok("Expired holds released and inventory restored."));
         }
 
-        // Job 4: Expires old loyalty points
+        // Job 4: Sends boarding alerts before trip departure
+        [HttpPost("process-boarding-alerts")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> ProcessBoardingAlerts([FromQuery] string secret, CancellationToken cancellationToken)
+        {
+            var expectedSecret = _configuration["JobSecretKey"];
+            if (string.IsNullOrWhiteSpace(expectedSecret))
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    ApiResponse.Fail("Job secret key is not configured."));
+            }
+
+            if (!string.Equals(secret, expectedSecret, StringComparison.Ordinal))
+            {
+                return Unauthorized(ApiResponse.Fail("Invalid secret key."));
+            }
+
+            await _bookingService.ProcessUpcomingBoardingAlertsAsync(cancellationToken);
+
+            return Ok("Boarding alerts processed successfully.");
+        }
+
+        // Job 5: Expires old loyalty points
         [HttpPost("expire-points")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
@@ -129,7 +153,7 @@ namespace GP.API.Controllers
             return Ok(result);
         }
 
-        // Job 5: Reset monthly challenges
+        // Job 6: Reset monthly challenges
         [HttpPost("reset-monthly-challenges")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
@@ -153,7 +177,7 @@ namespace GP.API.Controllers
             return Ok(result);
         }
 
-        // Job 6: Seed monthly challenges
+        // Job 7: Seed monthly challenges
         [HttpPost("seed-challenges")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]

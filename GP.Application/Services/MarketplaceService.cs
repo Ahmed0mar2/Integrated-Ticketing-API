@@ -14,13 +14,16 @@ public class MarketplaceService : IMarketplaceService
 {
     private readonly ApplicationDbContext _dbContext;
     private readonly ILogger<MarketplaceService> _logger;
+    private readonly INotificationService _notificationService;
 
     public MarketplaceService(
         ApplicationDbContext dbContext,
-        ILogger<MarketplaceService> logger)
+        ILogger<MarketplaceService> logger,
+        INotificationService notificationService)
     {
         _dbContext = dbContext;
         _logger = logger;
+        _notificationService = notificationService;
     }
 
     public async Task<ApiResponse> ListTicketAsync(int sellerUserId, ListTicketRequestDto request, CancellationToken cancellationToken = default)
@@ -106,6 +109,8 @@ public class MarketplaceService : IMarketplaceService
                         .ThenInclude(b => b.BookingPassengers)
                     .Include(l => l.Booking)
                         .ThenInclude(b => b.Occurrence)
+                    .Include(l => l.Booking)
+                        .ThenInclude(b => b.DestinationStation)
                     .Include(l => l.Seller)
                     .FirstOrDefaultAsync(l => l.Id == listingId, cancellationToken);
 
@@ -181,6 +186,15 @@ public class MarketplaceService : IMarketplaceService
 
                 await _dbContext.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
+
+                // Send real-time notification to seller
+                var destinationName = booking.DestinationStation?.ArabicName ?? "Your destination";
+                await _notificationService.SendNotificationAsync(
+                    listing.SellerId,
+                    "Ticket Sold!",
+                    $"Your ticket for {destinationName} has sold for {listing.AskingPrice} EGP.",
+                    "Marketplace",
+                    cancellationToken);
 
                 _logger.LogInformation("Marketplace listing sold. ListingId: {ListingId}, BuyerId: {BuyerId}, SellerId: {SellerId}",
                     listingId, buyerUserId, listing.SellerId);

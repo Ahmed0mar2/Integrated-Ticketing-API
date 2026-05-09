@@ -16,5 +16,6 @@ namespace GP.Application.Interfaces
         Task<List<MyTicketResponseDto>> GetMyTicketsAsync(int userId, CancellationToken cancellationToken = default);
         Task ReleaseExpiredHoldsAsync(CancellationToken cancellationToken = default);
         Task ProcessCompletedTripsAsync(CancellationToken cancellationToken = default);
+        Task ProcessUpcomingBoardingAlertsAsync(CancellationToken cancellationToken = default);
     }
 }

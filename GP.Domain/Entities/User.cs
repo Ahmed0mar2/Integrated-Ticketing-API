@@ -41,5 +41,6 @@ namespace GP.Domain.Entities
         public ICollection<WalletTransaction> WalletTransactions { get; set; } = [];
         public ICollection<PointTransaction> PointTransactions { get; set; } = [];
         public ICollection<UserChallenge> UserChallenges { get; set; } = [];
+        public ICollection<Notification> Notifications { get; set; } = [];
     }
 }

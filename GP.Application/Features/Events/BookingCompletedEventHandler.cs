@@ -1,5 +1,6 @@
 using GP.Application.Common;
 using GP.Application.Events;
+using GP.Application.Interfaces;
 using GP.Domain.Entities;
 using GP.Domain.Enums;
 using GP.Infrastructure.Data;
@@ -11,10 +12,14 @@ namespace GP.Application.Features.Events
     public class BookingCompletedEventHandler : INotificationHandler<BookingCompletedEvent>
     {
         private readonly ApplicationDbContext _dbContext;
+        private readonly INotificationService _notificationService;
 
-        public BookingCompletedEventHandler(ApplicationDbContext dbContext)
+        public BookingCompletedEventHandler(
+            ApplicationDbContext dbContext,
+            INotificationService notificationService)
         {
             _dbContext = dbContext;
+            _notificationService = notificationService;
         }
 
         public async Task Handle(BookingCompletedEvent notification, CancellationToken cancellationToken)
@@ -72,6 +77,16 @@ namespace GP.Application.Features.Events
             }
 
             await _dbContext.SaveChangesAsync(cancellationToken);
+
+            foreach (var uc in activeChallenges.Where(uc => uc.IsCompleted))
+            {
+                await _notificationService.SendNotificationAsync(
+                    uc.UserId,
+                    "Points Earned! 🎉",
+                    $"You just earned {uc.Challenge.RewardPoints} points for Completed Challenge: {uc.Challenge.Title}!",
+                    "Gamification",
+                    cancellationToken);
+            }
         }
     }
 }

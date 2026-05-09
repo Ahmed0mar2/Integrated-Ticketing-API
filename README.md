@@ -24,6 +24,7 @@
 - **Role-based Access Control** - Admin, User, and Partner roles
 - **Booking Management** - Complete booking lifecycle with passenger management
 - **Loyalty & Gamification** - Points ledger, monthly challenges, and progress tracking
+- **Real-Time Notifications + Inbox** - Persistent user inbox plus SignalR live push for marketplace sales, gamification rewards, and boarding alerts
 
 ### 🎯 Loyalty & Gamification Highlights
 
@@ -31,6 +32,13 @@
 - Earned points remain pending until departure and expire 4 months later
 - Monthly challenges reset and reseed via the Jobs endpoints
 - Challenge types include TotalTrips, TotalSpend, RoundTrip, and MultiDestination
+
+### 🔔 Notification Highlights
+
+- Every notification is persisted to a user inbox history and can be marked as read
+- Marketplace sellers receive a real-time `Ticket Sold!` notification when a listing is purchased
+- Users receive real-time `Points Earned! 🎉` notifications for checkout-earned points and challenge rewards
+- Confirmed passengers receive one-time `Boarding Soon!` notifications via cron-driven job processing 15 minutes before boarding
 
 ---
 
@@ -296,7 +304,7 @@ After running migrations, you can log in with the seeded admin account:
 | `GET`  | `/api/Search`                | Backward-compatible direct-trip search alias                               | ❌             |
 | `GET`  | `/api/trips/search/indirect` | Preferred 1-stop indirect search route                                     | ❌             |
 | `GET`  | `/api/Search/indirect`       | Backward-compatible indirect search alias                                  | ❌             |
-| `GET`  | `/api/trips/popular-routes`  | Top 3 governorate-to-governorate routes from the last 7 days (cached 1h)   | ❌             |
+| `GET`  | `/api/Search/popular-routes` | Top 3 governorate-to-governorate routes from the last 7 days (cached 1h)   | ❌             |
 
 ### 🪑 Occurrence Seat Map (`/api/occurrences`)
 
@@ -329,9 +337,34 @@ After running migrations, you can log in with the seeded admin account:
 | `POST` | `/api/Jobs/generate-occurrences?secret=<JobSecretKey>`    | Generate future occurrences (scheduler endpoint) | Secret query param |
 | `POST` | `/api/Jobs/process-completed-trips?secret=<JobSecretKey>` | Mark eligible trips as completed                 | Secret query param |
 | `POST` | `/api/Jobs/release-expired-holds?secret=<JobSecretKey>`   | Release expired holds and restore inventory      | Secret query param |
+| `POST` | `/api/Jobs/process-boarding-alerts?secret=<JobSecretKey>` | Send one-time boarding alerts for trips boarding soon | Secret query param |
 | `POST` | `/api/Jobs/expire-points?secret=<JobSecretKey>`           | Expire old loyalty point transactions            | Secret query param |
 | `POST` | `/api/Jobs/reset-monthly-challenges?secret=<JobSecretKey>`| Reset and reassign monthly challenges            | Secret query param |
 | `POST` | `/api/Jobs/seed-challenges?secret=<JobSecretKey>`         | Seed the static monthly challenges               | Secret query param |
+
+### 🔔 Notifications Inbox (`/api/Notifications`)
+
+| Method  | Endpoint                             | Description                                    | Auth Required |
+| ------- | ------------------------------------ | ---------------------------------------------- | ------------- |
+| `GET`   | `/api/Notifications?limit=50`        | Retrieve latest notifications (newest first)   | ✅             |
+| `PATCH` | `/api/Notifications/{id}/read`       | Mark one notification as read                  | ✅             |
+| `PATCH` | `/api/Notifications/read-all`        | Mark all unread notifications as read          | ✅             |
+
+### 🔔 Real-Time Notifications (SignalR)
+
+- Hub route: `/hubs/notifications`
+- Auth: JWT-authenticated connection
+- User targeting: routed by `domain_user_id` claim through server-side `Clients.User(userId)`
+- Client callback: `ReceiveNotification(title, message, type)`
+- Delivery model: notification is saved to inbox first, then pushed live through SignalR
+
+Current notification types:
+
+| Type          | Trigger                                                                 |
+| ------------- | ----------------------------------------------------------------------- |
+| `Marketplace` | Seller ticket sold in marketplace buy flow                              |
+| `Gamification`| Checkout points earned and challenge reward completion                  |
+| `Boarding`    | Cron endpoint `/api/Jobs/process-boarding-alerts` for 15-minute alerts |
 
 ### 🛡️ Admin Users (`/api/admin/users`)
 

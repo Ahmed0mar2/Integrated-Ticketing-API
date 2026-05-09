@@ -254,6 +254,9 @@ public static class ServiceCollectionExtensions
         // Marketplace Service
         services.AddScoped<IMarketplaceService, MarketplaceService>();
 
+        // Notifications Service
+        services.AddScoped<INotificationService, NotificationService>();
+
         return services;
     }
 
