@@ -1,4 +1,4 @@
-using GP.API.Extensions;
+﻿using GP.API.Extensions;
 using GP.Infrastructure.Hubs;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.OpenApi;
@@ -15,10 +15,14 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("SignalRCorsPolicy", policy =>
     {
-        policy.SetIsOriginAllowed(origin => true) 
+        policy.WithOrigins(
+                "http://localhost:4200",
+                "http://domain.com",
+                "https://domain.com"
+              )
               .AllowAnyMethod()
               .AllowAnyHeader()
-              .AllowCredentials(); 
+              .AllowCredentials();
     });
 });
 
@@ -96,7 +100,7 @@ app.MapScalarApiReference(options =>
 
 app.UseRateLimiter();
 app.UseExceptionHandler();
-//app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseCors("SignalRCorsPolicy"); //Todo: Change to "Production" for production
 app.UseAuthentication();
