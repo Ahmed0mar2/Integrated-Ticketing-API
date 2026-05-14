@@ -824,6 +824,35 @@ No request body.
 }
 ```
 
+## 5.4 Update FCM Token
+### Endpoint Overview
+- **Method:** `POST`
+- **URL:** `/api/Users/fcm-token`
+- **Business Use Case:** Registers or updates the authenticated user's device token for offline push notifications.
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** Authenticated user
+### Request Payload
+```json
+{
+  "token": "<fcm-token>",
+  "deviceType": "Android"
+}
+```
+### Request Field Reference
+| Field      | Type   | Required | Notes                     |
+| ---------- | ------ | -------- | ------------------------- |
+| token      | string | Yes      | FCM device token          |
+| deviceType | string | Yes      | Example: "Android", "iOS" |
+### Response Example (200 OK)
+```json
+{ "success": true, "message": "FCM token updated successfully.", "data": null, "errors": null, "timestamp": "2026-05-14T00:00:00Z" }
+```
+
+### Notes
+- If the token already exists for a different user, it is reassigned to the current user.
+- If the token exists for the same user, only `LastUsedAt` is updated.
+
 ---
 
 # 6. Stations API
@@ -2127,6 +2156,7 @@ Hub route: `/hubs/notifications`
 Delivery model:
 - Notifications are persisted to the inbox first.
 - Then pushed live to online clients through SignalR.
+- Offline delivery uses stored FCM device tokens registered via `/api/Users/fcm-token`.
 
 ### Authentication
 - Connection requires authenticated JWT user context.
@@ -2202,6 +2232,7 @@ Client method name:
 | `GET`    | `/api/Users/me`                       |                Yes | Get profile with loyalty stats and active challenges           |
 | `PUT`    | `/api/Users/me`                       |                Yes | Update profile                                                 |
 | `POST`   | `/api/Users/me/profile-picture`       |                Yes | Upload profile picture                                         |
+| `POST`   | `/api/Users/fcm-token`                |                Yes | Register/update user device token for offline push             |
 | `GET`    | `/api/Loyalty/history`                |                Yes | Retrieve loyalty point ledger history (latest first)           |
 | `GET`    | `/api/Loyalty/challenges`             |                Yes | Retrieve paged active and completed challenge history          |
 | `GET`    | `/api/Stations`                       |                 No | Get grouped stations                                           |

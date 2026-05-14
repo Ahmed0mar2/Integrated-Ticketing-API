@@ -1,5 +1,5 @@
 ﻿using GP.API.Extensions;
-using GP.Application.Common; 
+using GP.Application.Common;
 using GP.Application.DTOs.Profile;
 using GP.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -98,5 +98,30 @@ public class UsersController : ControllerBase
         return Ok(ApiResponse<object>.SuccessResponse(
             new { profilePictureUrl = result.NewImageUrl },
             result.Message));
+    }
+
+    /// <summary>
+    /// Registers or updates the user's FCM token for offline notifications.
+    /// </summary>
+    [HttpPost("fcm-token")]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> UpdateFcmToken(
+        [FromBody] FcmTokenRequestDto dto,
+        CancellationToken cancellationToken)
+    {
+        if (dto == null || string.IsNullOrWhiteSpace(dto.Token) || string.IsNullOrWhiteSpace(dto.DeviceType))
+        {
+            return BadRequest(ApiResponse.ErrorResponse("Token and deviceType are required."));
+        }
+
+        var userId = User.GetDomainUserId();
+        if (userId == null)
+            return Unauthorized(ApiResponse.ErrorResponse("Invalid user token."));
+
+        await _userProfileService.UpdateFcmTokenAsync(userId.Value, dto.Token, dto.DeviceType, cancellationToken);
+
+        return Ok(ApiResponse.Ok("FCM token updated successfully."));
     }
 }

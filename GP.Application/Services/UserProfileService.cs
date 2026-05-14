@@ -324,4 +324,45 @@ public class UserProfileService : IUserProfileService
             return (false, false, "An unexpected error occurred while uploading the image.", null);
         }
     }
+
+    public async Task UpdateFcmTokenAsync(
+        int userId,
+        string fcmToken,
+        string deviceType,
+        CancellationToken cancellationToken = default)
+    {
+        var normalizedToken = fcmToken?.Trim();
+        var normalizedDeviceType = deviceType?.Trim();
+
+        if (string.IsNullOrWhiteSpace(normalizedToken))
+            throw new InvalidOperationException("FCM token is required.");
+
+        if (string.IsNullOrWhiteSpace(normalizedDeviceType))
+            throw new InvalidOperationException("Device type is required.");
+
+        var now = AppTime.GetScheduleNow();
+
+        var existing = await _context.UserDeviceTokens
+            .FirstOrDefaultAsync(t => t.FcmToken == normalizedToken, cancellationToken);
+
+        if (existing == null)
+        {
+            _context.UserDeviceTokens.Add(new UserDeviceToken
+            {
+                UserId = userId,
+                FcmToken = normalizedToken,
+                DeviceType = normalizedDeviceType,
+                LastUsedAt = now
+            });
+        }
+        else
+        {
+            existing.UserId = userId;
+            existing.DeviceType = normalizedDeviceType;
+            existing.LastUsedAt = now;
+            existing.UpdatedAt = now;
+        }
+
+        await _context.SaveChangesAsync(cancellationToken);
+    }
 }

@@ -14,6 +14,12 @@ public interface IUserProfileService
         UpdateUserProfileDto dto,
         CancellationToken cancellationToken = default);
 
+    Task UpdateFcmTokenAsync(
+        int userId,
+        string fcmToken,
+        string deviceType,
+        CancellationToken cancellationToken = default);
+
     Task<(bool Success, bool NotFound, string Message, string? NewImageUrl)> UploadProfilePictureAsync(
         int userId,
         IFormFile file,

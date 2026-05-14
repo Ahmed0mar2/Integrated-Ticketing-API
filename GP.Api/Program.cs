@@ -1,5 +1,7 @@
 ﻿using GP.API.Extensions;
 using GP.Infrastructure.Hubs;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
@@ -10,6 +12,23 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
 builder.Services.AddSignalR();
+
+if (FirebaseApp.DefaultInstance == null)
+{
+    var credentialsPath = builder.Configuration["Firebase:CredentialsPath"];
+    if (string.IsNullOrWhiteSpace(credentialsPath))
+    {
+        throw new InvalidOperationException("Firebase credentials path is not configured.");
+    }
+
+    // Fix for CS0618: Set the environment variable so Google automatically finds it
+    Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", credentialsPath);
+
+    FirebaseApp.Create(new AppOptions
+    {
+        Credential = GoogleCredential.GetApplicationDefault()
+    });
+}
 
 builder.Services.AddCors(options =>
 {
