@@ -1,5 +1,7 @@
-using GP.API.Extensions;
+﻿using GP.API.Extensions;
 using GP.Infrastructure.Hubs;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
@@ -11,14 +13,35 @@ builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
 builder.Services.AddSignalR();
 
+if (FirebaseApp.DefaultInstance == null)
+{
+    var credentialsPath = builder.Configuration["Firebase:CredentialsPath"];
+    if (string.IsNullOrWhiteSpace(credentialsPath))
+    {
+        throw new InvalidOperationException("Firebase credentials path is not configured.");
+    }
+
+    // Fix for CS0618: Set the environment variable so Google automatically finds it
+    Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", credentialsPath);
+
+    FirebaseApp.Create(new AppOptions
+    {
+        Credential = GoogleCredential.GetApplicationDefault()
+    });
+}
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("SignalRCorsPolicy", policy =>
     {
-        policy.SetIsOriginAllowed(origin => true) 
+        policy.WithOrigins(
+                "http://localhost:4200",
+                "http://domain.com",
+                "https://domain.com"
+              )
               .AllowAnyMethod()
               .AllowAnyHeader()
-              .AllowCredentials(); 
+              .AllowCredentials();
     });
 });
 
@@ -96,7 +119,7 @@ app.MapScalarApiReference(options =>
 
 app.UseRateLimiter();
 app.UseExceptionHandler();
-//app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseCors("SignalRCorsPolicy"); //Todo: Change to "Production" for production
 app.UseAuthentication();

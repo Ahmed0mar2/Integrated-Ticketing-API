@@ -332,23 +332,23 @@ After running migrations, you can log in with the seeded admin account:
 
 ### ⚙️ Jobs (`/api/Jobs`)
 
-| Method | Endpoint                                                  | Description                                      | Auth Required      |
-| ------ | --------------------------------------------------------- | ------------------------------------------------ | ------------------ |
-| `POST` | `/api/Jobs/generate-occurrences?secret=<JobSecretKey>`    | Generate future occurrences (scheduler endpoint) | Secret query param |
-| `POST` | `/api/Jobs/process-completed-trips?secret=<JobSecretKey>` | Mark eligible trips as completed                 | Secret query param |
-| `POST` | `/api/Jobs/release-expired-holds?secret=<JobSecretKey>`   | Release expired holds and restore inventory      | Secret query param |
-| `POST` | `/api/Jobs/process-boarding-alerts?secret=<JobSecretKey>` | Send one-time boarding alerts for trips boarding soon | Secret query param |
-| `POST` | `/api/Jobs/expire-points?secret=<JobSecretKey>`           | Expire old loyalty point transactions            | Secret query param |
-| `POST` | `/api/Jobs/reset-monthly-challenges?secret=<JobSecretKey>`| Reset and reassign monthly challenges            | Secret query param |
-| `POST` | `/api/Jobs/seed-challenges?secret=<JobSecretKey>`         | Seed the static monthly challenges               | Secret query param |
+| Method | Endpoint                                                   | Description                                           | Auth Required      |
+| ------ | ---------------------------------------------------------- | ----------------------------------------------------- | ------------------ |
+| `POST` | `/api/Jobs/generate-occurrences?secret=<JobSecretKey>`     | Generate future occurrences (scheduler endpoint)      | Secret query param |
+| `POST` | `/api/Jobs/process-completed-trips?secret=<JobSecretKey>`  | Mark eligible trips as completed                      | Secret query param |
+| `POST` | `/api/Jobs/release-expired-holds?secret=<JobSecretKey>`    | Release expired holds and restore inventory           | Secret query param |
+| `POST` | `/api/Jobs/process-boarding-alerts?secret=<JobSecretKey>`  | Send one-time boarding alerts for trips boarding soon | Secret query param |
+| `POST` | `/api/Jobs/expire-points?secret=<JobSecretKey>`            | Expire old loyalty point transactions                 | Secret query param |
+| `POST` | `/api/Jobs/reset-monthly-challenges?secret=<JobSecretKey>` | Reset and reassign monthly challenges                 | Secret query param |
+| `POST` | `/api/Jobs/seed-challenges?secret=<JobSecretKey>`          | Seed the static monthly challenges                    | Secret query param |
 
 ### 🔔 Notifications Inbox (`/api/Notifications`)
 
-| Method  | Endpoint                             | Description                                    | Auth Required |
-| ------- | ------------------------------------ | ---------------------------------------------- | ------------- |
-| `GET`   | `/api/Notifications?limit=50`        | Retrieve latest notifications (newest first)   | ✅             |
-| `PATCH` | `/api/Notifications/{id}/read`       | Mark one notification as read                  | ✅             |
-| `PATCH` | `/api/Notifications/read-all`        | Mark all unread notifications as read          | ✅             |
+| Method  | Endpoint                       | Description                                  | Auth Required |
+| ------- | ------------------------------ | -------------------------------------------- | ------------- |
+| `GET`   | `/api/Notifications?limit=50`  | Retrieve latest notifications (newest first) | ✅             |
+| `PATCH` | `/api/Notifications/{id}/read` | Mark one notification as read                | ✅             |
+| `PATCH` | `/api/Notifications/read-all`  | Mark all unread notifications as read        | ✅             |
 
 ### 🔔 Real-Time Notifications (SignalR)
 
@@ -357,14 +357,15 @@ After running migrations, you can log in with the seeded admin account:
 - User targeting: routed by `domain_user_id` claim through server-side `Clients.User(userId)`
 - Client callback: `ReceiveNotification(title, message, type)`
 - Delivery model: notification is saved to inbox first, then pushed live through SignalR
+- Offline delivery uses stored FCM tokens registered via `/api/users/fcm-token`
 
 Current notification types:
 
-| Type          | Trigger                                                                 |
-| ------------- | ----------------------------------------------------------------------- |
-| `Marketplace` | Seller ticket sold in marketplace buy flow                              |
-| `Gamification`| Checkout points earned and challenge reward completion                  |
-| `Boarding`    | Cron endpoint `/api/Jobs/process-boarding-alerts` for 15-minute alerts |
+| Type           | Trigger                                                                |
+| -------------- | ---------------------------------------------------------------------- |
+| `Marketplace`  | Seller ticket sold in marketplace buy flow                             |
+| `Gamification` | Checkout points earned and challenge reward completion                 |
+| `Boarding`     | Cron endpoint `/api/Jobs/process-boarding-alerts` for 15-minute alerts |
 
 ### 🛡️ Admin Users (`/api/admin/users`)
 
@@ -384,36 +385,37 @@ These endpoints were added as part of the User Profile epic. They allow authenti
 
 | Method | Endpoint                        | Auth Required | Description                                                                                                                                       |
 | ------ | ------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/users/me`                 | ✅             | Get current user's profile, loyalty points, expiring points info, active challenges, and wallet balance                                             |
+| `GET`  | `/api/users/me`                 | ✅             | Get current user's profile, loyalty points, expiring points info, active challenges, and wallet balance                                           |
 | `PUT`  | `/api/users/me`                 | ✅             | Update current user's basic profile info (first/family/last name, email, phone). Email & phone uniqueness validated at domain and identity levels |
 | `POST` | `/api/users/me/profile-picture` | ✅             | Upload or replace user's profile picture (multipart file). Allowed extensions: `.jpg`, `.jpeg`, `.png`                                            |
+| `POST` | `/api/users/fcm-token`          | ✅             | Register or update user's FCM token for offline push notifications                                                                                |
 
 ### 🎁 Loyalty (`/api/Loyalty`)
 
-| Method | Endpoint              | Description                                                        | Auth Required |
-| ------ | --------------------- | ------------------------------------------------------------------ | ------------- |
-| `GET`  | `/api/Loyalty/history` | Retrieve the user's loyalty point ledger history (latest first)   | ✅             |
-| `GET`  | `/api/Loyalty/challenges` | Retrieve paged active and completed challenge history            | ✅             |
+| Method | Endpoint                  | Description                                                     | Auth Required |
+| ------ | ------------------------- | --------------------------------------------------------------- | ------------- |
+| `GET`  | `/api/Loyalty/history`    | Retrieve the user's loyalty point ledger history (latest first) | ✅             |
+| `GET`  | `/api/Loyalty/challenges` | Retrieve paged active and completed challenge history           | ✅             |
 
 ### 🛒 Bookings (`/api/Bookings`)
 
-| Method | Endpoint                   | Description                                                                               | Auth Required |
-| ------ | -------------------------- | ----------------------------------------------------------------------------------------- | ------------- |
-| `POST` | `/api/Bookings/cart`       | Add trip to cart with 10-minute seat soft-lock (one passenger ↔ one required seat number) | ✅             |
-| `POST` | `/api/Bookings/cart/add`   | Backward-compatible add-to-cart alias                                                     | ✅             |
-| `GET`  | `/api/Bookings/cart`       | Get current active cart (pending + not expired)                                           | ✅             |
-| `DELETE` | `/api/Bookings/bookings/{bookingId}` | Cancel an entire pending booking hold and release all held seats | ✅             |
-| `POST` | `/api/Bookings/checkout`   | Checkout all pending cart items with one wallet charge                                    | ✅             |
-| `GET`  | `/api/Bookings/my-tickets` | Get user's ticket history (non-pending bookings)                                          | ✅             |
+| Method   | Endpoint                             | Description                                                                               | Auth Required |
+| -------- | ------------------------------------ | ----------------------------------------------------------------------------------------- | ------------- |
+| `POST`   | `/api/Bookings/cart`                 | Add trip to cart with 10-minute seat soft-lock (one passenger ↔ one required seat number) | ✅             |
+| `POST`   | `/api/Bookings/cart/add`             | Backward-compatible add-to-cart alias                                                     | ✅             |
+| `GET`    | `/api/Bookings/cart`                 | Get current active cart (pending + not expired)                                           | ✅             |
+| `DELETE` | `/api/Bookings/bookings/{bookingId}` | Cancel an entire pending booking hold and release all held seats                          | ✅             |
+| `POST`   | `/api/Bookings/checkout`             | Checkout all pending cart items with one wallet charge                                    | ✅             |
+| `GET`    | `/api/Bookings/my-tickets`           | Get user's ticket history (non-pending bookings)                                          | ✅             |
 
 ### 🏪 Marketplace (`/api/Marketplace`)
 
-| Method | Endpoint                           | Description                          | Auth Required |
-| ------ | ---------------------------------- | ------------------------------------ | ------------- |
-| `POST` | `/api/Marketplace/list`            | List a booking for resale            | ✅             |
-| `POST` | `/api/Marketplace/buy/{listingId}` | Purchase a listed booking            | ✅             |
-| `GET`  | `/api/Marketplace/active`          | Retrieve active marketplace listings | ❌             |
-| `POST` | `/api/Marketplace/cancel/{listingId}` | Delist a marketplace listing       | ✅             |
+| Method | Endpoint                              | Description                          | Auth Required |
+| ------ | ------------------------------------- | ------------------------------------ | ------------- |
+| `POST` | `/api/Marketplace/list`               | List a booking for resale            | ✅             |
+| `POST` | `/api/Marketplace/buy/{listingId}`    | Purchase a listed booking            | ✅             |
+| `GET`  | `/api/Marketplace/active`             | Retrieve active marketplace listings | ❌             |
+| `POST` | `/api/Marketplace/cancel/{listingId}` | Delist a marketplace listing         | ✅             |
 
 ### 💳 Wallet (`/api/Wallet`)
 

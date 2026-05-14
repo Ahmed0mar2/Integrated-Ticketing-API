@@ -4,6 +4,8 @@ using GP.Domain.Entities;
 using GP.Infrastructure.Data;
 using GP.Infrastructure.Hubs;
 using GP.Infrastructure.Interfaces;
+using FcmMessage = FirebaseAdmin.Messaging.Message;
+using FcmNotification = FirebaseAdmin.Messaging.Notification;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
@@ -43,6 +45,52 @@ namespace GP.Application.Services
 
             await _hubContext.Clients.User(userId.ToString())
                 .ReceiveNotification(title, message, type);
+
+            var deviceTokens = await _dbContext.UserDeviceTokens
+                .Where(t => t.UserId == userId)
+                .ToListAsync(cancellationToken);
+
+            if (deviceTokens.Count == 0)
+            {
+                return;
+            }
+
+            var tokensToRemove = new List<UserDeviceToken>();
+
+            foreach (var deviceToken in deviceTokens)
+            {
+                var fcmMessage = new FcmMessage
+                {
+                    Token = deviceToken.FcmToken,
+                    Notification = new FcmNotification
+                    {
+                        Title = title,
+                        Body = message
+                    },
+                    Data = new Dictionary<string, string>
+                    {
+                        ["type"] = type
+                    }
+                };
+
+                try
+                {
+                    await FirebaseAdmin.Messaging.FirebaseMessaging.DefaultInstance
+                        .SendAsync(fcmMessage, cancellationToken: cancellationToken);
+                }
+                catch (FirebaseAdmin.Messaging.FirebaseMessagingException ex) when (
+                    ex.MessagingErrorCode == FirebaseAdmin.Messaging.MessagingErrorCode.Unregistered ||
+                    ex.MessagingErrorCode == FirebaseAdmin.Messaging.MessagingErrorCode.InvalidArgument)
+                {
+                    tokensToRemove.Add(deviceToken);
+                }
+            }
+
+            if (tokensToRemove.Count > 0)
+            {
+                _dbContext.UserDeviceTokens.RemoveRange(tokensToRemove);
+                await _dbContext.SaveChangesAsync(cancellationToken);
+            }
         }
 
         public async Task<List<NotificationDto>> GetUserNotificationsAsync(
