@@ -2,16 +2,11 @@
 
 using FluentValidation;
 using GP.Application.DTOs.Auth;
-using GP.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
 
 public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
 {
-    private readonly ApplicationDbContext _context;
-    public RegisterRequestValidator(ApplicationDbContext context)
+    public RegisterRequestValidator()
     {
-        _context = context;
-
         RuleFor(x => x.Email)
             .NotEmpty().WithMessage("Email is required")
             .EmailAddress().WithMessage("Invalid email format")
@@ -19,10 +14,7 @@ public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
 
         RuleFor(x => x.Password)
             .NotEmpty().WithMessage("Password is required")
-            .MinimumLength(8).WithMessage("Password must be at least 8 characters")
-            .Matches(@"[A-Z]").WithMessage("Password must contain at least one uppercase letter")
-            .Matches(@"[a-z]").WithMessage("Password must contain at least one lowercase letter")
-            .Matches(@"[0-9]").WithMessage("Password must contain at least one digit");
+            .PasswordRules();
 
         RuleFor(x => x.ConfirmPassword)
             .Equal(x => x.Password).WithMessage("Passwords do not match");
@@ -58,14 +50,7 @@ public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
         RuleFor(x => x.CountryCode)
            .NotEmpty().WithMessage("Country is required")
            .Length(2).WithMessage("Invalid country code")
-           .MustAsync(BeAValidCountryCode).WithMessage("Invalid country");
-    }
-
-    private async Task<bool> BeAValidCountryCode(string countryCode, CancellationToken cancellationToken)
-    {
-        if (string.IsNullOrWhiteSpace(countryCode)) return false;
-        var code = countryCode.ToUpperInvariant();
-        return await _context.Countries.AnyAsync(c => c.CountryCode == code, cancellationToken);
+           .Matches(@"^[A-Za-z]{2}$").WithMessage("Invalid country code");
     }
 
     private bool BeAValidAge(DateOnly dateOfBirth)

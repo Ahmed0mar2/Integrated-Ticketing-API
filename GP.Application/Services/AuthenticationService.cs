@@ -18,6 +18,7 @@ using System.Text;
 using System.Threading.Tasks;
 using GP.Application.Interfaces;
 using GP.Application.Common;
+using Microsoft.Extensions.Configuration;
 
 namespace GP.Application.Services
 {
@@ -27,17 +28,19 @@ namespace GP.Application.Services
         private readonly ApplicationDbContext _context;
         private readonly JwtSettings _jwtSettings;
         private readonly IEmailService _emailService;
-
+        private readonly IConfiguration _configuration;
         public AuthenticationService(
             UserManager<ApplicationUser> userManager,
             ApplicationDbContext context,
             IOptions<JwtSettings> jwtSettings,
-            IEmailService emailService)
+            IEmailService emailService,
+            IConfiguration configuration)
         {
             _userManager = userManager;
             _context = context;
             _jwtSettings = jwtSettings.Value;
             _emailService = emailService;
+            _configuration = configuration;
         }
 
         public async Task<(bool Success, string Message, AuthResponse? Data)> RegisterAsync(
@@ -64,6 +67,19 @@ namespace GP.Application.Services
                     {
                         result = (false, "Email already registered", null);
                         return;
+                    }
+
+                    // VALIDATE Phone uniqueness
+                    if (!string.IsNullOrWhiteSpace(request.PhoneNumber))
+                    {
+                        var phoneInUse = await _userManager.Users
+                            .AnyAsync(u => u.PhoneNumber == request.PhoneNumber);
+
+                        if (phoneInUse)
+                        {
+                            result = (false, "Phone number already registered", null);
+                            return;
+                        }
                     }
 
                     // VALIDATE National ID number uniqueness
@@ -500,6 +516,7 @@ namespace GP.Application.Services
 
         public async Task<(bool Success, string Message)> SendVerificationEmailAsync(string email)
         {
+            var frontendUrl = _configuration["FrontendUrl"];
             try
             {
                 var user = await _userManager.FindByEmailAsync(email);
@@ -517,8 +534,7 @@ namespace GP.Application.Services
                 var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
                 //Todo: Create verification link
-                var verificationLink = $"http://localhost:44399/verify-email?userId={user.Id}&token={Uri.EscapeDataString(token)}";
-
+                var verificationLink = $"{frontendUrl}/auth/verify-email?userId={user.Id}&token={Uri.EscapeDataString(token)}";
                 // Send email
                 var emailSent = await _emailService.SendVerificationEmailAsync(user.Email!, verificationLink);
 
@@ -573,6 +589,7 @@ namespace GP.Application.Services
 
         public async Task<(bool Success, string Message)> ForgotPasswordAsync(string email)
         {
+            var frontendUrl = _configuration["FrontendUrl"];
             try
             {
                 var user = await _userManager.FindByEmailAsync(email);
@@ -585,8 +602,7 @@ namespace GP.Application.Services
                 var token = await _userManager.GeneratePasswordResetTokenAsync(user);
 
                 //Todo: Create reset link
-                var resetLink = $"http://localhost:44399/reset-password?email={Uri.EscapeDataString(email)}&token={Uri.EscapeDataString(token)}";
-
+                var resetLink = $"{frontendUrl}/auth/reset-password?email={Uri.EscapeDataString(email)}&token={Uri.EscapeDataString(token)}";
                 // Send email
                 var emailSent = await _emailService.SendPasswordResetEmailAsync(user.Email!, resetLink);
 

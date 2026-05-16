@@ -364,3 +364,6 @@ FodyWeavers.xsd
 
 # Firebase Credentials (CRITICAL: DO NOT COMMIT)
 **/service-account.json
+
+# Ignore Visual Studio Code C# Dev Kit cache files
+*.lscache
