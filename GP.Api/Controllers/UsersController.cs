@@ -2,9 +2,13 @@
 using GP.Application.Common;
 using GP.Application.DTOs.Profile;
 using GP.Application.Interfaces;
+using GP.Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.IO;
 
 namespace GP.Api.Controllers;
 
@@ -14,10 +18,17 @@ namespace GP.Api.Controllers;
 public class UsersController : ControllerBase
 {
     private readonly IUserProfileService _userProfileService;
+    private readonly ApplicationDbContext _dbContext;
+    private readonly IWebHostEnvironment _webHostEnvironment;
 
-    public UsersController(IUserProfileService userProfileService)
+    public UsersController(
+        IUserProfileService userProfileService,
+        ApplicationDbContext dbContext,
+        IWebHostEnvironment webHostEnvironment)
     {
         _userProfileService = userProfileService;
+        _dbContext = dbContext;
+        _webHostEnvironment = webHostEnvironment;
     }
 
     /// <summary>
@@ -87,17 +98,55 @@ public class UsersController : ControllerBase
         if (userId == null)
             return Unauthorized(ApiResponse.ErrorResponse("Invalid user token."));
 
-        var result = await _userProfileService.UploadProfilePictureAsync(userId.Value, file, cancellationToken);
+        var user = await _dbContext.Users
+            .FirstOrDefaultAsync(u => u.UserId == userId.Value, cancellationToken);
 
-        if (result.NotFound)
-            return NotFound(ApiResponse.ErrorResponse(result.Message));
+        if (user == null)
+            return NotFound(ApiResponse.ErrorResponse("User not found."));
 
-        if (!result.Success)
-            return BadRequest(ApiResponse.ErrorResponse(result.Message));
+        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+        string[] allowedExtensions = { ".jpg", ".jpeg", ".png" };
+
+        if (string.IsNullOrWhiteSpace(extension) || !allowedExtensions.Contains(extension))
+            return BadRequest(ApiResponse.ErrorResponse(
+                $"Invalid file extension. Allowed extensions are: {string.Join(", ", allowedExtensions)}"));
+
+        if (string.IsNullOrWhiteSpace(_webHostEnvironment.WebRootPath))
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                ApiResponse.ErrorResponse("Web root path is not configured."));
+        }
+
+        var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "profiles");
+        Directory.CreateDirectory(uploadsFolder);
+
+        var fileName = $"{Guid.NewGuid()}{extension}";
+        var filePath = Path.Combine(uploadsFolder, fileName);
+
+        await using (var fileStream = new FileStream(filePath, FileMode.Create))
+        {
+            await file.CopyToAsync(fileStream, cancellationToken);
+        }
+
+        if (!string.IsNullOrWhiteSpace(user.ProfilePictureUrl))
+        {
+            var oldRelative = user.ProfilePictureUrl.TrimStart('/');
+            var oldPath = Path.Combine(_webHostEnvironment.WebRootPath,
+                oldRelative.Replace('/', Path.DirectorySeparatorChar));
+
+            if (System.IO.File.Exists(oldPath))
+                System.IO.File.Delete(oldPath);
+        }
+
+        var newImageUrl = $"/images/profiles/{fileName}";
+        user.ProfilePictureUrl = newImageUrl;
+        user.UpdatedAt = AppTime.GetScheduleNow();
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
         return Ok(ApiResponse<object>.SuccessResponse(
-            new { profilePictureUrl = result.NewImageUrl },
-            result.Message));
+            new { profilePictureUrl = newImageUrl },
+            "Profile picture uploaded successfully."));
     }
 
     /// <summary>
