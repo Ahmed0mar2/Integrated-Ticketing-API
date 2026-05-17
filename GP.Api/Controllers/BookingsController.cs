@@ -14,10 +14,14 @@ namespace GP.Api.Controllers
     public class BookingsController : ControllerBase
     {
         private readonly IBookingService _bookingService;
+        private readonly IBoardingPassService _boardingPassService;
 
-        public BookingsController(IBookingService bookingService)
+        public BookingsController(
+            IBookingService bookingService,
+            IBoardingPassService boardingPassService)
         {
             _bookingService = bookingService;
+            _boardingPassService = boardingPassService;
         }
 
         [HttpPost("cart")]
@@ -155,6 +159,70 @@ namespace GP.Api.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError,
                     ApiResponse.ErrorResponse("An unexpected error occurred during checkout."));
+            }
+        }
+
+        [HttpGet("{bookingId}/passengers/{passengerId}/qr-payload")]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> GetBoardingPassPayload(
+            [FromRoute] int bookingId,
+            [FromRoute] int passengerId,
+            CancellationToken cancellationToken)
+        {
+            var userId = User.GetDomainUserId();
+            if (userId == null)
+            {
+                return Unauthorized(ApiResponse.ErrorResponse("Invalid token"));
+            }
+
+            try
+            {
+                var payload = await _boardingPassService.GenerateBoardingPassPayloadAsync(
+                    userId.Value,
+                    bookingId,
+                    passengerId,
+                    cancellationToken);
+
+                return Ok(ApiResponse<string>.SuccessResponse(payload, "Boarding pass generated successfully."));
+            }
+            catch (BadHttpRequestException ex)
+            {
+                return BadRequest(ApiResponse.ErrorResponse(ex.Message));
+            }
+        }
+
+        [HttpPost("verify-pass")]
+        [ProducesResponseType(typeof(ApiResponse<VerifyPassResponseDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> VerifyBoardingPass(
+            [FromBody] VerifyPassRequestDto request,
+            CancellationToken cancellationToken)
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.Payload))
+            {
+                return BadRequest(ApiResponse.ErrorResponse("Boarding pass payload is required."));
+            }
+
+            try
+            {
+                var result = await _boardingPassService.VerifyBoardingPassAsync(
+                    request.Payload,
+                    cancellationToken);
+
+                return Ok(ApiResponse<VerifyPassResponseDto>.SuccessResponse(
+                    result,
+                    "Boarding pass verified successfully."));
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ApiResponse.ErrorResponse(ex.Message));
+            }
+            catch (BadHttpRequestException ex)
+            {
+                return BadRequest(ApiResponse.ErrorResponse(ex.Message));
             }
         }
     }
