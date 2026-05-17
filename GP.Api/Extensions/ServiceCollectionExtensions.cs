@@ -229,6 +229,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUserProfileService, UserProfileService>();
 
         services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
+        services.Configure<BoardingPassSettings>(configuration.GetSection("BoardingPassSettings"));
 
         // Trip Occurrence Generator
         services.AddScoped<ITripOccurrenceService, TripOccurrenceService>();
@@ -244,6 +245,9 @@ public static class ServiceCollectionExtensions
 
         // Booking Service
         services.AddScoped<IBookingService, BookingService>();
+
+        // Boarding Pass Service
+        services.AddScoped<IBoardingPassService, BoardingPassService>();
 
         // Wallet Service
         services.AddScoped<IWalletService, WalletService>();
