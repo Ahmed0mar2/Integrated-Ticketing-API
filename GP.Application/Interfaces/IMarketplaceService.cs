@@ -7,7 +7,7 @@ public interface IMarketplaceService
 {
     Task<ApiResponse> ListTicketAsync(int sellerUserId, ListTicketRequestDto request, CancellationToken cancellationToken = default);
 
-    Task<ApiResponse> BuyTicketAsync(int buyerUserId, int listingId, CancellationToken cancellationToken = default);
+    Task<ApiResponse> BuyTicketAsync(int buyerUserId, int listingId, MarketplaceBuyRequestDto request, CancellationToken cancellationToken = default);
 
     Task<ApiResponse> CancelListingAsync(int userId, int listingId, CancellationToken cancellationToken = default);
     Task<ApiResponse> CancelListingByBookingAsync(int userId, int bookingId, CancellationToken cancellationToken = default);

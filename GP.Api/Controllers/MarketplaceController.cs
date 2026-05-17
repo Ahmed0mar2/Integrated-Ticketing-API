@@ -42,11 +42,12 @@ namespace GP.Api.Controllers
         }
 
         [HttpPost("buy/{listingId:int}")]
+        [HttpPost("listings/{listingId:int}/buy")]
         [Authorize]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
-        public async Task<IActionResult> BuyTicket(int listingId, CancellationToken cancellationToken)
+        public async Task<IActionResult> BuyTicket(int listingId, [FromBody] MarketplaceBuyRequestDto request, CancellationToken cancellationToken)
         {
             var userId = User.GetDomainUserId();
             if (userId == null)
@@ -54,7 +55,7 @@ namespace GP.Api.Controllers
                 return Unauthorized(ApiResponse.ErrorResponse("Invalid token"));
             }
 
-            var result = await _marketplaceService.BuyTicketAsync(userId.Value, listingId, cancellationToken);
+            var result = await _marketplaceService.BuyTicketAsync(userId.Value, listingId, request, cancellationToken);
 
             if (!result.Success)
             {

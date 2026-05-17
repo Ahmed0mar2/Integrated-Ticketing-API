@@ -4,6 +4,7 @@ using GP.Application.Interfaces;
 using GP.Domain.Entities;
 using GP.Domain.Enums;
 using GP.Infrastructure.Data;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
@@ -94,8 +95,11 @@ public class MarketplaceService : IMarketplaceService
         return ApiResponse.Ok("Ticket listed on marketplace successfully.");
     }
 
-    public async Task<ApiResponse> BuyTicketAsync(int buyerUserId, int listingId, CancellationToken cancellationToken = default)
+    public async Task<ApiResponse> BuyTicketAsync(int buyerUserId, int listingId, MarketplaceBuyRequestDto request, CancellationToken cancellationToken = default)
     {
+        if (request == null)
+            throw new BadHttpRequestException("Request payload is required.");
+
         var strategy = _dbContext.Database.CreateExecutionStrategy();
         var scheduleNow = AppTime.GetScheduleNow();
         return await strategy.ExecuteAsync(async () =>
@@ -145,6 +149,9 @@ public class MarketplaceService : IMarketplaceService
                 if (booking.BookingPassengers == null || booking.BookingPassengers.Count == 0)
                     return ApiResponse.Fail("No passengers found for this booking.");
 
+                if (request.Passengers == null || request.Passengers.Count != booking.SeatsBooked)
+                    throw new BadHttpRequestException("Passenger count must match the number of booked seats.");
+
                 // Wallet transfer
                 buyer.WalletBalance -= listing.AskingPrice;
                 listing.Seller.WalletBalance += listing.AskingPrice;
@@ -172,12 +179,24 @@ public class MarketplaceService : IMarketplaceService
                 booking.IsMarketplacePurchase = true;
                 booking.TotalPrice = listing.AskingPrice;
                 booking.ContactName = $"{buyer.FirstName} {buyer.LastName}".Trim();
-                booking.ContactEmail = buyer.Email;
-                booking.ContactPhone = buyer.Phone ?? "N/A";
+                booking.ContactEmail = buyer.Email.Trim();
+                booking.ContactPhone = string.IsNullOrWhiteSpace(buyer.Phone) ? "N/A" : buyer.Phone.Trim();
                 booking.UpdatedAt = scheduleNow;
 
-                foreach (var passenger in booking.BookingPassengers)
+                var orderedPassengers = booking.BookingPassengers
+                    .OrderBy(p => p.PassengerId)
+                    .ToList();
+
+                for (var i = 0; i < orderedPassengers.Count; i++)
                 {
+                    var passengerRequest = request.Passengers[i];
+                    var passenger = orderedPassengers[i];
+
+                    passenger.Name = passengerRequest.PassengerName?.Trim() ?? string.Empty;
+                    passenger.IdType = ParsePassengerIdTypeOrNull(passengerRequest.IdType);
+                    passenger.IdNumber = string.IsNullOrWhiteSpace(passengerRequest.IdNumber)
+                        ? null
+                        : passengerRequest.IdNumber.Trim();
                     passenger.IsOfferedForResale = false;
                 }
 
@@ -371,6 +390,18 @@ public class MarketplaceService : IMarketplaceService
     private static string BuildSellerFullName(User seller)
     {
         return $"{seller.FirstName} {seller.FamilyName} {seller.LastName}".Trim();
+    }
+
+    private static IdType? ParsePassengerIdTypeOrNull(string? rawIdType)
+    {
+        if (string.IsNullOrWhiteSpace(rawIdType))
+            return null;
+
+        if (Enum.TryParse<IdType>(rawIdType.Trim(), true, out var parsed) && Enum.IsDefined(parsed))
+            return parsed;
+
+        throw new BadHttpRequestException(
+            "Invalid IdType. Allowed values: NationalId, Passport, DrivingLicense, StudentId, Other.");
     }
 
     private static (DateTime BoardingTime, DateTime DropoffTime) ResolvePassengerLocalTimes(Booking booking)

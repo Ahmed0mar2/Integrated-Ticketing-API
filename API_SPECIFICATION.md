@@ -1948,7 +1948,7 @@ Base route: `/api/Marketplace`
 ## 13.2 Buy Ticket
 ### Endpoint Overview
 - **Method:** `POST`
-- **URL:** `/api/Marketplace/buy/{listingId}`
+- **URL:** `/api/Marketplace/listings/{listingId}/buy`
 - **Business Use Case:** Purchases a listed booking and transfers ownership of the entire booking.
 
 ### Authentication / Authorization
@@ -1960,12 +1960,40 @@ Base route: `/api/Marketplace`
 | --------- | ---- | -------- | -------------- |
 | listingId | int  | Yes      | Marketplace ID |
 
+### Request Payload
+```json
+{
+  "passengers": [
+    {
+      "passengerName": "Ahmed Hassan",
+      "idType": "NationalId",
+      "idNumber": "29805151234567"
+    }
+  ]
+}
+```
+
+### Request Field Reference
+| Field                | Type   | Required | Notes                                                    |
+| -------------------- | ------ | -------- | -------------------------------------------------------- |
+| passengers           | array  | Yes      | Must match `SeatsBooked` count                           |
+| passengers[].passengerName | string | Yes | Required for each passenger                              |
+| passengers[].idType  | string | No       | Optional: NationalId, Passport, DrivingLicense, StudentId, Other |
+| passengers[].idNumber | string | Conditional | Required when `idType` is provided                      |
+| passengers[].seatNumber | string | No | Ignored for marketplace purchase (seat is preserved)     |
+
+### Notes
+- Backward-compatible alias: `/api/Marketplace/buy/{listingId}`
+
 ### Purchase Rules
 - Listing must exist and be `Available`.
 - Buyer cannot be the seller.
 - Trip departure must be in the future.
 - Buyer wallet balance must cover `askingPrice`.
+- `passengers` count must exactly match `SeatsBooked`.
 - The entire booking (all passengers) is transferred to the buyer.
+- Contact info is updated from the buyer profile.
+- Passenger details are replaced in-seat-order; seat numbers remain unchanged.
 
 ### Response Example (200 OK)
 ```json
@@ -2249,7 +2277,7 @@ Client method name:
 | `POST`   | `/api/Bookings/checkout`              |                Yes | Checkout all valid pending cart items with one wallet charge   |
 | `GET`    | `/api/Bookings/my-tickets`            |                Yes | Retrieve user's ticket history (non-pending bookings)          |
 | `POST`   | `/api/Marketplace/list`               |                Yes | List ticket for resale                                         |
-| `POST`   | `/api/Marketplace/buy/{listingId}`    |                Yes | Purchase listed ticket                                         |
+| `POST`   | `/api/Marketplace/listings/{listingId}/buy` |             Yes | Purchase listed ticket (alias: `/api/Marketplace/buy/{listingId}`) |
 | `GET`    | `/api/Marketplace/active`             |                 No | Retrieve paged active marketplace listings                     |
 | `POST`   | `/api/Marketplace/cancel/{listingId}` |                Yes | Cancel an active marketplace listing                           |
 | `POST`   | `/api/Wallet/deposit`                 |                Yes | Deposit wallet funds and write ledger entry                    |
