@@ -1568,6 +1568,93 @@ No request body.
 }
 ```
 
+## 9.6 Boarding Pass QR (Overview)
+
+This feature provides a stateless, HMAC-SHA256-signed boarding pass string which the passenger client renders as a QR code. The driver's device submits the scanned string to the server for cryptographic verification and receives passenger seat details on success.
+
+### Security & Configuration
+- The signing key is configured in `BoardingPassSettings:QrSecretKey` in `appsettings.json` (use secrets in production).
+- The payload embeds the `userId` and an expiration Unix timestamp. Verification checks both the HMAC signature and that the embedded `userId` matches the current `Booking.UserId` to prevent replay after marketplace transfers.
+
+### Payload Format
+
+Unsigned raw data (pipe-separated):
+
+`GP|{bookingId}|{passengerId}|{userId}|{expUnix}`
+
+Final payload returned to clients:
+
+`GP|{bookingId}|{passengerId}|{userId}|{expUnix}|{signatureBase64}`
+
+Where `signatureBase64` = Base64(HMAC-SHA256(secret, rawData)).
+
+## 9.7 Generate Boarding Pass (Passenger)
+### Endpoint Overview
+- **Method:** `GET`
+- **URL:** `/api/Bookings/{bookingId}/passengers/{passengerId}/qr-payload`
+- **Business Use Case:** Returns a signed QR payload string for a specific passenger under a confirmed booking.
+
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** Authenticated user (must be owner of the booking)
+
+### Path Parameters
+| Field       | Type | Required | Notes                                   |
+| ----------- | ---- | -------- | --------------------------------------- |
+| bookingId   | int  | Yes      | Booking identifier (must be Confirmed)  |
+| passengerId | int  | Yes      | Passenger identifier inside the booking |
+
+### Request Payload
+No request body.
+
+### Response Example (200 OK)
+```json
+{
+  "success": true,
+  "message": "Boarding pass generated successfully.",
+  "data": "GP|1024|5001|15|1713268800|QmFzZTY0U2lnbmF0dXJl...",
+  "errors": null,
+  "timestamp": "2026-05-18T10:00:00Z"
+}
+```
+
+### Errors
+- **400 Bad Request:** Invalid booking/passenger or booking not confirmed.
+- **401 Unauthorized:** Missing or invalid JWT.
+
+## 9.8 Verify Boarding Pass (Driver)
+### Endpoint Overview
+- **Method:** `POST`
+- **URL:** `/api/Bookings/verify-pass`
+- **Business Use Case:** Driver device verifies a scanned boarding pass payload and receives passenger seat details.
+
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** Driver/Conductor app (authenticated)
+
+### Request Payload
+```json
+{ "payload": "GP|1024|5001|15|1713268800|QmFzZTY0U2lnbmF0dXJl..." }
+```
+
+### Response Example (200 OK)
+```json
+{
+  "success": true,
+  "message": "Boarding pass verified successfully.",
+  "data": {
+    "passengerName": "Ali Hassan",
+    "seatNumber": "7"
+  },
+  "errors": null,
+  "timestamp": "2026-05-18T10:01:00Z"
+}
+```
+
+### Errors
+- **400 Bad Request:** Malformed payload or expired pass.
+- **401 Unauthorized:** Signature mismatch or ticket ownership invalid (`Ticket Ownership Invalid - This ticket has been transferred.`).
+
 ---
 
 # 10. Wallet API
@@ -2276,6 +2363,8 @@ Client method name:
 | `DELETE` | `/api/Bookings/{bookingId}`           |                Yes | Cancel a pending booking hold and release held seats           |
 | `POST`   | `/api/Bookings/checkout`              |                Yes | Checkout all valid pending cart items with one wallet charge   |
 | `GET`    | `/api/Bookings/my-tickets`            |                Yes | Retrieve user's ticket history (non-pending bookings)          |
+| `GET`    | `/api/Bookings/{bookingId}/passengers/{passengerId}/qr-payload` |                Yes | Generate boarding pass QR payload                              |
+| `POST`   | `/api/Bookings/verify-pass`           |                Yes | Verify boarding pass QR payload                                |
 | `POST`   | `/api/Marketplace/list`               |                Yes | List ticket for resale                                         |
 | `POST`   | `/api/Marketplace/listings/{listingId}/buy` |             Yes | Purchase listed ticket (alias: `/api/Marketplace/buy/{listingId}`) |
 | `GET`    | `/api/Marketplace/active`             |                 No | Retrieve paged active marketplace listings                     |
