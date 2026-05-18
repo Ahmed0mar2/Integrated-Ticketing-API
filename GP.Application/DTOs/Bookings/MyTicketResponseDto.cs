@@ -20,7 +20,9 @@ namespace GP.Application.DTOs.Bookings
 
         // Trip Details
         public string AgencyName { get; set; } = string.Empty;
+        public string? AgencyNameAr { get; set; }
         public string ClassName { get; set; } = string.Empty;
+        public string? ClassNameAr { get; set; }
         public string OriginStation { get; set; } = string.Empty;
         public string OriginGov { get; set; } = string.Empty;
         public string DestinationStation { get; set; } = string.Empty;

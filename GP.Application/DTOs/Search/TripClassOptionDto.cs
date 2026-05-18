@@ -10,6 +10,7 @@ namespace GP.Application.DTOs.Search
     {
         public int CoachClassId { get; set; }
         public string ClassName { get; set; } = string.Empty;
+        public string? ClassNameAr { get; set; }
         public int RemainingSeats { get; set; }
         public decimal Price { get; set; }
     }

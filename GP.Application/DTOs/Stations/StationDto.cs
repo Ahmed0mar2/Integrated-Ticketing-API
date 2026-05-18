@@ -9,9 +9,10 @@ namespace GP.Application.DTOs.Stations
     public class StationDto
     {
         public int Id { get; set; }
-        public string ArabicName { get; set; } = string.Empty;
+        public string? ArabicName { get; set; }
         public string EnglishName { get; set; } = string.Empty;
         public string Slug { get; set; } = string.Empty;
         public string City { get; set; } = string.Empty;
+        public string? GovernorateAr { get; set; }
     }
 }

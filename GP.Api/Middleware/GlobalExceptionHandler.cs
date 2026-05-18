@@ -1,7 +1,7 @@
 ﻿namespace GP.API.Middleware;
 
+using GP.Application.Common;
 using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
 
 public class GlobalExceptionHandler : IExceptionHandler
 {
@@ -22,36 +22,44 @@ public class GlobalExceptionHandler : IExceptionHandler
             "Exception occurred: {Message}",
             exception.Message);
 
-        var problemDetails = new ProblemDetails
-        {
-            Status = StatusCodes.Status500InternalServerError,
-            Title = "Server Error",
-            Type = "https://tools.ietf.org/html/rfc7231#section-6.6.1"
-        };
+        var statusCode = StatusCodes.Status500InternalServerError;
+        var message = "An unexpected error occurred.";
+        string? errorCode = null;
 
         switch (exception)
         {
             case BadHttpRequestException badRequestException:
-                problemDetails.Status = StatusCodes.Status400BadRequest;
-                problemDetails.Title = "Bad Request";
-                problemDetails.Detail = badRequestException.Message;
+                statusCode = StatusCodes.Status400BadRequest;
+                message = badRequestException.Message;
                 break;
 
             case UnauthorizedAccessException:
-                problemDetails.Status = StatusCodes.Status401Unauthorized;
-                problemDetails.Title = "Unauthorized";
-                problemDetails.Detail = "You are not authorized to access this resource";
+                statusCode = StatusCodes.Status401Unauthorized;
+                message = "You are not authorized to access this resource";
+                break;
+
+            case CartValidationException cartValidationException:
+                statusCode = StatusCodes.Status400BadRequest;
+                message = cartValidationException.Message;
+                errorCode = cartValidationException.ErrorCode;
+                break;
+
+            case CartConcurrencyException cartConcurrencyException:
+                statusCode = StatusCodes.Status409Conflict;
+                message = cartConcurrencyException.Message;
+                errorCode = cartConcurrencyException.ErrorCode;
                 break;
 
             default:
-                problemDetails.Detail = exception.Message;
+                message = exception.Message;
                 break;
         }
 
-        httpContext.Response.StatusCode = problemDetails.Status.Value;
+        httpContext.Response.StatusCode = statusCode;
 
-        await httpContext.Response
-            .WriteAsJsonAsync(problemDetails, cancellationToken);
+        var response = ApiResponse.ErrorResponse(message, errorCode: errorCode);
+
+        await httpContext.Response.WriteAsJsonAsync(response, cancellationToken);
 
         return true;
     }

@@ -11,6 +11,7 @@ public class OccurrenceClassSeatsDto
 {
     public int CoachClassId { get; set; }
     public string ClassName { get; set; } = string.Empty;
+    public string? ClassNameAr { get; set; }
     public int TotalSeats { get; set; }
     public int RemainingSeats { get; set; }
     public string? LayoutType { get; set; }

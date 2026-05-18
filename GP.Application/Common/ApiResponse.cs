@@ -6,6 +6,7 @@
         public string Message { get; set; } = null!;
         public T? Data { get; set; }
         public List<string>? Errors { get; set; }
+        public string? ErrorCode { get; set; }
         public DateTime Timestamp { get; set; } = AppTime.GetScheduleNow();
 
         public static ApiResponse<T> SuccessResponse(
@@ -22,25 +23,29 @@
 
         public static ApiResponse<T> ErrorResponse(
             string message,
-            List<string>? errors = null)
+            List<string>? errors = null,
+            string? errorCode = null)
         {
             return new ApiResponse<T>
             {
                 Success = false,
                 Message = message,
-                Errors = errors
+                Errors = errors,
+                ErrorCode = errorCode
             };
         }
 
         public static ApiResponse<T> ErrorResponse(
             string message,
-            string error)
+            string error,
+            string? errorCode = null)
         {
             return new ApiResponse<T>
             {
                 Success = false,
                 Message = message,
-                Errors = new List<string> { error }
+                Errors = new List<string> { error },
+                ErrorCode = errorCode
             };
         }
     }
@@ -60,13 +65,15 @@
 
         public static ApiResponse Fail(
             string message,
-            List<string>? errors = null)
+            List<string>? errors = null,
+            string? errorCode = null)
         {
             return new ApiResponse
             {
                 Success = false,
                 Message = message,
-                Errors = errors
+                Errors = errors,
+                ErrorCode = errorCode
             };
         }
     }

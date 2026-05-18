@@ -372,8 +372,10 @@ public class MarketplaceService : IMarketplaceService
                     OriginGov = booking.OriginStation.Governorate ?? "Unknown",
                     DestinationGov = booking.DestinationStation.Governorate ?? "Unknown",
                     AgencyName = booking.Occurrence.Trip.Agency.AgencyName,
+                    AgencyNameAr = booking.Occurrence.Trip.Agency.AgencyNameAr,
                     Time = boardingTime,
-                    Class = $"{booking.Occurrence.Trip.Agency.AgencyName} - {booking.CoachClass.Name}"
+                    Class = $"{booking.Occurrence.Trip.Agency.AgencyName} - {booking.CoachClass.Name}",
+                    ClassNameAr = booking.CoachClass.ClassNameAr
                 }
             };
         }).ToList();

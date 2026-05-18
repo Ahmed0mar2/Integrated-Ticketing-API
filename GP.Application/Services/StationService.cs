@@ -23,13 +23,15 @@ namespace GP.Application.Services
                 .Select(g => new GovernorateStationsDto
                 {
                     Governorate = g.Key,
+                    GovernorateAr = g.Select(s => s.GovernorateAr).FirstOrDefault(),
                     Stations = g.Select(s => new StationDto
                     {
                         Id = s.StopId,
                         ArabicName = s.ArabicName,
                         EnglishName = s.NormalizedSlug,
                         Slug = s.NormalizedSlug,
-                        City = s.City
+                        City = s.City,
+                        GovernorateAr = s.GovernorateAr
                     })
                     .OrderBy(s => s.EnglishName)
                     .ToList()

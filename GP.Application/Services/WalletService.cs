@@ -77,12 +77,31 @@ namespace GP.Application.Services
                 {
                     Id = t.Id,
                     Amount = t.Amount,
-                    Type = t.Type.ToString(),
+                    Type = ToTransactionTypeToken(t.Type),
                     Description = t.Description,
                     BookingId = t.BookingId,
                     CreatedAt = DateTime.SpecifyKind(t.CreatedAt, DateTimeKind.Utc)
                 })
                 .ToListAsync(cancellationToken);
+        }
+
+        private static string ToTransactionTypeToken(TransactionType type)
+        {
+            var name = type.ToString();
+            if (string.IsNullOrWhiteSpace(name))
+                return string.Empty;
+
+            var builder = new StringBuilder(name.Length + 8);
+            for (var i = 0; i < name.Length; i++)
+            {
+                var c = name[i];
+                if (char.IsUpper(c) && i > 0)
+                    builder.Append('_');
+
+                builder.Append(char.ToUpperInvariant(c));
+            }
+
+            return builder.ToString();
         }
     }
 }

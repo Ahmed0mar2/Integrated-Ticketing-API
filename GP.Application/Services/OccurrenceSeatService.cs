@@ -108,6 +108,7 @@ public class OccurrenceSeatService : IOccurrenceSeatService
             {
                 CoachClassId = inventory.CoachClassId,
                 ClassName = inventory.CoachClass.Name,
+                ClassNameAr = inventory.CoachClass.ClassNameAr,
                 TotalSeats = inventory.TotalSeats,
                 RemainingSeats = inventory.RemainingSeats,
                 LayoutType = inventory.CoachClass.LayoutType,

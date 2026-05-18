@@ -15,6 +15,7 @@ namespace GP.Infrastructure.Data.Configurations
         {
             builder.HasKey(a => a.AgencyId);
             builder.Property(a => a.AgencyName).IsRequired().HasMaxLength(100);
+            builder.Property(a => a.AgencyNameAr).HasMaxLength(100).IsRequired(false);
             builder.Property(a => a.AgencyType).IsRequired();
             
             builder.HasIndex(a => a.AgencyName).IsUnique();

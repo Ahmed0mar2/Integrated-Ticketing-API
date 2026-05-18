@@ -289,6 +289,7 @@ namespace GP.Application.Services
                             {
                                 CoachClassId = i.CoachClassId,
                                 ClassName = i.CoachClass.Name,
+                                ClassNameAr = i.CoachClass.ClassNameAr,
                                 RemainingSeats = i.RemainingSeats,
                                 Price = segmentFare.Value
                             };
@@ -310,6 +311,8 @@ namespace GP.Application.Services
                         .Select(ts => new IntermediateStopDto
                         {
                             StationName = ts.Station.ArabicName,
+                            ArabicName = ts.Station.ArabicName,
+                            GovernorateAr = ts.Station.GovernorateAr,
                             ArrivalTime = ts.ArrivalTime,
                             DepartureTime = ts.DepartureTime,
                             StopSequence = ts.StopSequence
@@ -323,6 +326,7 @@ namespace GP.Application.Services
                         TripOccurrenceId = occurrence.TripOccurrenceId,
                         TripId = occurrence.TripId,
                         AgencyName = trip.Agency.AgencyName,
+                        AgencyNameAr = trip.Agency.AgencyNameAr,
                         BoardingTime = AppTime.AsSchedule(boardingTime),
                         DropoffTime = AppTime.AsSchedule(dropoffTime),
                         DepartureTime = AppTime.AsSchedule(occurrence.DepartureDateTime),
@@ -330,10 +334,14 @@ namespace GP.Application.Services
                         TotalDurationMinutes = duration,
                         OriginStationId = fromStop.StationId,
                         OriginStationName = fromStop.Station.ArabicName,
+                        OriginStationNameAr = fromStop.Station.ArabicName,
                         OriginGovernorate = fromStop.Station.Governorate ?? "Unknown",
+                        OriginGovernorateAr = fromStop.Station.GovernorateAr,
                         DestinationStationId = toStop.StationId,
                         DestinationStationName = toStop.Station.ArabicName,
+                        DestinationStationNameAr = toStop.Station.ArabicName,
                         DestinationGovernorate = toStop.Station.Governorate ?? "Unknown",
+                        DestinationGovernorateAr = toStop.Station.GovernorateAr,
                         StartingPrice = startingPrice,
                         RouteStops = routeStops,
                         AvailableClasses = classOptions

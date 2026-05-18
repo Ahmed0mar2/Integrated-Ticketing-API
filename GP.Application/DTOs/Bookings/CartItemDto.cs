@@ -7,7 +7,9 @@ namespace GP.Application.DTOs.Bookings
         public int SeatsBooked { get; set; }
         public DateTime HoldExpiresAt { get; set; }
         public string AgencyName { get; set; } = string.Empty;
+        public string? AgencyNameAr { get; set; }
         public string ClassName { get; set; } = string.Empty;
+        public string? ClassNameAr { get; set; }
         public string Origin { get; set; } = string.Empty;
         public string Destination { get; set; } = string.Empty;
         public string OriginGov { get; set; } = string.Empty;

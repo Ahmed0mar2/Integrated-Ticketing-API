@@ -9,6 +9,7 @@ namespace GP.Application.DTOs.Stations
     public class GovernorateStationsDto
     {
         public string Governorate { get; set; } = string.Empty;
+        public string? GovernorateAr { get; set; }
         public List<StationDto> Stations { get; set; } = [];
     }
 }

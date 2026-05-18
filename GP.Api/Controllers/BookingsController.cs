@@ -49,11 +49,11 @@ namespace GP.Api.Controllers
             }
             catch (CartConcurrencyException ex)
             {
-                return Conflict(ApiResponse<BookingCartResponseDto>.ErrorResponse(ex.Message));
+                return Conflict(ApiResponse<BookingCartResponseDto>.ErrorResponse(ex.Message, errorCode: ex.ErrorCode));
             }
             catch (CartValidationException ex)
             {
-                return BadRequest(ApiResponse<BookingCartResponseDto>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<BookingCartResponseDto>.ErrorResponse(ex.Message, errorCode: ex.ErrorCode));
             }
             catch (Exception)
             {
@@ -103,7 +103,7 @@ namespace GP.Api.Controllers
             }
             catch (CartValidationException ex)
             {
-                return BadRequest(ApiResponse<object?>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<object?>.ErrorResponse(ex.Message, errorCode: ex.ErrorCode));
             }
             catch (Exception)
             {
@@ -149,11 +149,11 @@ namespace GP.Api.Controllers
             }
             catch (CartValidationException ex)
             {
-                return BadRequest(ApiResponse<string>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<string>.ErrorResponse(ex.Message, errorCode: ex.ErrorCode));
             }
             catch (CartConcurrencyException ex)
             {
-                return Conflict(ApiResponse<string>.ErrorResponse(ex.Message));
+                return Conflict(ApiResponse<string>.ErrorResponse(ex.Message, errorCode: ex.ErrorCode));
             }
             catch (Exception)
             {

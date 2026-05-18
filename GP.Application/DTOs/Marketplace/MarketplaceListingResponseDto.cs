@@ -18,6 +18,8 @@ public class MarketplaceTripDetailsDto
     public string OriginGov { get; set; } = string.Empty;
     public string DestinationGov { get; set; } = string.Empty;
     public string AgencyName { get; set; } = string.Empty;
+    public string? AgencyNameAr { get; set; }
     public DateTime Time { get; set; }
     public string Class { get; set; } = string.Empty;
+    public string? ClassNameAr { get; set; }
 }

@@ -11,6 +11,7 @@ namespace GP.Domain.Entities
     {
         public int AgencyId { get; set; }
         public string AgencyName { get; set; } = null!;
+        public string? AgencyNameAr { get; set; }
         public AgencyType AgencyType { get; set; }
 
         public ICollection<Trip> Trips { get; set; } = new List<Trip>();

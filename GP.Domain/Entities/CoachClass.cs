@@ -10,6 +10,7 @@ namespace GP.Domain.Entities
     {
         public int CoachClassId { get; set; }
         public string Name { get; set; } = null!;
+        public string? ClassNameAr { get; set; }
         public int DefaultCapacity { get; set; }
         public string? LayoutType { get; set; }
         public int DeckCount { get; set; } = 1;

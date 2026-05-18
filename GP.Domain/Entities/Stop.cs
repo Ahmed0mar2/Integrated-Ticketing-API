@@ -15,7 +15,7 @@ namespace GP.Domain.Entities
         public string NormalizedSlug { get; set; } = null!;
         public string City { get; set; } = null!;
         public string? Governorate { get; set; }
-
+        public string? GovernorateAr { get; set; }
         public decimal? Latitude { get; set; }
         public decimal? Longitude { get; set; }
 

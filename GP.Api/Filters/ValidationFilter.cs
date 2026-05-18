@@ -39,7 +39,8 @@ public class ValidationFilter : IAsyncActionFilter
 
                     var response = ApiResponse.ErrorResponse(
                         "Validation failed",
-                        errors);
+                        errors,
+                        errorCode: "VALIDATION_ERROR");
 
                     context.Result = new BadRequestObjectResult(response);
                     return;

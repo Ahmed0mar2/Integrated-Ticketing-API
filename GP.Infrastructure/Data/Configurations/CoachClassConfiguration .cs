@@ -16,6 +16,7 @@ namespace GP.Infrastructure.Data.Configurations
             builder.HasKey(c => c.CoachClassId);
             builder.Property(c => c.CoachClassId).ValueGeneratedOnAdd();
             builder.Property(c => c.Name).IsRequired().HasMaxLength(100);
+            builder.Property(c => c.ClassNameAr).HasMaxLength(100).IsRequired(false);
             builder.Property(c => c.DefaultCapacity).IsRequired();
             builder.Property(c => c.LayoutType).HasMaxLength(50).IsRequired(false);
             builder.Property(c => c.DeckCount).IsRequired().HasDefaultValue(1);

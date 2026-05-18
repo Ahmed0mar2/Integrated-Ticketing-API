@@ -164,7 +164,9 @@ namespace GP.Application.Services
                             .ToList();
 
                         if (conflictingSeats.Count > 0)
-                            throw new CartConcurrencyException("One or more selected seats were just taken. Please refresh the seat map.");
+                            throw new CartConcurrencyException(
+                                "One or more selected seats were just taken. Please refresh the seat map.",
+                                "SEAT_ALREADY_BOOKED");
 
                         resolvedSeatNumbers = requestedSeatNumbers;
                     }
@@ -225,7 +227,10 @@ namespace GP.Application.Services
                 catch (DbUpdateConcurrencyException ex)
                 {
                     await SafeRollbackAsync(transaction, cancellationToken);
-                    throw new CartConcurrencyException("These seats were just purchased by another user. Please search again.", ex);
+                    throw new CartConcurrencyException(
+                        "These seats were just purchased by another user. Please search again.",
+                        "SEAT_ALREADY_BOOKED",
+                        ex);
                 }
                 catch
                 {
@@ -309,7 +314,9 @@ namespace GP.Application.Services
                     decimal finalPrice = Math.Max(grandTotal - discountEgp, 10.00m);
 
                     if (user.WalletBalance < finalPrice)
-                        throw new CartValidationException($"Insufficient funds. Your wallet balance is {user.WalletBalance:0.00}, but checkout total is {finalPrice:0.00}.");
+                        throw new CartValidationException(
+                            $"Insufficient funds. Your wallet balance is {user.WalletBalance:0.00}, but checkout total is {finalPrice:0.00}.",
+                            "INSUFFICIENT_WALLET_BALANCE");
 
                     var appliedDiscount = grandTotal - finalPrice;
                     if (appliedDiscount > 0m && grandTotal > 0m)
@@ -441,12 +448,18 @@ namespace GP.Application.Services
                 catch (DbUpdateConcurrencyException ex)
                 {
                     await SafeRollbackAsync(transaction, cancellationToken);
-                    throw new CartConcurrencyException("Checkout failed due to concurrent updates. Please try again.", ex);
+                    throw new CartConcurrencyException(
+                        "Checkout failed due to concurrent updates. Please try again.",
+                        null,
+                        ex);
                 }
                 catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("IX_BookingPassenger_UniqueSeat", StringComparison.OrdinalIgnoreCase) == true)
                 {
                     await SafeRollbackAsync(transaction, cancellationToken);
-                    throw new CartConcurrencyException("The selected seats were just taken by another checkout. Please try again.", ex);
+                    throw new CartConcurrencyException(
+                        "The selected seats were just taken by another checkout. Please try again.",
+                        "SEAT_ALREADY_BOOKED",
+                        ex);
                 }
                 catch
                 {
@@ -490,7 +503,9 @@ namespace GP.Application.Services
                     SeatsBooked = b.SeatsBooked,
                     HoldExpiresAt = AppTime.AsSchedule(b.HoldExpiresAt!.Value),
                     AgencyName = b.Occurrence.Trip.Agency.AgencyName,
+                    AgencyNameAr = b.Occurrence.Trip.Agency.AgencyNameAr,
                     ClassName = b.CoachClass.Name,
+                    ClassNameAr = b.CoachClass.ClassNameAr,
                     Origin = b.OriginStation.ArabicName,
                     OriginGov = b.OriginStation.Governorate ?? "Unknown",
                     Destination = b.DestinationStation.ArabicName,
@@ -571,7 +586,9 @@ namespace GP.Application.Services
                         ActiveListingId = activeListingId,
                         IsOfferedForResale = activeListingId.HasValue,
                         AgencyName = b.Occurrence.Trip.Agency.AgencyName,
+                        AgencyNameAr = b.Occurrence.Trip.Agency.AgencyNameAr,
                         ClassName = b.CoachClass.Name,
+                        ClassNameAr = b.CoachClass.ClassNameAr,
                         OriginStation = b.OriginStation.ArabicName,
                         OriginGov = b.OriginStation.Governorate ?? "Unknown",
                         DestinationStation = b.DestinationStation.ArabicName,
