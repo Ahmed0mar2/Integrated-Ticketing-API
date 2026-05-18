@@ -310,7 +310,7 @@ namespace GP.Application.Services
                         .OrderBy(ts => ts.StopSequence)
                         .Select(ts => new IntermediateStopDto
                         {
-                            StationName = ts.Station.ArabicName,
+                            StationName = ts.Station.EnglishName,
                             ArabicName = ts.Station.ArabicName,
                             GovernorateAr = ts.Station.GovernorateAr,
                             ArrivalTime = ts.ArrivalTime,
@@ -333,12 +333,12 @@ namespace GP.Application.Services
                         ArrivalTime = AppTime.AsSchedule(occurrence.ArrivalDateTime),
                         TotalDurationMinutes = duration,
                         OriginStationId = fromStop.StationId,
-                        OriginStationName = fromStop.Station.ArabicName,
+                        OriginStationName = fromStop.Station.EnglishName,
                         OriginStationNameAr = fromStop.Station.ArabicName,
                         OriginGovernorate = fromStop.Station.Governorate ?? "Unknown",
                         OriginGovernorateAr = fromStop.Station.GovernorateAr,
                         DestinationStationId = toStop.StationId,
-                        DestinationStationName = toStop.Station.ArabicName,
+                        DestinationStationName = toStop.Station.EnglishName,
                         DestinationStationNameAr = toStop.Station.ArabicName,
                         DestinationGovernorate = toStop.Station.Governorate ?? "Unknown",
                         DestinationGovernorateAr = toStop.Station.GovernorateAr,

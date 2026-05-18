@@ -91,6 +91,8 @@ public class UserProfileService : IUserProfileService
                 ChallengeId = uc.ChallengeId,
                 Title = uc.Challenge.Title,
                 Description = uc.Challenge.Description,
+                TitleAr = uc.Challenge.TitleAr,
+                DescriptionAr = uc.Challenge.DescriptionAr,
                 Type = (int)uc.Challenge.Type,
                 Frequency = (int)uc.Challenge.Frequency,
                 CurrentProgress = uc.CurrentProgress,

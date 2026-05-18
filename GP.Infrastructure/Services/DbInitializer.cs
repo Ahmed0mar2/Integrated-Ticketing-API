@@ -61,13 +61,33 @@ namespace GP.Infrastructure.Services
             }
 
             var welcomeQuests = new List<Challenge>
-            {
-                new Challenge { Title = "Complete your first booking", Description = "Complete your first booking to unlock your onboarding reward.", Type = ChallengeType.TotalTrips, GoalValue = 1, RewardPoints = 400, IsActive = true, Frequency = ChallengeFrequency.OneTime },
-                new Challenge { Title = "Complete 3 bookings", Description = "Complete 3 bookings to build your momentum.", Type = ChallengeType.TotalTrips, GoalValue = 3, RewardPoints = 600, IsActive = true, Frequency = ChallengeFrequency.OneTime },
-                new Challenge { Title = "Try a round trip", Description = "Book and complete a round trip to earn this quest reward.", Type = ChallengeType.RoundTrip, GoalValue = 1, RewardPoints = 500, IsActive = true, Frequency = ChallengeFrequency.OneTime },
-                new Challenge { Title = "Master the system", Description = "Book a multi-destination trip to prove you're a travel pro.", Type = ChallengeType.MultiDestination, GoalValue = 1, RewardPoints = 800, IsActive = true, Frequency = ChallengeFrequency.OneTime },
-                new Challenge { Title = "Big Spender", Description = "Spend a total of 1,500 EGP to unlock this lifetime badge.", Type = ChallengeType.TotalSpend, GoalValue = 1500, RewardPoints = 800, IsActive = true, Frequency = ChallengeFrequency.OneTime }
-            };
+{
+    new Challenge {
+        Title = "Complete your first booking", TitleAr = "حجزك الأول",
+        Description = "Complete your first booking to unlock your onboarding reward.", DescriptionAr = "أكمل حجزك الأول لتحصل على مكافأة الترحيب الخاصة بك.",
+        Type = ChallengeType.TotalTrips, GoalValue = 1, RewardPoints = 400, IsActive = true, Frequency = ChallengeFrequency.OneTime
+    },
+    new Challenge {
+        Title = "Complete 3 bookings", TitleAr = "إنجاز 3 حجوزات",
+        Description = "Complete 3 bookings to build your momentum.", DescriptionAr = "أكمل 3 حجوزات لتزيد من رصيد نقاطك.",
+        Type = ChallengeType.TotalTrips, GoalValue = 3, RewardPoints = 600, IsActive = true, Frequency = ChallengeFrequency.OneTime
+    },
+    new Challenge {
+        Title = "Try a round trip", TitleAr = "رحلة متكاملة",
+        Description = "Book and complete a round trip to earn this quest reward.", DescriptionAr = "احجز وأكمل رحلة ذهاب وعودة لتحصل على هذه المكافأة.",
+        Type = ChallengeType.RoundTrip, GoalValue = 1, RewardPoints = 500, IsActive = true, Frequency = ChallengeFrequency.OneTime
+    },
+    new Challenge {
+        Title = "Master the system", TitleAr = "خبير الرحلات",
+        Description = "Book a multi-destination trip to prove you're a travel pro.", DescriptionAr = "احجز رحلة لعدة وجهات لتثبت خبرتك في التخطيط.",
+        Type = ChallengeType.MultiDestination, GoalValue = 1, RewardPoints = 800, IsActive = true, Frequency = ChallengeFrequency.OneTime
+    },
+    new Challenge {
+        Title = "Big Spender", TitleAr = "العميل الذهبي",
+        Description = "Spend a total of 1,500 EGP to unlock this lifetime badge.", DescriptionAr = "أنفق إجمالي 1,500 جنيه لتفتح هذه الشارة الدائمة.",
+        Type = ChallengeType.TotalSpend, GoalValue = 1500, RewardPoints = 800, IsActive = true, Frequency = ChallengeFrequency.OneTime
+    }
+};
 
             context.Challenges.AddRange(welcomeQuests);
             await context.SaveChangesAsync();

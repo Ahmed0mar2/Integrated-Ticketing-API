@@ -26,16 +26,20 @@ namespace GP.Application.Services
 
         public async Task SendNotificationAsync(
             int userId,
-            string title,
-            string message,
+            string titleEn,
+            string messageEn,
+            string titleAr,
+            string messageAr,
             string type,
             CancellationToken cancellationToken = default)
         {
             var notification = new Notification
             {
                 UserId = userId,
-                Title = title,
-                Message = message,
+                Title = titleEn,
+                Message = messageEn,
+                TitleAr = titleAr,
+                MessageAr = messageAr,
                 Type = type,
                 IsRead = false
             };
@@ -44,7 +48,7 @@ namespace GP.Application.Services
             await _dbContext.SaveChangesAsync(cancellationToken);
 
             await _hubContext.Clients.User(userId.ToString())
-                .ReceiveNotification(title, message, type);
+                .ReceiveNotification(titleEn, messageEn, type);
 
             var deviceTokens = await _dbContext.UserDeviceTokens
                 .Where(t => t.UserId == userId)
@@ -64,12 +68,14 @@ namespace GP.Application.Services
                     Token = deviceToken.FcmToken,
                     Notification = new FcmNotification
                     {
-                        Title = title,
-                        Body = message
+                        Title = titleEn,
+                        Body = messageEn
                     },
                     Data = new Dictionary<string, string>
                     {
-                        ["type"] = type
+                        ["type"] = type,
+                        ["title_ar"] = titleAr ?? string.Empty,
+                        ["body_ar"] = messageAr ?? string.Empty
                     }
                 };
 
@@ -113,6 +119,8 @@ namespace GP.Application.Services
                     Id = n.Id,
                     Title = n.Title,
                     Message = n.Message,
+                    TitleAr = n.TitleAr,
+                    MessageAr = n.MessageAr,
                     Type = n.Type,
                     IsRead = n.IsRead,
                     CreatedAt = n.CreatedAt

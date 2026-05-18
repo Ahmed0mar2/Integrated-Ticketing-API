@@ -203,6 +203,8 @@ namespace GP.Application.Services
                     ChallengeId = uc.ChallengeId,
                     Title = uc.Challenge.Title,
                     Description = uc.Challenge.Description,
+                    TitleAr = uc.Challenge.TitleAr,
+                    DescriptionAr = uc.Challenge.DescriptionAr,
                     Type = uc.Challenge.Type.ToString(),
                     Frequency = uc.Challenge.Frequency.ToString(),
                     CurrentProgress = uc.CurrentProgress,

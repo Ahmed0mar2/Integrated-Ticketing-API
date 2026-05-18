@@ -767,6 +767,8 @@ No request body.
         "challengeId": 1,
         "title": "Frequent Traveler",
         "description": "Take 4 trips this month to earn bonus points.",
+        "titleAr": "مسافر دائم",
+        "descriptionAr": "قم بأربع رحلات هذا الشهر لتحصل على نقاط إضافية.",
         "type": 1,
         "frequency": 2,
         "currentProgress": 2,
@@ -888,14 +890,14 @@ No request body.
       "governorate": "Cairo",
       "governorateAr": "القاهرة",
       "stations": [
-        { "id": 101, "arabicName": "رمسيس", "englishName": "ramses", "slug": "ramses", "city": "Cairo", "governorateAr": "القاهرة" }
+        { "id": 101, "arabicName": "رمسيس", "englishName": "Ramses", "slug": "ramses", "city": "Cairo", "governorateAr": "القاهرة" }
       ]
     },
     {
       "governorate": "Alexandria",
       "governorateAr": "الإسكندرية",
       "stations": [
-        { "id": 201, "arabicName": "سيدي جابر", "englishName": "sidi-gaber", "slug": "sidi-gaber", "city": "Alexandria", "governorateAr": "الإسكندرية" }
+        { "id": 201, "arabicName": "سيدي جابر", "englishName": "Sidi Gaber", "slug": "sidi-gaber", "city": "Alexandria", "governorateAr": "الإسكندرية" }
       ]
     }
   ],
@@ -979,6 +981,7 @@ Query string parameters:
 - `originGovernorateAr`, `destinationGovernorateAr`
 - `routeStops[].arabicName`, `routeStops[].governorateAr`
 - `availableClasses[].classNameAr`
+- `originStationName`, `destinationStationName`, and `routeStops[].stationName` are English display names derived from the slug.
 
 ### Response Example (200 OK)
 ```json
@@ -998,19 +1001,19 @@ Query string parameters:
         "arrivalTime": "2026-03-20T10:40:00",
         "totalDurationMinutes": 160,
         "originStationId": 101,
-        "originStationName": "رمسيس",
+        "originStationName": "Ramses",
         "originStationNameAr": "رمسيس",
         "originGovernorate": "Cairo",
         "originGovernorateAr": "القاهرة",
         "destinationStationId": 201,
-        "destinationStationName": "سيدي جابر",
+        "destinationStationName": "Sidi Gaber",
         "destinationStationNameAr": "سيدي جابر",
         "destinationGovernorate": "Alexandria",
         "destinationGovernorateAr": "الإسكندرية",
         "startingPrice": 180.0,
         "routeStops": [
           {
-            "stationName": "رمسيس",
+            "stationName": "Ramses",
             "arabicName": "رمسيس",
             "governorateAr": "القاهرة",
             "arrivalTime": null,
@@ -1018,7 +1021,7 @@ Query string parameters:
             "stopSequence": 1
           },
           {
-            "stationName": "سيدي جابر",
+            "stationName": "Sidi Gaber",
             "arabicName": "سيدي جابر",
             "governorateAr": "الإسكندرية",
             "arrivalTime": "10:00:00",
@@ -1150,19 +1153,19 @@ Query string parameters:
             "arrivalTime": "2026-03-20T10:00:00",
             "totalDurationMinutes": 180,
             "originStationId": 101,
-            "originStationName": "رمسيس",
+            "originStationName": "Ramses",
             "originStationNameAr": "رمسيس",
             "originGovernorate": "Cairo",
             "originGovernorateAr": "القاهرة",
             "destinationStationId": 220,
-            "destinationStationName": "المنيا",
+            "destinationStationName": "Minya",
             "destinationStationNameAr": "المنيا",
             "destinationGovernorate": "Minya",
             "destinationGovernorateAr": "المنيا",
             "startingPrice": 180.0,
             "routeStops": [
-              { "stationName": "رمسيس", "arabicName": "رمسيس", "governorateAr": "القاهرة", "arrivalTime": null, "departureTime": "06:30:00", "stopSequence": 1 },
-              { "stationName": "المنيا", "arabicName": "المنيا", "governorateAr": "المنيا", "arrivalTime": "09:30:00", "departureTime": null, "stopSequence": 4 }
+              { "stationName": "Ramses", "arabicName": "رمسيس", "governorateAr": "القاهرة", "arrivalTime": null, "departureTime": "06:30:00", "stopSequence": 1 },
+              { "stationName": "Minya", "arabicName": "المنيا", "governorateAr": "المنيا", "arrivalTime": "09:30:00", "departureTime": null, "stopSequence": 4 }
             ],
             "availableClasses": [
               { "coachClassId": 1, "className": "Business", "classNameAr": "درجة رجال الاعمال", "remainingSeats": 9, "price": 180.0 }
@@ -1179,19 +1182,19 @@ Query string parameters:
             "arrivalTime": "2026-03-20T17:10:00",
             "totalDurationMinutes": 325,
             "originStationId": 220,
-            "originStationName": "المنيا",
+            "originStationName": "Minya",
             "originStationNameAr": "المنيا",
             "originGovernorate": "Minya",
             "originGovernorateAr": "المنيا",
             "destinationStationId": 880,
-            "destinationStationName": "أسوان",
+            "destinationStationName": "Aswan",
             "destinationStationNameAr": "أسوان",
             "destinationGovernorate": "Aswan",
             "destinationGovernorateAr": "أسوان",
             "startingPrice": 240.0,
             "routeStops": [
-              { "stationName": "المنيا", "arabicName": "المنيا", "governorateAr": "المنيا", "arrivalTime": null, "departureTime": "11:05:00", "stopSequence": 2 },
-              { "stationName": "أسوان", "arabicName": "أسوان", "governorateAr": "أسوان", "arrivalTime": "16:30:00", "departureTime": null, "stopSequence": 7 }
+              { "stationName": "Minya", "arabicName": "المنيا", "governorateAr": "المنيا", "arrivalTime": null, "departureTime": "11:05:00", "stopSequence": 2 },
+              { "stationName": "Aswan", "arabicName": "أسوان", "governorateAr": "أسوان", "arrivalTime": "16:30:00", "departureTime": null, "stopSequence": 7 }
             ],
             "availableClasses": [
               { "coachClassId": 2, "className": "Second Class", "classNameAr": "الدرجة الثانية", "remainingSeats": 22, "price": 240.0 }
@@ -1881,6 +1884,8 @@ Base route: `/api/Loyalty`
         "challengeId": 5,
         "title": "Frequent Traveler",
         "description": "Take 4 trips this month to earn bonus points.",
+        "titleAr": "مسافر دائم",
+        "descriptionAr": "قم بأربع رحلات هذا الشهر لتحصل على نقاط إضافية.",
         "type": "TotalTrips",
         "frequency": "Monthly",
         "currentProgress": 2,
@@ -1892,6 +1897,8 @@ Base route: `/api/Loyalty`
         "challengeId": 1,
         "title": "Welcome Quest",
         "description": "Complete your first booking to earn welcome points.",
+        "titleAr": "مهمة الترحيب",
+        "descriptionAr": "أكمل أول حجز لك لتحصل على نقاط ترحيبية.",
         "type": "TotalTrips",
         "frequency": "OneTime",
         "currentProgress": 1,
@@ -2265,15 +2272,19 @@ All endpoints require authenticated JWT user context.
       "id": 102,
       "title": "Boarding Soon!",
       "message": "Your bus boards at 07:45 PM from Ramses.",
-      "type": "Boarding",
+      "titleAr": "حان وقت الركوب!",
+      "messageAr": "تنطلق رحلتك الساعة 07:45 PM من رمسيس.",
+      "type": "BOARDING_SOON",
       "isRead": false,
       "createdAt": "2026-05-09T19:30:00"
     },
     {
       "id": 101,
       "title": "Points Earned! 🎉",
-      "message": "You just earned 25 points for Earned from 1-leg Booking!",
-      "type": "Gamification",
+      "message": "You just earned 25 points for your booking!",
+      "titleAr": "لقد كسبت نقاط! 🎉",
+      "messageAr": "لقد كسبت 25 نقطة لإتمام حجزك!",
+      "type": "POINTS_EARNED",
       "isRead": true,
       "createdAt": "2026-05-09T11:15:00"
     }
@@ -2282,6 +2293,10 @@ All endpoints require authenticated JWT user context.
   "timestamp": "2026-05-09T19:30:10Z"
 }
 ```
+
+### Notes
+- `title` / `message` contain the English content.
+- `titleAr` / `messageAr` contain the Arabic content when available.
 
 ## 14.2 Mark One Notification As Read
 ### Endpoint Overview
@@ -2347,14 +2362,16 @@ Client method name:
 - `ReceiveNotification(title, message, type)`
 
 ### Current Notification Types
-- `Marketplace`
+- `TICKET_SOLD`
   - Trigger: seller ticket sold in marketplace buy flow.
   - Sample title: `Ticket Sold!`
-- `Gamification`
-  - Trigger 1: checkout points earned.
-  - Trigger 2: challenge completion reward granted.
+- `POINTS_EARNED`
+  - Trigger: checkout points earned.
   - Sample title: `Points Earned! 🎉`
-- `Boarding`
+- `CHALLENGE_COMPLETED`
+  - Trigger: challenge completion reward granted.
+  - Sample title: `Challenge Completed! 🏆`
+- `BOARDING_SOON`
   - Trigger: jobs endpoint processing bookings boarding in the next 15 minutes.
   - Sample title: `Boarding Soon!`
 

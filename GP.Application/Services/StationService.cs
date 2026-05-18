@@ -16,9 +16,12 @@ namespace GP.Application.Services
 
         public async Task<List<GovernorateStationsDto>> GetStationsGroupedByGovernorateAsync(CancellationToken cancellationToken = default)
         {
-            return await _dbContext.Stops
+            var stops = await _dbContext.Stops
                 .AsNoTracking()
                 .Where(s => !string.IsNullOrWhiteSpace(s.Governorate))
+                .ToListAsync(cancellationToken);
+
+            return stops
                 .GroupBy(s => s.Governorate!)
                 .Select(g => new GovernorateStationsDto
                 {
@@ -28,7 +31,7 @@ namespace GP.Application.Services
                     {
                         Id = s.StopId,
                         ArabicName = s.ArabicName,
-                        EnglishName = s.NormalizedSlug,
+                        EnglishName = s.EnglishName,
                         Slug = s.NormalizedSlug,
                         City = s.City,
                         GovernorateAr = s.GovernorateAr
@@ -37,7 +40,7 @@ namespace GP.Application.Services
                     .ToList()
                 })
                 .OrderBy(g => g.Governorate)
-                .ToListAsync(cancellationToken);
+                .ToList();
         }
     }
 }

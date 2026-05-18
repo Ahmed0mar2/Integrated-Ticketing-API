@@ -5,6 +5,8 @@ public class ActiveChallengeDto
     public int ChallengeId { get; set; }
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
+    public string? TitleAr { get; set; }
+    public string? DescriptionAr { get; set; }
     public int Type { get; set; }
     public int Frequency { get; set; }
     public int CurrentProgress { get; set; }

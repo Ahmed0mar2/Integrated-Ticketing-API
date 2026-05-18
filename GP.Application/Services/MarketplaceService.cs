@@ -207,12 +207,13 @@ public class MarketplaceService : IMarketplaceService
                 await transaction.CommitAsync(cancellationToken);
 
                 // Send real-time notification to seller
-                var destinationName = booking.DestinationStation?.ArabicName ?? "Your destination";
                 await _notificationService.SendNotificationAsync(
                     listing.SellerId,
                     "Ticket Sold!",
-                    $"Your ticket for {destinationName} has sold for {listing.AskingPrice} EGP.",
-                    "Marketplace",
+                    $"Your ticket for {booking.DestinationStation?.EnglishName} has sold for {listing.AskingPrice} EGP.",
+                    "تم بيع التذكرة!",
+                    $"تم بيع تذكرتك إلى {booking.DestinationStation?.ArabicName} مقابل {listing.AskingPrice} جنيه.",
+                    "TICKET_SOLD",
                     cancellationToken);
 
                 _logger.LogInformation("Marketplace listing sold. ListingId: {ListingId}, BuyerId: {BuyerId}, SellerId: {SellerId}",

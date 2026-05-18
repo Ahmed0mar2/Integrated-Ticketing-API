@@ -82,9 +82,11 @@ namespace GP.Application.Features.Events
             {
                 await _notificationService.SendNotificationAsync(
                     uc.UserId,
-                    "Points Earned! 🎉",
-                    $"You just earned {uc.Challenge.RewardPoints} points for Completed Challenge: {uc.Challenge.Title}!",
-                    "Gamification",
+                    "Challenge Completed! 🏆",
+                    $"You earned {uc.Challenge.RewardPoints} points for completing: {uc.Challenge.Title}!",
+                    "تم إنجاز المهمة! 🏆",
+                    $"لقد كسبت {uc.Challenge.RewardPoints} نقطة لإنجازك: {uc.Challenge.TitleAr}!",
+                    "CHALLENGE_COMPLETED",
                     cancellationToken);
             }
         }

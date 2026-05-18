@@ -7,6 +7,8 @@ namespace GP.Domain.Entities
         public int Id { get; set; }
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
+        public string? TitleAr { get; set; }
+        public string? DescriptionAr { get; set; }
         public ChallengeType Type { get; set; }
         public int GoalValue { get; set; }
         public int RewardPoints { get; set; }

@@ -202,12 +202,28 @@ namespace GP.API.Controllers
             }
 
             var standardChallenges = new List<Challenge>
-            {
-               new() { Title = "Frequent Traveler", Description = "Take 4 trips this month to earn bonus points.", Type = ChallengeType.TotalTrips, GoalValue = 4, RewardPoints = 600, IsActive = true, Frequency = ChallengeFrequency.Monthly },
-               new() { Title = "High Roller", Description = "Spend 2,500 EGP this month to earn a massive bonus.", Type = ChallengeType.TotalSpend, GoalValue = 2500, RewardPoints = 1000, IsActive = true, Frequency = ChallengeFrequency.Monthly },
-               new() { Title = "The Getaway", Description = "Complete a round trip this month to earn points.", Type = ChallengeType.RoundTrip, GoalValue = 1, RewardPoints = 300, IsActive = true, Frequency = ChallengeFrequency.Monthly },
-               new() { Title = "The Explorer", Description = "Book a multi-destination trip this month to earn extra points.", Type = ChallengeType.MultiDestination, GoalValue = 1, RewardPoints = 500, IsActive = true, Frequency = ChallengeFrequency.Monthly }
-            };
+{
+    new() {
+        Title = "Frequent Traveler", TitleAr = "المسافر الدائم",
+        Description = "Take 4 trips this month to earn bonus points.", DescriptionAr = "قم بإجراء 4 رحلات هذا الشهر لتحصل على نقاط إضافية.",
+        Type = ChallengeType.TotalTrips, GoalValue = 4, RewardPoints = 600, IsActive = true, Frequency = ChallengeFrequency.Monthly
+    },
+    new() {
+        Title = "High Roller", TitleAr = "العميل المميز",
+        Description = "Spend 2,500 EGP this month to earn a massive bonus.", DescriptionAr = "أنفق 2,500 جنيه هذا الشهر لتحصل على مكافأة كبرى.",
+        Type = ChallengeType.TotalSpend, GoalValue = 2500, RewardPoints = 1000, IsActive = true, Frequency = ChallengeFrequency.Monthly
+    },
+    new() {
+        Title = "The Getaway", TitleAr = "عطلة سريعة",
+        Description = "Complete a round trip this month to earn points.", DescriptionAr = "أكمل رحلة ذهاب وعودة هذا الشهر لتحصل على النقاط.",
+        Type = ChallengeType.RoundTrip, GoalValue = 1, RewardPoints = 300, IsActive = true, Frequency = ChallengeFrequency.Monthly
+    },
+    new() {
+        Title = "The Explorer", TitleAr = "المستكشف",
+        Description = "Book a multi-destination trip this month to earn extra points.", DescriptionAr = "احجز رحلة متعددة الوجهات هذا الشهر لتحصل على نقاط أكثر.",
+        Type = ChallengeType.MultiDestination, GoalValue = 1, RewardPoints = 500, IsActive = true, Frequency = ChallengeFrequency.Monthly
+    }
+};
 
             _dbContext.Challenges.AddRange(standardChallenges);
             await _dbContext.SaveChangesAsync(cancellationToken);

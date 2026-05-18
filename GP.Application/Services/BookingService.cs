@@ -436,10 +436,12 @@ namespace GP.Application.Services
 
                     await _notificationService.SendNotificationAsync(
                         userId,
-                            "Points Earned! 🎉",
-                            $"You just earned {earnedPoints} points for {earnTransaction.Description}!",
-                            "Gamification",
-                            cancellationToken);
+                        "Points Earned! 🎉",
+                        $"You just earned {earnedPoints} points for your booking!",
+                        "لقد كسبت نقاط! 🎉",
+                        $"لقد كسبت {earnedPoints} نقطة لإتمام حجزك!",
+                        "POINTS_EARNED",
+                        cancellationToken);
 
                     await transaction.CommitAsync(cancellationToken);
 
@@ -792,10 +794,12 @@ namespace GP.Application.Services
 
                 await _notificationService.SendNotificationAsync(
                     booking.UserId,
-                        "Boarding Soon!",
-                        $"Your bus boards at {boardingTime:hh:mm tt} from {booking.OriginStation.ArabicName}.",
-                        "Boarding",
-                        cancellationToken);
+                    "Boarding Soon!",
+                    $"Your bus boards at {boardingTime:hh:mm tt} from {booking.OriginStation.EnglishName}.",
+                    "حان وقت الركوب!",
+                    $"تنطلق رحلتك الساعة {boardingTime:hh:mm tt} من {booking.OriginStation.ArabicName}.",
+                    "BOARDING_SOON",
+                    cancellationToken);
 
                 booking.IsBoardingAlertSent = true;
             }
