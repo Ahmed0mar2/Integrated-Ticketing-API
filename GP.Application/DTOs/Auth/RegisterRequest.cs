@@ -18,7 +18,8 @@ namespace GP.Application.DTOs.Auth
         public string FamilyName { get; init; } = null!;
         public Gender Gender { get; init; }
         public DateOnly DateOfBirth { get; init; }
-        public string? NationalIdNumber { get; init; }
+        public IdType? IdType { get; init; }
+        public string? IdNumber { get; init; }
         public string CountryCode { get; init; } = null!; //ISO code (e.g., "EG")
     }
 }

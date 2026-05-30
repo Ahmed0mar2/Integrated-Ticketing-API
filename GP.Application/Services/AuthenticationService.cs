@@ -82,13 +82,13 @@ namespace GP.Application.Services
                         }
                     }
 
-                    // VALIDATE National ID number uniqueness
-                    if (!string.IsNullOrWhiteSpace(request.NationalIdNumber))
+                    // VALIDATE ID number uniqueness
+                    if (!string.IsNullOrWhiteSpace(request.IdNumber))
                     {
-                        if (await _context.Users.AnyAsync(u =>
-                            u.NationalIdNumber == request.NationalIdNumber))
+                        var normalizedIdNumber = request.IdNumber.Trim();
+                        if (await _context.Users.AnyAsync(u => u.IdNumber == normalizedIdNumber))
                         {
-                            result = (false, "National ID number already registered", null);
+                            result = (false, "ID number already registered", null);
                             return;
                         }
                     }
@@ -148,8 +148,12 @@ namespace GP.Application.Services
                         FamilyName = request.FamilyName,
                         Gender = request.Gender,
                         DateOfBirth = request.DateOfBirth,
-                        NationalIdNumber = request.NationalIdNumber,
-                        IsNationalIdVerified = !string.IsNullOrWhiteSpace(request.NationalIdNumber),
+                        IdType = request.IdType,
+                        IdNumber = string.IsNullOrWhiteSpace(request.IdNumber)
+                            ? null
+                            : request.IdNumber.Trim(),
+                        IsNationalIdVerified = request.IdType == IdType.NationalId
+                            && !string.IsNullOrWhiteSpace(request.IdNumber),
                         CountryId = country.CountryId,
                         Nationality = country.NationalityName,
                         Country = country,

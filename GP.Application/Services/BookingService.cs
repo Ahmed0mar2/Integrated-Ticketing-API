@@ -70,10 +70,7 @@ namespace GP.Application.Services
                     if (tripContext == null)
                         throw new CartValidationException("Trip occurrence not found.");
 
-                    var isEnrAgency = string.Equals(
-                        tripContext.AgencyName,
-                        "Egyptian National Railways",
-                        StringComparison.OrdinalIgnoreCase);
+                    var isEnrAgency = IsEnrAgency(tripContext.AgencyName);
 
                     var requestedSeats = request.Passengers.Count;
 
@@ -89,44 +86,20 @@ namespace GP.Application.Services
 
                     var now = AppTime.GetScheduleNow();
 
+                    await ValidatePassengerRosterAsync(
+                        request.TripOccurrenceId,
+                        tripContext.AgencyName,
+                        request.Passengers,
+                        cancellationToken);
+
                     List<string> resolvedSeatNumbers;
                     var parsedPassengerIdTypes = new List<IdType>();
 
                     if (isEnrAgency)
                     {
-                        if (request.Passengers.Any(p => string.IsNullOrWhiteSpace(p.PassengerName)))
-                            throw new CartValidationException("PassengerName is required for every ENR passenger.");
-
-                        if (request.Passengers.Any(p => string.IsNullOrWhiteSpace(p.IdType)))
-                            throw new CartValidationException("IdType is required for every ENR passenger.");
-
-                        if (request.Passengers.Any(p => string.IsNullOrWhiteSpace(p.IdNumber)))
-                            throw new CartValidationException("IdNumber is required for every ENR passenger.");
-
-                        var requestedPassengerIds = GetRequestedPassengerIds(request);
-                        var normalizedRequestedPassengerIds = NormalizePassengerIds(requestedPassengerIds);
-
-                        if (normalizedRequestedPassengerIds.Count != requestedPassengerIds.Count)
-                            throw new CartValidationException("Passenger ID numbers must be unique within the same cart item.");
-
                         parsedPassengerIdTypes = request.Passengers
                             .Select((p, index) => ParsePassengerIdTypeOrThrow(p.IdType!, index + 1))
                             .ToList();
-
-                        var duplicatePassengerId = await _dbContext.BookingPassengers
-                            .Include(p => p.Booking)
-                            .Where(p => p.OccurrenceId == request.TripOccurrenceId
-                                     && p.IdNumber != null
-                                     && (p.Booking.Status == BookingStatus.Confirmed
-                                         || (p.Booking.Status == BookingStatus.Pending
-                                             && p.Booking.HoldExpiresAt.HasValue
-                                             && p.Booking.HoldExpiresAt.Value > now))
-                                     && normalizedRequestedPassengerIds.Contains(p.IdNumber.Trim().ToUpper()))
-                            .Select(p => p.IdNumber)
-                            .FirstOrDefaultAsync(cancellationToken);
-
-                        if (!string.IsNullOrWhiteSpace(duplicatePassengerId))
-                            throw new CartValidationException($"Passenger [{duplicatePassengerId.Trim()}] already holds a ticket for this specific trip.");
 
                         resolvedSeatNumbers = await AssignNextAvailableSeatNumbersAsync(
                             request.TripOccurrenceId,
@@ -263,6 +236,51 @@ namespace GP.Application.Services
             _dbContext.Bookings.Remove(booking);
 
             await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+
+        public async Task ValidatePassengerRosterAsync(
+            int occurrenceId,
+            string agencyName,
+            List<PassengerDetailDto> passengers,
+            CancellationToken cancellationToken = default)
+        {
+            if (!IsEnrAgency(agencyName))
+                return;
+
+            if (passengers == null || passengers.Count == 0)
+                throw new CartValidationException("You must provide at least one passenger.");
+
+            if (passengers.Any(p => string.IsNullOrWhiteSpace(p.PassengerName)))
+                throw new CartValidationException("PassengerName is required for every ENR passenger.");
+
+            if (passengers.Any(p => string.IsNullOrWhiteSpace(p.IdType)))
+                throw new CartValidationException("IdType is required for every ENR passenger.");
+
+            if (passengers.Any(p => string.IsNullOrWhiteSpace(p.IdNumber)))
+                throw new CartValidationException("IdNumber is required for every ENR passenger.");
+
+            var requestedPassengerIds = GetRequestedPassengerIds(passengers);
+            var normalizedRequestedPassengerIds = NormalizePassengerIds(requestedPassengerIds);
+
+            if (normalizedRequestedPassengerIds.Count != requestedPassengerIds.Count)
+                throw new CartValidationException("Passenger ID numbers must be unique within the same cart item.");
+
+            var now = AppTime.GetScheduleNow();
+
+            var duplicatePassengerId = await _dbContext.BookingPassengers
+                .Include(p => p.Booking)
+                .Where(p => p.OccurrenceId == occurrenceId
+                         && p.IdNumber != null
+                         && (p.Booking.Status == BookingStatus.Confirmed
+                             || (p.Booking.Status == BookingStatus.Pending
+                                 && p.Booking.HoldExpiresAt.HasValue
+                                 && p.Booking.HoldExpiresAt.Value > now))
+                         && normalizedRequestedPassengerIds.Contains(p.IdNumber.Trim().ToUpper()))
+                .Select(p => p.IdNumber)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (!string.IsNullOrWhiteSpace(duplicatePassengerId))
+                throw new CartValidationException($"Passenger [{duplicatePassengerId.Trim()}] already holds a ticket for this specific trip.");
         }
 
         public async Task<string> CheckoutAsync(int userId, CheckoutRequestDto request, CancellationToken cancellationToken = default)
@@ -815,6 +833,14 @@ namespace GP.Application.Services
                                                && b.HoldExpiresAt.Value > now);
         }
 
+        private static bool IsEnrAgency(string agencyName)
+        {
+            return string.Equals(
+                agencyName,
+                "Egyptian National Railways",
+                StringComparison.OrdinalIgnoreCase);
+        }
+
         private static List<string> GetRequestedSeatNumbers(AddToCartRequestDto request)
         {
             return request.Passengers
@@ -822,9 +848,9 @@ namespace GP.Application.Services
                 .ToList();
         }
 
-        private static List<string> GetRequestedPassengerIds(AddToCartRequestDto request)
+        private static List<string> GetRequestedPassengerIds(IEnumerable<PassengerDetailDto> passengers)
         {
-            return request.Passengers
+            return passengers
                 .Select(p => (p.IdNumber ?? string.Empty).Trim())
                 .ToList();
         }

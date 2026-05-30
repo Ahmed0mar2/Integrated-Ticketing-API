@@ -53,7 +53,13 @@ namespace GP.Infrastructure.Data.Configurations
             builder.Property(u => u.DateOfBirth)
                 .HasColumnName("date_of_birth");
 
-            builder.Property(u => u.NationalIdNumber)
+            builder.Property(u => u.IdType)
+                .HasColumnName("id_type")
+                .HasConversion<string>()
+                .HasMaxLength(20)
+                .IsRequired(false);
+
+            builder.Property(u => u.IdNumber)
                 .HasColumnName("national_id_number")
                 .HasMaxLength(50)
                 .IsRequired(false);
@@ -84,7 +90,7 @@ namespace GP.Infrastructure.Data.Configurations
             builder.HasIndex(u => u.Email)
                 .IsUnique();
 
-            builder.HasIndex(u => u.NationalIdNumber)
+            builder.HasIndex(u => u.IdNumber)
             .IsUnique()
             .HasFilter("[national_id_number] IS NOT NULL");
 

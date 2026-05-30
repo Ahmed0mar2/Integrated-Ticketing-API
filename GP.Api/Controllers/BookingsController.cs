@@ -192,7 +192,7 @@ namespace GP.Api.Controllers
                 return BadRequest(ApiResponse.ErrorResponse(ex.Message));
             }
         }
-
+        [AllowAnonymous]
         [HttpPost("verify-pass")]
         [ProducesResponseType(typeof(ApiResponse<VerifyPassResponseDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]

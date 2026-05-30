@@ -2,6 +2,7 @@
 
 using FluentValidation;
 using GP.Application.DTOs.Auth;
+using GP.Domain.Enums;
 
 public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
 {
@@ -42,10 +43,18 @@ public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
             .NotEmpty().WithMessage("Date of birth is required")
             .Must(BeAValidAge).WithMessage("You must be at least 16 years old");
 
-        RuleFor(x => x.NationalIdNumber)
+        RuleFor(x => x.IdNumber)
+            .NotEmpty().WithMessage("IdNumber is required when IdType is provided")
+            .When(x => x.IdType.HasValue);
+
+        RuleFor(x => x.IdNumber)
             .Length(14).WithMessage("National ID must be 14 digits")
             .Matches(@"^\d+$").WithMessage("National ID must contain only digits")
-            .When(x => !string.IsNullOrWhiteSpace(x.NationalIdNumber));
+            .When(x => x.IdType == IdType.NationalId);
+
+        RuleFor(x => x.IdNumber)
+            .MaximumLength(50).WithMessage("IdNumber must be 50 characters or fewer")
+            .When(x => x.IdType.HasValue && x.IdType != IdType.NationalId);
 
         RuleFor(x => x.CountryCode)
            .NotEmpty().WithMessage("Country is required")

@@ -101,7 +101,8 @@ Base route: `/api/Auth`
   "familyName": "Mohamed",
   "gender": 1,
   "dateOfBirth": "1995-05-15",
-  "nationalIdNumber": "29805151234567",
+  "idType": 1,
+  "idNumber": "29805151234567",
   "countryCode": "EG"
 }
 ```
@@ -118,7 +119,8 @@ Base route: `/api/Auth`
 | familyName       | string | Yes      | Max 100                  |
 | gender           | int    | Yes      | 1=Male,2=Female,3=Other  |
 | dateOfBirth      | date   | Yes      | At least 16 years old    |
-| nationalIdNumber | string | No       | 14 digits if provided    |
+| idType           | int    | No       | 1=NationalId,2=Passport,3=DrivingLicense,4=StudentId,5=Other |
+| idNumber         | string | Conditional | Required when `idType` is provided. NationalId must be 14 digits; other types max 50 |
 | countryCode      | string | Yes      | 2 chars, must exist      |
 
 ### Response Example (200 OK)
@@ -660,7 +662,8 @@ No request body.
     "fullName": "Ahmed Mohamed Hassan",
     "email": "user@example.com",
     "phone": "+201234567890",
-    "nationalIdNumber": "29805151234567",
+    "idType": 1,
+    "idNumber": "29805151234567",
     "totalTripsCount": 5,
     "totalDistanceTraveled": 1200.5,
     "createdAt": "2026-03-01T10:00:00Z",
@@ -2122,9 +2125,9 @@ Base route: `/api/Marketplace`
 | Field                      | Type   | Required    | Notes                                                            |
 | -------------------------- | ------ | ----------- | ---------------------------------------------------------------- |
 | passengers                 | array  | Yes         | Must match `SeatsBooked` count                                   |
-| passengers[].passengerName | string | Yes         | Required for each passenger                                      |
-| passengers[].idType        | string | No          | Optional: NationalId, Passport, DrivingLicense, StudentId, Other |
-| passengers[].idNumber      | string | Conditional | Required when `idType` is provided                               |
+| passengers[].passengerName | string | Conditional | Required for ENR agency                                          |
+| passengers[].idType        | string | Conditional | Required for ENR agency. Allowed: NationalId, Passport, DrivingLicense, StudentId, Other |
+| passengers[].idNumber      | string | Conditional | Required for ENR agency                                          |
 | passengers[].seatNumber    | string | No          | Ignored for marketplace purchase (seat is preserved)             |
 
 ### Notes
@@ -2136,6 +2139,8 @@ Base route: `/api/Marketplace`
 - Trip departure must be in the future.
 - Buyer wallet balance must cover `askingPrice`.
 - `passengers` count must exactly match `SeatsBooked`.
+- For ENR agencies, each passenger must provide `passengerName`, `idType`, and `idNumber`.
+- For ENR, passenger ID numbers must be unique in the request and not already assigned to active pending/confirmed bookings for the same occurrence.
 - The entire booking (all passengers) is transferred to the buyer.
 - Contact info is updated from the buyer profile.
 - Passenger details are replaced in-seat-order; seat numbers remain unchanged.

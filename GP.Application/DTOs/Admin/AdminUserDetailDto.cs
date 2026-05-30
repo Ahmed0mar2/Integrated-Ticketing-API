@@ -6,7 +6,8 @@ namespace GP.Application.DTOs.Admin
         public string FullName { get; init; } = string.Empty;
         public string Email { get; init; } = string.Empty;
         public string Phone { get; init; } = string.Empty;
-        public string? NationalIdNumber { get; init; }
+        public GP.Domain.Enums.IdType? IdType { get; init; }
+        public string? IdNumber { get; init; }
         public int TotalTripsCount { get; init; }
         public DateTime CreatedAt { get; init; }
         public DateTime? LastLoginAt { get; init; }

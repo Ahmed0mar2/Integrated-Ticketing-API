@@ -14,15 +14,18 @@ namespace GP.Application.Services;
 public class MarketplaceService : IMarketplaceService
 {
     private readonly ApplicationDbContext _dbContext;
+    private readonly IBookingService _bookingService;
     private readonly ILogger<MarketplaceService> _logger;
     private readonly INotificationService _notificationService;
 
     public MarketplaceService(
         ApplicationDbContext dbContext,
+        IBookingService bookingService,
         ILogger<MarketplaceService> logger,
         INotificationService notificationService)
     {
         _dbContext = dbContext;
+        _bookingService = bookingService;
         _logger = logger;
         _notificationService = notificationService;
     }
@@ -113,6 +116,8 @@ public class MarketplaceService : IMarketplaceService
                         .ThenInclude(b => b.BookingPassengers)
                     .Include(l => l.Booking)
                         .ThenInclude(b => b.Occurrence)
+                            .ThenInclude(o => o.Trip)
+                                .ThenInclude(t => t.Agency)
                     .Include(l => l.Booking)
                         .ThenInclude(b => b.DestinationStation)
                     .Include(l => l.Seller)
@@ -151,6 +156,19 @@ public class MarketplaceService : IMarketplaceService
 
                 if (request.Passengers == null || request.Passengers.Count != booking.SeatsBooked)
                     throw new BadHttpRequestException("Passenger count must match the number of booked seats.");
+
+                try
+                {
+                    await _bookingService.ValidatePassengerRosterAsync(
+                        booking.OccurrenceId,
+                        listing.Booking.Occurrence.Trip.Agency.AgencyName,
+                        request.Passengers,
+                        cancellationToken);
+                }
+                catch (CartValidationException ex)
+                {
+                    return ApiResponse.Fail(ex.Message);
+                }
 
                 // Wallet transfer
                 buyer.WalletBalance -= listing.AskingPrice;

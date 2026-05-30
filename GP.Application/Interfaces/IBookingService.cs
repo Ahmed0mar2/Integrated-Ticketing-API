@@ -10,6 +10,7 @@ namespace GP.Application.Interfaces
     public interface IBookingService
     {
         Task<BookingCartResponseDto> AddToCartAsync(int userId, AddToCartRequestDto request, CancellationToken cancellationToken = default);
+        Task ValidatePassengerRosterAsync(int occurrenceId, string agencyName, List<PassengerDetailDto> passengers, CancellationToken cancellationToken = default);
         Task<string> CheckoutAsync(int userId, CheckoutRequestDto request, CancellationToken cancellationToken = default);
         Task<BookingCartResponseDto?> GetActiveCartAsync(int userId, CancellationToken cancellationToken = default);
         Task CancelCartHoldAsync(int userId, int bookingId, CancellationToken cancellationToken = default);

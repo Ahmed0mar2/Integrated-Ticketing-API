@@ -43,7 +43,6 @@ namespace GP.Infrastructure.Data
         public DbSet<PointTransaction> PointTransactions { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<UserDeviceToken> UserDeviceTokens { get; set; }
-        public DbSet<DiscountRule> DiscountRules { get; set; }
         public DbSet<Challenge> Challenges { get; set; }
         public DbSet<UserChallenge> UserChallenges { get; set; }
         public DbSet<RouteSearchLog> RouteSearchLogs { get; set; }

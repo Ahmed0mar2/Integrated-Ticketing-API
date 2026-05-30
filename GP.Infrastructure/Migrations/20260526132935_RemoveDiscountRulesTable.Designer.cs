@@ -4,6 +4,7 @@ using GP.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GP.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260526132935_RemoveDiscountRulesTable")]
+    partial class RemoveDiscountRulesTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -977,16 +980,6 @@ namespace GP.Infrastructure.Migrations
                         .HasColumnType("nvarchar(20)")
                         .HasColumnName("gender");
 
-                    b.Property<string>("IdNumber")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("national_id_number");
-
-                    b.Property<string>("IdType")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("id_type");
-
                     b.Property<bool>("IsNationalIdVerified")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
@@ -1014,6 +1007,11 @@ namespace GP.Infrastructure.Migrations
                         .HasColumnType("int")
                         .HasDefaultValue(0)
                         .HasColumnName("loyalty_points_balance");
+
+                    b.Property<string>("NationalIdNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("national_id_number");
 
                     b.Property<string>("Nationality")
                         .IsRequired()
@@ -1054,7 +1052,7 @@ namespace GP.Infrastructure.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.HasIndex("IdNumber")
+                    b.HasIndex("NationalIdNumber")
                         .IsUnique()
                         .HasFilter("[national_id_number] IS NOT NULL");
 

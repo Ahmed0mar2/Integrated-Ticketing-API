@@ -17,7 +17,8 @@ namespace GP.Domain.Entities
         // Personal Info
         public Gender Gender { get; set; }
         public DateOnly DateOfBirth { get; set; }
-        public string? NationalIdNumber { get; set; }
+        public IdType? IdType { get; set; }
+        public string? IdNumber { get; set; }
         public bool IsNationalIdVerified { get; set; }
         public string Nationality { get; set; } = null!;
 

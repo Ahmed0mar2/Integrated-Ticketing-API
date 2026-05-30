@@ -182,7 +182,8 @@ public class AdminUserService : IAdminUserService
             FullName = $"{domainUser.FirstName} {domainUser.FamilyName} {domainUser.LastName}".Trim(),
             Email = domainUser.Email,
             Phone = domainUser.Phone,
-            NationalIdNumber = domainUser.NationalIdNumber,
+            IdType = domainUser.IdType,
+            IdNumber = domainUser.IdNumber,
             TotalTripsCount = domainUser.TotalTripsCount,
             CreatedAt = AppTime.AsSchedule(domainUser.CreatedAt),
             LastLoginAt = identityUser.LastLoginAt.HasValue
