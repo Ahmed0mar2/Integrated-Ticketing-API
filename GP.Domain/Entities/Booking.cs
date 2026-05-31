@@ -21,6 +21,7 @@ namespace GP.Domain.Entities
         public DateTime BookingTime { get; set; }
         public BookingStatus Status { get; set; } = BookingStatus.Pending;
         public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
+        public RefundRequestStatus? RefundStatus { get; set; }
         public DateTime? HoldExpiresAt { get; set; }
         public bool IsMarketplacePurchase { get; set; } = false;
         public bool IsBoardingAlertSent { get; set; } = false;

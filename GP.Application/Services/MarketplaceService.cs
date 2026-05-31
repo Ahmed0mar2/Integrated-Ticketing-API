@@ -71,9 +71,6 @@ public class MarketplaceService : IMarketplaceService
 
         var originalPrice = booking.TotalPrice;
 
-        if (request.AskingPrice > originalPrice)
-            throw new InvalidOperationException("The asking price must be strictly less than the original ticket price.");
-
         var listing = new MarketplaceListing
         {
             BookingId = booking.BookingId,

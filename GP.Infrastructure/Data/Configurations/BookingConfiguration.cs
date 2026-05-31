@@ -19,6 +19,9 @@ namespace GP.Infrastructure.Data.Configurations
             builder.Property(b => b.BookingTime).IsRequired().HasDefaultValueSql("GETUTCDATE()");
             builder.Property(b => b.Status).IsRequired();
             builder.Property(b => b.PaymentStatus).IsRequired();
+            builder.Property(b => b.RefundStatus)
+                .HasColumnName("refund_status")
+                .IsRequired(false);
             builder.Property(b => b.ContactName).IsRequired().HasMaxLength(200);
             builder.Property(b => b.ContactPhone).IsRequired().HasMaxLength(50);
             builder.Property(b => b.ContactEmail).IsRequired().HasMaxLength(255);

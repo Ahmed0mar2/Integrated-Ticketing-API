@@ -729,6 +729,39 @@ No request body.
 { "success": true, "message": "User deleted successfully.", "data": null, "errors": null, "timestamp": "2026-03-06T12:00:00Z" }
 ```
 
+## 4.6 Process Booking Refund Request
+Base route: `/api/admin`
+
+### Endpoint Overview
+- **Method:** `PUT`
+- **URL:** `/api/admin/bookings/{bookingId}/refund`
+- **Business Use Case:** Approves or rejects a pending refund request and applies wallet refund when approved.
+
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** Admin
+
+### Request Payload
+```json
+{ "isApproved": true }
+```
+
+### Request Field Reference
+| Field      | Type | Required | Notes                                |
+| ---------- | ---- | -------- | ------------------------------------ |
+| isApproved | bool | Yes      | `true` = approve, `false` = reject   |
+
+### Rules
+- Booking must exist and be in `RefundStatus = Requested`.
+- If approved: booking is cancelled, payment marked refunded, wallet balance credited, and a refund ledger entry is recorded.
+- If rejected: refund status becomes `Rejected`.
+- User receives a localized notification based on preferred language.
+
+### Response Example (200 OK)
+```json
+{ "success": true, "message": "Refund request approved.", "data": null, "errors": null, "timestamp": "2026-05-31T12:00:00Z" }
+```
+
 ---
 
 # 5. User Profile API
@@ -1646,7 +1679,35 @@ No request body.
 }
 ```
 
-## 9.6 Boarding Pass QR (Overview)
+## 9.6 Request Refund
+### Endpoint Overview
+- **Method:** `POST`
+- **URL:** `/api/Bookings/{bookingId}/refund-request`
+- **Business Use Case:** Submits a refund request for a confirmed booking owned by the authenticated user.
+
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** Authenticated user
+
+### Request Payload
+No request body.
+
+### Path Parameters
+| Field     | Type | Required | Notes                 |
+| --------- | ---- | -------- | --------------------- |
+| bookingId | int  | Yes      | Booking identifier    |
+
+### Rules
+- Booking must belong to the authenticated user and be in `Confirmed` status.
+- Refund request must not already be pending.
+- Trip departure time must be in the future (schedule-local).
+
+### Response Example (200 OK)
+```json
+{ "success": true, "message": "Refund request submitted successfully.", "data": null, "errors": null, "timestamp": "2026-05-31T12:00:00Z" }
+```
+
+## 9.7 Boarding Pass QR (Overview)
 
 This feature provides a stateless, HMAC-SHA256-signed boarding pass string which the passenger client renders as a QR code. The driver's device submits the scanned string to the server for cryptographic verification and receives passenger seat details on success.
 
@@ -1666,7 +1727,7 @@ Final payload returned to clients:
 
 Where `signatureBase64` = Base64(HMAC-SHA256(secret, rawData)).
 
-## 9.7 Generate Boarding Pass (Passenger)
+## 9.8 Generate Boarding Pass (Passenger)
 ### Endpoint Overview
 - **Method:** `GET`
 - **URL:** `/api/Bookings/{bookingId}/passengers/{passengerId}/qr-payload`
@@ -1700,7 +1761,7 @@ No request body.
 - **400 Bad Request:** Invalid booking/passenger or booking not confirmed.
 - **401 Unauthorized:** Missing or invalid JWT.
 
-## 9.8 Verify Boarding Pass (Driver)
+## 9.9 Verify Boarding Pass (Driver)
 ### Endpoint Overview
 - **Method:** `POST`
 - **URL:** `/api/Bookings/verify-pass`
@@ -2102,7 +2163,7 @@ Base route: `/api/Marketplace`
 | Field       | Type    | Required | Notes                                        |
 | ----------- | ------- | -------- | -------------------------------------------- |
 | bookingId   | int     | Yes      | Must be a confirmed booking                  |
-| askingPrice | decimal | Yes      | Must be > 0 and below original booking price |
+| askingPrice | decimal | Yes      | Must be > 0                                  |
 
 ### Listing Rules
 - Only the booking owner can list a ticket.
@@ -2110,7 +2171,6 @@ Base route: `/api/Marketplace`
 - Booking must not have `IsMarketplacePurchase = true` (tickets purchased from the marketplace cannot be resold).
 - Booking must not already have an active listing.
 - All passengers in the booking are offered for resale together.
-- Asking price must be strictly less than the original booking price.
 
 ### Response Example (200 OK)
 ```json
@@ -2404,6 +2464,12 @@ Client method name:
 - `BOARDING_SOON`
   - Trigger: jobs endpoint processing bookings boarding in the next 15 minutes.
   - Sample title: `Boarding Soon!`
+- `REFUND_APPROVED`
+  - Trigger: admin approves a pending refund request.
+  - Sample title: `Refund Approved`
+- `REFUND_REJECTED`
+  - Trigger: admin rejects a pending refund request.
+  - Sample title: `Refund Rejected`
 
 ---
 
@@ -2620,6 +2686,7 @@ Admin endpoints require Admin role.
 | `DELETE` | `/api/admin/users/{id}`                                         |        Yes (Admin) | Delete user                                                        |
 | `GET`    | `/api/admin/support/tickets`                                    |        Yes (Admin) | List all support tickets                                           |
 | `PUT`    | `/api/admin/support/tickets/{ticketId}/status`                  |        Yes (Admin) | Update support ticket status                                       |
+| `PUT`    | `/api/admin/bookings/{bookingId}/refund`                        |        Yes (Admin) | Approve or reject pending booking refund request                   |
 | `GET`    | `/api/Users/me`                                                 |                Yes | Get profile with loyalty stats and active challenges               |
 | `PUT`    | `/api/Users/me`                                                 |                Yes | Update profile                                                     |
 | `POST`   | `/api/Users/me/profile-picture`                                 |                Yes | Upload profile picture                                             |
@@ -2642,6 +2709,7 @@ Admin endpoints require Admin role.
 | `DELETE` | `/api/Bookings/{bookingId}`                                     |                Yes | Cancel a pending booking hold and release held seats               |
 | `POST`   | `/api/Bookings/checkout`                                        |                Yes | Checkout all valid pending cart items with one wallet charge       |
 | `GET`    | `/api/Bookings/my-tickets`                                      |                Yes | Retrieve user's ticket history (non-pending bookings)              |
+| `POST`   | `/api/Bookings/{bookingId}/refund-request`                      |                Yes | Request a refund for a confirmed booking                           |
 | `GET`    | `/api/Bookings/{bookingId}/passengers/{passengerId}/qr-payload` |                Yes | Generate boarding pass QR payload                                  |
 | `POST`   | `/api/Bookings/verify-pass`                                     |                Yes | Verify boarding pass QR payload                                    |
 | `POST`   | `/api/Marketplace/list`                                         |                Yes | List ticket for resale                                             |

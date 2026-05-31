@@ -23,6 +23,7 @@
 - **User Authentication** - Secure JWT-based authentication with email verification
 - **Role-based Access Control** - Admin, User, and Partner roles
 - **Booking Management** - Complete booking lifecycle with passenger management
+- **Refund Requests** - Users can request refunds; admins approve/reject with wallet refunds and notifications
 - **Loyalty & Gamification** - Points ledger, monthly challenges, and progress tracking
 - **Real-Time Notifications + Inbox** - Persistent user inbox plus SignalR live push for marketplace sales, gamification rewards, and boarding alerts
 
@@ -351,6 +352,13 @@ After running migrations, you can log in with the seeded admin account:
 | `PATCH` | `/api/Notifications/{id}/read` | Mark one notification as read                | ✅             |
 | `PATCH` | `/api/Notifications/read-all`  | Mark all unread notifications as read        | ✅             |
 
+### 🆘 Support Tickets (`/api/Support`)
+
+| Method | Endpoint               | Description                         | Auth Required |
+| ------ | ---------------------- | ----------------------------------- | ------------- |
+| `POST` | `/api/Support/tickets` | Create a new support ticket         | ✅             |
+| `GET`  | `/api/Support/tickets` | Retrieve user's support ticket list | ✅             |
+
 ### 🔔 Real-Time Notifications (SignalR)
 
 - Hub route: `/hubs/notifications`
@@ -378,6 +386,19 @@ Current notification types:
 | `PATCH`  | `/api/admin/users/{id}/toggle-status` | ✅             | Suspend or activate a user account                     |
 | `POST`   | `/api/admin/users/{id}/roles`         | ✅             | Assign a system role to a user                         |
 | `DELETE` | `/api/admin/users/{id}`               | ✅             | Permanently delete a user                              |
+
+### 🛡️ Admin Support (`/api/admin/support`)
+
+| Method | Endpoint                                  | Auth Required | Description                         |
+| ------ | ----------------------------------------- | ------------- | ----------------------------------- |
+| `GET`  | `/api/admin/support/tickets`              | ✅             | List all support tickets            |
+| `PUT`  | `/api/admin/support/tickets/{ticketId}/status` | ✅             | Update support ticket status        |
+
+### 🛡️ Admin Bookings (`/api/admin`)
+
+| Method | Endpoint                                | Auth Required | Description                                |
+| ------ | --------------------------------------- | ------------- | ------------------------------------------ |
+| `PUT`  | `/api/admin/bookings/{bookingId}/refund` | ✅             | Approve or reject a pending refund request |
 
 ### 🧑‍💻 User Profile 
 
@@ -410,6 +431,7 @@ These endpoints were added as part of the User Profile epic. They allow authenti
 | `DELETE` | `/api/Bookings/bookings/{bookingId}`                            | Cancel an entire pending booking hold and release all held seats                          | ✅             |
 | `POST`   | `/api/Bookings/checkout`                                        | Checkout all pending cart items with one wallet charge                                    | ✅             |
 | `GET`    | `/api/Bookings/my-tickets`                                      | Get user's ticket history (non-pending bookings)                                          | ✅             |
+| `POST`   | `/api/Bookings/{bookingId}/refund-request`                      | Request a refund for a confirmed booking                                                  | ✅             |
 | `GET`    | `/api/Bookings/{bookingId}/passengers/{passengerId}/qr-payload` | Get signed boarding pass QR payload for a passenger                                       | ✅             |
 | `POST`   | `/api/Bookings/verify-pass`                                     | Verify scanned boarding pass payload (driver app)                                         | ✅             |
 

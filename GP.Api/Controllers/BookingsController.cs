@@ -2,9 +2,12 @@
 using GP.Application.Common;
 using GP.Application.DTOs.Bookings;
 using GP.Application.Interfaces;
+using GP.Domain.Enums;
+using GP.Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace GP.Api.Controllers
 {
@@ -15,13 +18,16 @@ namespace GP.Api.Controllers
     {
         private readonly IBookingService _bookingService;
         private readonly IBoardingPassService _boardingPassService;
+        private readonly ApplicationDbContext _dbContext;
 
         public BookingsController(
             IBookingService bookingService,
-            IBoardingPassService boardingPassService)
+            IBoardingPassService boardingPassService,
+            ApplicationDbContext dbContext)
         {
             _bookingService = bookingService;
             _boardingPassService = boardingPassService;
+            _dbContext = dbContext;
         }
 
         [HttpPost("cart")]
@@ -125,6 +131,54 @@ namespace GP.Api.Controllers
 
             var tickets = await _bookingService.GetMyTicketsAsync(userId.Value, cancellationToken);
             return Ok(ApiResponse<List<MyTicketResponseDto>>.SuccessResponse(tickets, "Tickets retrieved successfully."));
+        }
+
+        [HttpPost("{bookingId:int}/refund-request")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> RequestRefund(
+            [FromRoute] int bookingId,
+            CancellationToken cancellationToken)
+        {
+            var userId = User.GetDomainUserId();
+            if (userId == null)
+            {
+                return Unauthorized(ApiResponse.ErrorResponse("Invalid token"));
+            }
+
+            var booking = await _dbContext.Bookings
+                .Include(b => b.Occurrence)
+                .FirstOrDefaultAsync(b => b.BookingId == bookingId && b.UserId == userId.Value, cancellationToken);
+
+            if (booking == null)
+            {
+                return NotFound(ApiResponse.ErrorResponse("Booking not found."));
+            }
+
+            if (booking.Status != BookingStatus.Confirmed)
+            {
+                return BadRequest(ApiResponse.ErrorResponse("Only confirmed bookings can request a refund."));
+            }
+
+            if (booking.RefundStatus == RefundRequestStatus.Requested)
+            {
+                return BadRequest(ApiResponse.ErrorResponse("Refund request is already pending."));
+            }
+
+            var scheduleNow = AppTime.GetScheduleNow();
+            if (booking.Occurrence.DepartureDateTime <= scheduleNow)
+            {
+                return BadRequest(ApiResponse.ErrorResponse("Refund requests are not allowed after departure time."));
+            }
+
+            booking.RefundStatus = RefundRequestStatus.Requested;
+            booking.UpdatedAt = scheduleNow;
+
+            await _dbContext.SaveChangesAsync(cancellationToken);
+
+            return Ok(ApiResponse.Ok("Refund request submitted successfully."));
         }
 
         [HttpPost("checkout")]
