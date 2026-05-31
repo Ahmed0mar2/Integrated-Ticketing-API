@@ -423,43 +423,50 @@ namespace GP.Application.Services
                         Description = "Checkout for multiple trips."
                     });
 
-                    int distinctTrips = pendingBookings.Select(c => c.OccurrenceId).Distinct().Count();
-                    decimal bonusMultiplier = distinctTrips switch
+                    if (request.PointsToRedeem <= 0)
                     {
-                        >= 3 => 1.25m,
-                        2 => 1.15m,
-                        _ => 1.00m
-                    };
+                        int distinctTrips = pendingBookings.Select(c => c.OccurrenceId).Distinct().Count();
+                        decimal bonusMultiplier = distinctTrips switch
+                        {
+                            >= 3 => 1.25m,
+                            2 => 1.15m,
+                            _ => 1.00m
+                        };
 
-                    int earnedPoints = (int)(finalPrice * earnRate * bonusMultiplier);
-                    var departureDate = pendingBookings.Min(c => c.Occurrence.DepartureDateTime);
-                    var referenceBookingId = pendingBookings[0].BookingId;
+                        int earnedPoints = (int)(finalPrice * earnRate * bonusMultiplier);
+                        var departureDate = pendingBookings.Min(c => c.Occurrence.DepartureDateTime);
+                        var referenceBookingId = pendingBookings[0].BookingId;
 
-                    var earnTransaction = new PointTransaction
+                        var earnTransaction = new PointTransaction
+                        {
+                            UserId = userId,
+                            Amount = earnedPoints,
+                            AvailableAmount = earnedPoints,
+                            Description = $"Earned from {distinctTrips}-leg Booking",
+                            Source = PointSource.BookingEarned,
+                            Status = PointTransactionStatus.Pending,
+                            CreatedAt = now,
+                            UnlocksAt = departureDate,
+                            BookingId = referenceBookingId,
+                            ExpiresAt = departureDate.AddMonths(4)
+                        };
+                        _dbContext.PointTransactions.Add(earnTransaction);
+
+                        await _dbContext.SaveChangesAsync(cancellationToken);
+
+                        await _notificationService.SendNotificationAsync(
+                            userId,
+                            "Points Earned! 🎉",
+                            $"You just earned {earnedPoints} points for your booking!",
+                            "لقد كسبت نقاط! 🎉",
+                            $"لقد كسبت {earnedPoints} نقطة لإتمام حجزك!",
+                            "POINTS_EARNED",
+                            cancellationToken);
+                    }
+                    else
                     {
-                        UserId = userId,
-                        Amount = earnedPoints,
-                        AvailableAmount = earnedPoints,
-                        Description = $"Earned from {distinctTrips}-leg Booking",
-                        Source = PointSource.BookingEarned,
-                        Status = PointTransactionStatus.Pending,
-                        CreatedAt = now,
-                        UnlocksAt = departureDate,
-                        BookingId = referenceBookingId,
-                        ExpiresAt = departureDate.AddMonths(4)
-                    };
-                    _dbContext.PointTransactions.Add(earnTransaction);
-
-                    await _dbContext.SaveChangesAsync(cancellationToken);
-
-                    await _notificationService.SendNotificationAsync(
-                        userId,
-                        "Points Earned! 🎉",
-                        $"You just earned {earnedPoints} points for your booking!",
-                        "لقد كسبت نقاط! 🎉",
-                        $"لقد كسبت {earnedPoints} نقطة لإتمام حجزك!",
-                        "POINTS_EARNED",
-                        cancellationToken);
+                        await _dbContext.SaveChangesAsync(cancellationToken);
+                    }
 
                     await transaction.CommitAsync(cancellationToken);
 

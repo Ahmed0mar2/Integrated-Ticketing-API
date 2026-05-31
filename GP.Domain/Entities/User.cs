@@ -33,6 +33,7 @@ namespace GP.Domain.Entities
 
         // Account
         public string? ProfilePictureUrl { get; set; }
+        public string PreferredLanguage { get; set; } = "en";
         public DateTime CreatedAt { get; set; } = AppTime.GetScheduleNow();
         public DateTime? UpdatedAt { get; set; }
 

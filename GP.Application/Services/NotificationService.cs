@@ -50,6 +50,14 @@ namespace GP.Application.Services
             await _hubContext.Clients.User(userId.ToString())
                 .ReceiveNotification(titleEn, messageEn, type);
 
+            var preferredLanguage = await _dbContext.Users
+                .AsNoTracking()
+                .Where(u => u.UserId == userId)
+                .Select(u => u.PreferredLanguage)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            var isArabic = preferredLanguage == "ar";
+
             var deviceTokens = await _dbContext.UserDeviceTokens
                 .Where(t => t.UserId == userId)
                 .ToListAsync(cancellationToken);
@@ -68,8 +76,8 @@ namespace GP.Application.Services
                     Token = deviceToken.FcmToken,
                     Notification = new FcmNotification
                     {
-                        Title = titleEn,
-                        Body = messageEn
+                        Title = isArabic ? titleAr : titleEn,
+                        Body = isArabic ? messageAr : messageEn
                     },
                     Data = new Dictionary<string, string>
                     {

@@ -759,6 +759,9 @@ No request body.
     "phoneNumber": "+201234567890",
     "gender": "Male",
     "profilePictureUrl": "images/profiles/abcd.jpg",
+    "idType": "NationalId",
+    "idNumber": "29805151234567",
+    "preferredLanguage": "en",
     "countryCode": "EG",
     "countryName": "Egypt",
     "totalTripsCount": 12,
@@ -866,6 +869,27 @@ No request body.
 ### Notes
 - If the token already exists for a different user, it is reassigned to the current user.
 - If the token exists for the same user, only `LastUsedAt` is updated.
+
+## 5.5 Update Preferred Language
+### Endpoint Overview
+- **Method:** `PUT`
+- **URL:** `/api/Users/language`
+- **Business Use Case:** Sets the authenticated user's preferred language for server-side localized push notifications.
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** Authenticated user
+### Request Payload
+```json
+{ "language": "ar" }
+```
+### Request Field Reference
+| Field    | Type   | Required | Notes                                        |
+| -------- | ------ | -------- | -------------------------------------------- |
+| language | string | Yes      | Use `ar` for Arabic; any other value uses `en` |
+### Response Example (200 OK)
+```json
+{ "success": true, "message": "Language updated successfully.", "data": null, "errors": null, "timestamp": "2026-05-31T00:00:00Z" }
+```
 
 ---
 
@@ -2347,6 +2371,7 @@ Delivery model:
 - Notifications are persisted to the inbox first.
 - Then pushed live to online clients through SignalR.
 - Offline delivery uses stored FCM device tokens registered via `/api/Users/fcm-token`.
+- FCM `notification` title/body is localized using the user's preferred language set via `/api/Users/language` (defaults to `en`).
 
 ### Authentication
 - Connection requires authenticated JWT user context.
@@ -2425,6 +2450,7 @@ Client method name:
 | `PUT`    | `/api/Users/me`                                                 |                Yes | Update profile                                                     |
 | `POST`   | `/api/Users/me/profile-picture`                                 |                Yes | Upload profile picture                                             |
 | `POST`   | `/api/Users/fcm-token`                                          |                Yes | Register/update user device token for offline push                 |
+| `PUT`    | `/api/Users/language`                                           |                Yes | Update preferred language for localized push notifications         |
 | `GET`    | `/api/Loyalty/history`                                          |                Yes | Retrieve loyalty point ledger history (latest first)               |
 | `GET`    | `/api/Loyalty/challenges`                                       |                Yes | Retrieve paged active and completed challenge history              |
 | `GET`    | `/api/Stations`                                                 |                 No | Get grouped stations                                               |

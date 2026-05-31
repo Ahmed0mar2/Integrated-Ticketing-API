@@ -168,4 +168,34 @@ public class UsersController : ControllerBase
 
         return Ok(ApiResponse.Ok("FCM token updated successfully."));
     }
+
+    /// <summary>
+    /// Updates the logged-in user's preferred language.
+    /// </summary>
+    [HttpPut("language")]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdatePreferredLanguage(
+        [FromBody] UpdateLanguageRequestDto dto,
+        CancellationToken cancellationToken)
+    {
+        var userId = User.GetDomainUserId();
+        if (userId == null)
+            return Unauthorized(ApiResponse.ErrorResponse("Invalid user token."));
+
+        var user = await _dbContext.Users
+            .FirstOrDefaultAsync(u => u.UserId == userId.Value, cancellationToken);
+
+        if (user == null)
+            return NotFound(ApiResponse.ErrorResponse("User not found."));
+
+        var requested = dto.Language?.Trim();
+        user.PreferredLanguage = requested == "ar" ? "ar" : "en";
+        user.UpdatedAt = AppTime.GetScheduleNow();
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return Ok(ApiResponse.Ok("Language updated successfully."));
+    }
 }

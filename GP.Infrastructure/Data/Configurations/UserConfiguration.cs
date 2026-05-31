@@ -80,6 +80,11 @@ namespace GP.Infrastructure.Data.Configurations
                 .HasColumnName("profile_picture_url")
                 .HasMaxLength(500);
 
+            builder.Property(u => u.PreferredLanguage)
+                .HasColumnName("preferred_language")
+                .HasMaxLength(10)
+                .HasDefaultValue("en");
+
             builder.Property(u => u.CreatedAt)
                 .HasColumnName("created_at")
                 .HasDefaultValueSql("GETUTCDATE()");

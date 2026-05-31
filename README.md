@@ -39,6 +39,7 @@
 - Marketplace sellers receive a real-time `Ticket Sold!` notification when a listing is purchased
 - Users receive real-time `Points Earned! 🎉` notifications for checkout-earned points and challenge rewards
 - Confirmed passengers receive one-time `Boarding Soon!` notifications via cron-driven job processing 15 minutes before boarding
+- FCM notification title/body is localized using the user's preferred language (defaults to `en`)
 
 ---
 
@@ -358,6 +359,7 @@ After running migrations, you can log in with the seeded admin account:
 - Client callback: `ReceiveNotification(title, message, type)`
 - Delivery model: notification is saved to inbox first, then pushed live through SignalR
 - Offline delivery uses stored FCM tokens registered via `/api/users/fcm-token`
+- FCM `notification` title/body is localized using the user's preferred language set via `/api/users/language`
 
 Current notification types:
 
@@ -385,10 +387,11 @@ These endpoints were added as part of the User Profile epic. They allow authenti
 
 | Method | Endpoint                        | Auth Required | Description                                                                                                                                       |
 | ------ | ------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/users/me`                 | ✅             | Get current user's profile, loyalty points, expiring points info, active challenges, and wallet balance                                           |
+| `GET`  | `/api/users/me`                 | ✅             | Get current user's profile (including ID type/number and preferred language), loyalty points, active challenges, and wallet balance             |
 | `PUT`  | `/api/users/me`                 | ✅             | Update current user's basic profile info (first/family/last name, email, phone). Email & phone uniqueness validated at domain and identity levels |
 | `POST` | `/api/users/me/profile-picture` | ✅             | Upload or replace user's profile picture (multipart file). Allowed extensions: `.jpg`, `.jpeg`, `.png`                                            |
 | `POST` | `/api/users/fcm-token`          | ✅             | Register or update user's FCM token for offline push notifications                                                                                |
+| `PUT`  | `/api/users/language`           | ✅             | Update user's preferred language (`ar` or `en`) for server-side localized push notifications                                                     |
 
 ### 🎁 Loyalty (`/api/Loyalty`)
 

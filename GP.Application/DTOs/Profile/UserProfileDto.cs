@@ -10,6 +10,9 @@ public class UserProfileDto
     public string? PhoneNumber { get; set; }
     public string? Gender { get; set; }
     public string? ProfilePictureUrl { get; set; }
+    public string? IdType { get; set; }
+    public string? IdNumber { get; set; }
+    public string PreferredLanguage { get; set; } = "en";
 
     // Country
     public string CountryCode { get; set; } = string.Empty;
