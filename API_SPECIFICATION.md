@@ -2407,6 +2407,178 @@ Client method name:
 
 ---
 
+# 16. Support Tickets API
+
+Base route (User): `/api/Support`
+
+Base route (Admin): `/api/admin/support`
+
+User endpoints require authenticated JWT user context.
+
+Admin endpoints require Admin role.
+
+## 16.1 Create Support Ticket
+### Endpoint Overview
+- **Method:** `POST`
+- **URL:** `/api/Support/tickets`
+- **Business Use Case:** Submits a new support ticket for the authenticated user.
+
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** Authenticated user
+
+### Request Payload
+```json
+{
+  "title": "Payment failed",
+  "description": "Wallet deposit returned an error.",
+  "issueCategory": 1
+}
+```
+
+### Request Field Reference
+| Field         | Type   | Required | Notes                                                       |
+| ------------- | ------ | -------- | ----------------------------------------------------------- |
+| title         | string | Yes      | Max 200                                                     |
+| description   | string | Yes      | Max 1000                                                    |
+| issueCategory | int    | Yes      | 1=Payment,2=TripExperience,3=AppBug,4=AccountIssue,5=Other   |
+
+### Response Example (200 OK)
+```json
+{
+  "success": true,
+  "message": "Support ticket created successfully.",
+  "data": {
+    "ticketId": 1001,
+    "title": "Payment failed",
+    "description": "Wallet deposit returned an error.",
+    "category": "Payment",
+    "status": "Open",
+    "createdAt": "2026-05-31T12:00:00Z",
+    "updatedAt": null
+  },
+  "errors": null,
+  "timestamp": "2026-05-31T12:00:00Z"
+}
+```
+
+### Notes
+- `status` starts as `Open`.
+- `category` and `status` are enum string values.
+
+## 16.2 Get My Tickets
+### Endpoint Overview
+- **Method:** `GET`
+- **URL:** `/api/Support/tickets`
+- **Business Use Case:** Returns the authenticated user's support tickets, newest first.
+
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** Authenticated user
+
+### Response Example (200 OK)
+```json
+{
+  "success": true,
+  "message": "Support tickets retrieved successfully.",
+  "data": [
+    {
+      "ticketId": 1001,
+      "title": "Payment failed",
+      "description": "Wallet deposit returned an error.",
+      "category": "Payment",
+      "status": "Open",
+      "createdAt": "2026-05-31T12:00:00Z",
+      "updatedAt": null
+    }
+  ],
+  "errors": null,
+  "timestamp": "2026-05-31T12:00:00Z"
+}
+```
+
+## 16.3 Admin - Get All Tickets
+### Endpoint Overview
+- **Method:** `GET`
+- **URL:** `/api/admin/support/tickets`
+- **Business Use Case:** Lists all support tickets with user contact details, newest first.
+
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** Admin
+
+### Response Example (200 OK)
+```json
+{
+  "success": true,
+  "message": "Support tickets retrieved successfully.",
+  "data": [
+    {
+      "ticketId": 1001,
+      "title": "Payment failed",
+      "description": "Wallet deposit returned an error.",
+      "category": "Payment",
+      "status": "Open",
+      "createdAt": "2026-05-31T12:00:00Z",
+      "updatedAt": null,
+      "userId": 15,
+      "userFullName": "Ahmed Mohamed Hassan",
+      "userEmail": "user@example.com",
+      "userPhone": "+201234567890"
+    }
+  ],
+  "errors": null,
+  "timestamp": "2026-05-31T12:00:00Z"
+}
+```
+
+## 16.4 Admin - Update Ticket Status
+### Endpoint Overview
+- **Method:** `PUT`
+- **URL:** `/api/admin/support/tickets/{ticketId}/status`
+- **Business Use Case:** Updates the ticket status and refreshes the updated timestamp.
+
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** Admin
+
+### Request Payload
+```json
+{
+  "status": 2
+}
+```
+
+### Request Field Reference
+| Field  | Type | Required | Notes                                      |
+| ------ | ---- | -------- | ------------------------------------------ |
+| status | int  | Yes      | 1=Open,2=InProgress,3=Resolved,4=Closed    |
+
+### Response Example (200 OK)
+```json
+{
+  "success": true,
+  "message": "Support ticket status updated successfully.",
+  "data": {
+    "ticketId": 1001,
+    "title": "Payment failed",
+    "description": "Wallet deposit returned an error.",
+    "category": "Payment",
+    "status": "InProgress",
+    "createdAt": "2026-05-31T12:00:00Z",
+    "updatedAt": "2026-05-31T12:30:00Z",
+    "userId": 15,
+    "userFullName": "Ahmed Mohamed Hassan",
+    "userEmail": "user@example.com",
+    "userPhone": "+201234567890"
+  },
+  "errors": null,
+  "timestamp": "2026-05-31T12:30:00Z"
+}
+```
+
+---
+
 # Quick Endpoint Index
 
 | Method   | URL                                                             |               Auth | Description                                                        |
@@ -2446,11 +2618,15 @@ Client method name:
 | `PATCH`  | `/api/admin/users/{id}/toggle-status`                           |        Yes (Admin) | Toggle user active status                                          |
 | `POST`   | `/api/admin/users/{id}/roles`                                   |        Yes (Admin) | Assign role                                                        |
 | `DELETE` | `/api/admin/users/{id}`                                         |        Yes (Admin) | Delete user                                                        |
+| `GET`    | `/api/admin/support/tickets`                                    |        Yes (Admin) | List all support tickets                                           |
+| `PUT`    | `/api/admin/support/tickets/{ticketId}/status`                  |        Yes (Admin) | Update support ticket status                                       |
 | `GET`    | `/api/Users/me`                                                 |                Yes | Get profile with loyalty stats and active challenges               |
 | `PUT`    | `/api/Users/me`                                                 |                Yes | Update profile                                                     |
 | `POST`   | `/api/Users/me/profile-picture`                                 |                Yes | Upload profile picture                                             |
 | `POST`   | `/api/Users/fcm-token`                                          |                Yes | Register/update user device token for offline push                 |
 | `PUT`    | `/api/Users/language`                                           |                Yes | Update preferred language for localized push notifications         |
+| `POST`   | `/api/Support/tickets`                                          |                Yes | Create support ticket                                              |
+| `GET`    | `/api/Support/tickets`                                          |                Yes | Retrieve user's support tickets                                    |
 | `GET`    | `/api/Loyalty/history`                                          |                Yes | Retrieve loyalty point ledger history (latest first)               |
 | `GET`    | `/api/Loyalty/challenges`                                       |                Yes | Retrieve paged active and completed challenge history              |
 | `GET`    | `/api/Stations`                                                 |                 No | Get grouped stations                                               |

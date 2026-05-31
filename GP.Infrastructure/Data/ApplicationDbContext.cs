@@ -42,6 +42,7 @@ namespace GP.Infrastructure.Data
         public DbSet<WalletTransaction> WalletTransactions { get; set; }
         public DbSet<PointTransaction> PointTransactions { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<SupportTicket> SupportTickets { get; set; }
         public DbSet<UserDeviceToken> UserDeviceTokens { get; set; }
         public DbSet<Challenge> Challenges { get; set; }
         public DbSet<UserChallenge> UserChallenges { get; set; }

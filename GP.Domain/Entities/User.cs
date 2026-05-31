@@ -45,5 +45,6 @@ namespace GP.Domain.Entities
         public ICollection<UserChallenge> UserChallenges { get; set; } = [];
         public ICollection<Notification> Notifications { get; set; } = [];
         public ICollection<UserDeviceToken> DeviceTokens { get; set; } = [];
+        public ICollection<SupportTicket> SupportTickets { get; set; } = [];
     }
 }
