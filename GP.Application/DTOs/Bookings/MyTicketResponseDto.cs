@@ -11,6 +11,7 @@ namespace GP.Application.DTOs.Bookings
         public int BookingId { get; set; }
         public string Status { get; set; } = string.Empty;
         public string PaymentStatus { get; set; } = string.Empty;
+        public string? RefundStatus { get; set; }
         public decimal TotalPrice { get; set; }
         public int SeatsBooked { get; set; }
         public DateTime BookingDate { get; set; }
@@ -23,10 +24,14 @@ namespace GP.Application.DTOs.Bookings
         public string? AgencyNameAr { get; set; }
         public string ClassName { get; set; } = string.Empty;
         public string? ClassNameAr { get; set; }
-        public string OriginStation { get; set; } = string.Empty;
-        public string OriginGov { get; set; } = string.Empty;
-        public string DestinationStation { get; set; } = string.Empty;
-        public string DestinationGov { get; set; } = string.Empty;
+        public string OriginStationNameAr { get; set; } = string.Empty;
+        public string OriginStationNameEn { get; set; } = string.Empty;
+        public string? OriginGovAr { get; set; }
+        public string? OriginGovEn { get; set; }
+        public string DestinationStationNameAr { get; set; } = string.Empty;
+        public string DestinationStationNameEn { get; set; } = string.Empty;
+        public string? DestinationGovAr { get; set; }
+        public string? DestinationGovEn { get; set; }
         public DateTime BoardingTime { get; set; }
         public DateTime DropoffTime { get; set; }
 

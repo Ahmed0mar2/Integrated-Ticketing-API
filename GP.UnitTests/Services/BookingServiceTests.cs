@@ -250,7 +250,10 @@ public class BookingServiceTests
         context.CoachClasses.Add(coachClass);
         context.Trips.Add(trip);
         context.TripOccurrences.Add(occurrence);
-        context.TripOccurrenceClassInventories.Add(inventory);
+        context.SaveChanges();
+        context.Database.ExecuteSqlRaw(@"INSERT INTO TripOccurrenceClassInventories
+            (TripOccurrenceClassInventoryId, TripOccurrenceId, CoachClassId, TotalSeats, RemainingSeats, RowVersion)
+            VALUES (1, 1, 1, 40, 39, x'01')");
         context.TripFares.Add(fare);
         context.Bookings.Add(booking);
 

@@ -108,20 +108,20 @@ Base route: `/api/Auth`
 ```
 
 ### Request Field Reference
-| Field            | Type   | Required | Notes                    |
-| ---------------- | ------ | -------- | ------------------------ |
-| email            | string | Yes      | Valid email, max 255     |
-| password         | string | Yes      | Min 8, upper/lower/digit |
-| confirmPassword  | string | Yes      | Must match password      |
-| phoneNumber      | string | Yes      | E.164 format             |
-| firstName        | string | Yes      | Max 100                  |
-| lastName         | string | Yes      | Max 100                  |
-| familyName       | string | Yes      | Max 100                  |
-| gender           | int    | Yes      | 1=Male,2=Female,3=Other  |
-| dateOfBirth      | date   | Yes      | At least 16 years old    |
-| idType           | int    | No       | 1=NationalId,2=Passport,3=DrivingLicense,4=StudentId,5=Other |
-| idNumber         | string | Conditional | Required when `idType` is provided. NationalId must be 14 digits; other types max 50 |
-| countryCode      | string | Yes      | 2 chars, must exist      |
+| Field           | Type   | Required    | Notes                                                                                |
+| --------------- | ------ | ----------- | ------------------------------------------------------------------------------------ |
+| email           | string | Yes         | Valid email, max 255                                                                 |
+| password        | string | Yes         | Min 8, upper/lower/digit                                                             |
+| confirmPassword | string | Yes         | Must match password                                                                  |
+| phoneNumber     | string | Yes         | E.164 format                                                                         |
+| firstName       | string | Yes         | Max 100                                                                              |
+| lastName        | string | Yes         | Max 100                                                                              |
+| familyName      | string | Yes         | Max 100                                                                              |
+| gender          | int    | Yes         | 1=Male,2=Female,3=Other                                                              |
+| dateOfBirth     | date   | Yes         | At least 16 years old                                                                |
+| idType          | int    | No          | 1=NationalId,2=Passport,3=DrivingLicense,4=StudentId,5=Other                         |
+| idNumber        | string | Conditional | Required when `idType` is provided. NationalId must be 14 digits; other types max 50 |
+| countryCode     | string | Yes         | 2 chars, must exist                                                                  |
 
 ### Response Example (200 OK)
 ```json
@@ -747,9 +747,9 @@ Base route: `/api/admin`
 ```
 
 ### Request Field Reference
-| Field      | Type | Required | Notes                                |
-| ---------- | ---- | -------- | ------------------------------------ |
-| isApproved | bool | Yes      | `true` = approve, `false` = reject   |
+| Field      | Type | Required | Notes                              |
+| ---------- | ---- | -------- | ---------------------------------- |
+| isApproved | bool | Yes      | `true` = approve, `false` = reject |
 
 ### Rules
 - Booking must exist and be in `RefundStatus = Requested`.
@@ -916,8 +916,8 @@ No request body.
 { "language": "ar" }
 ```
 ### Request Field Reference
-| Field    | Type   | Required | Notes                                        |
-| -------- | ------ | -------- | -------------------------------------------- |
+| Field    | Type   | Required | Notes                                          |
+| -------- | ------ | -------- | ---------------------------------------------- |
 | language | string | Yes      | Use `ar` for Arabic; any other value uses `en` |
 ### Response Example (200 OK)
 ```json
@@ -1644,6 +1644,7 @@ No request body.
       "bookingId": 1024,
       "status": "Confirmed",
       "paymentStatus": "Paid",
+      "refundStatus": "Requested",
       "totalPrice": 360.0,
       "seatsBooked": 2,
       "bookingDate": "2026-03-31T00:02:00Z",
@@ -1654,8 +1655,14 @@ No request body.
       "agencyNameAr": "جو باص",
       "className": "Business",
       "classNameAr": "درجة رجال الاعمال",
-      "originStation": "رمسيس",
-      "destinationStation": "سيدي جابر",
+      "originStationNameAr": "رمسيس",
+      "originStationNameEn": "Ramses",
+      "originGovAr": "القاهرة",
+      "originGovEn": "Cairo",
+      "destinationStationNameAr": "سيدي جابر",
+      "destinationStationNameEn": "Sidi Gaber",
+      "destinationGovAr": "الاسكندرية",
+      "destinationGovEn": "Alexandria",
       "boardingTime": "2026-04-02T07:20:00",
       "dropoffTime": "2026-04-02T10:00:00",
       "passengers": [
@@ -1679,6 +1686,9 @@ No request body.
 }
 ```
 
+### Notes
+- `refundStatus` is `Requested`, `Approved`, or `Rejected` when a refund exists; otherwise `null`.
+
 ## 9.6 Request Refund
 ### Endpoint Overview
 - **Method:** `POST`
@@ -1693,9 +1703,9 @@ No request body.
 No request body.
 
 ### Path Parameters
-| Field     | Type | Required | Notes                 |
-| --------- | ---- | -------- | --------------------- |
-| bookingId | int  | Yes      | Booking identifier    |
+| Field     | Type | Required | Notes              |
+| --------- | ---- | -------- | ------------------ |
+| bookingId | int  | Yes      | Booking identifier |
 
 ### Rules
 - Booking must belong to the authenticated user and be in `Confirmed` status.
@@ -2160,10 +2170,10 @@ Base route: `/api/Marketplace`
 ```
 
 ### Request Field Reference
-| Field       | Type    | Required | Notes                                        |
-| ----------- | ------- | -------- | -------------------------------------------- |
-| bookingId   | int     | Yes      | Must be a confirmed booking                  |
-| askingPrice | decimal | Yes      | Must be > 0                                  |
+| Field       | Type    | Required | Notes                       |
+| ----------- | ------- | -------- | --------------------------- |
+| bookingId   | int     | Yes      | Must be a confirmed booking |
+| askingPrice | decimal | Yes      | Must be > 0                 |
 
 ### Listing Rules
 - Only the booking owner can list a ticket.
@@ -2206,13 +2216,13 @@ Base route: `/api/Marketplace`
 ```
 
 ### Request Field Reference
-| Field                      | Type   | Required    | Notes                                                            |
-| -------------------------- | ------ | ----------- | ---------------------------------------------------------------- |
-| passengers                 | array  | Yes         | Must match `SeatsBooked` count                                   |
-| passengers[].passengerName | string | Conditional | Required for ENR agency                                          |
+| Field                      | Type   | Required    | Notes                                                                                    |
+| -------------------------- | ------ | ----------- | ---------------------------------------------------------------------------------------- |
+| passengers                 | array  | Yes         | Must match `SeatsBooked` count                                                           |
+| passengers[].passengerName | string | Conditional | Required for ENR agency                                                                  |
 | passengers[].idType        | string | Conditional | Required for ENR agency. Allowed: NationalId, Passport, DrivingLicense, StudentId, Other |
-| passengers[].idNumber      | string | Conditional | Required for ENR agency                                          |
-| passengers[].seatNumber    | string | No          | Ignored for marketplace purchase (seat is preserved)             |
+| passengers[].idNumber      | string | Conditional | Required for ENR agency                                                                  |
+| passengers[].seatNumber    | string | No          | Ignored for marketplace purchase (seat is preserved)                                     |
 
 ### Notes
 - Backward-compatible alias: `/api/Marketplace/buy/{listingId}`
@@ -2503,11 +2513,11 @@ Admin endpoints require Admin role.
 ```
 
 ### Request Field Reference
-| Field         | Type   | Required | Notes                                                       |
-| ------------- | ------ | -------- | ----------------------------------------------------------- |
-| title         | string | Yes      | Max 200                                                     |
-| description   | string | Yes      | Max 1000                                                    |
-| issueCategory | int    | Yes      | 1=Payment,2=TripExperience,3=AppBug,4=AccountIssue,5=Other   |
+| Field         | Type   | Required | Notes                                                      |
+| ------------- | ------ | -------- | ---------------------------------------------------------- |
+| title         | string | Yes      | Max 200                                                    |
+| description   | string | Yes      | Max 1000                                                   |
+| issueCategory | int    | Yes      | 1=Payment,2=TripExperience,3=AppBug,4=AccountIssue,5=Other |
 
 ### Response Example (200 OK)
 ```json
@@ -2616,9 +2626,9 @@ Admin endpoints require Admin role.
 ```
 
 ### Request Field Reference
-| Field  | Type | Required | Notes                                      |
-| ------ | ---- | -------- | ------------------------------------------ |
-| status | int  | Yes      | 1=Open,2=InProgress,3=Resolved,4=Closed    |
+| Field  | Type | Required | Notes                                   |
+| ------ | ---- | -------- | --------------------------------------- |
+| status | int  | Yes      | 1=Open,2=InProgress,3=Resolved,4=Closed |
 
 ### Response Example (200 OK)
 ```json
