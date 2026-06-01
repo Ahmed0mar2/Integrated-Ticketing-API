@@ -398,6 +398,7 @@ Current notification types:
 
 | Method | Endpoint                                | Auth Required | Description                                |
 | ------ | --------------------------------------- | ------------- | ------------------------------------------ |
+| `GET`  | `/api/admin/bookings/refund-requests`   | ✅             | List booking refund requests               |
 | `PUT`  | `/api/admin/bookings/{bookingId}/refund` | ✅             | Approve or reject a pending refund request |
 
 ### 🧑‍💻 User Profile 

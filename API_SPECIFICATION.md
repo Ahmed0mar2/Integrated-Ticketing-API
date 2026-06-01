@@ -762,6 +762,44 @@ Base route: `/api/admin`
 { "success": true, "message": "Refund request approved.", "data": null, "errors": null, "timestamp": "2026-05-31T12:00:00Z" }
 ```
 
+## 4.7 Admin - List Refund Requests
+Base route: `/api/admin`
+
+### Endpoint Overview
+- **Method:** `GET`
+- **URL:** `/api/admin/bookings/refund-requests`
+- **Business Use Case:** Lists all booking refund requests with user contact details and trip context, newest first.
+
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** Admin
+
+### Response Example (200 OK)
+```json
+{
+  "success": true,
+  "message": "Refund requests retrieved successfully.",
+  "data": [
+    {
+      "bookingId": 1205,
+      "userId": 15,
+      "userFullName": "Ahmed Mohamed Hassan",
+      "userEmail": "user@example.com",
+      "userPhone": "+201234567890",
+      "totalPrice": 350.0,
+      "refundStatus": "Requested",
+      "bookingStatus": "Confirmed",
+      "originStationName": "Cairo",
+      "destinationStationName": "Alexandria",
+      "departureTime": "2026-06-02T09:30:00",
+      "updatedAt": "2026-06-01T10:15:00Z"
+    }
+  ],
+  "errors": null,
+  "timestamp": "2026-06-01T10:20:00Z"
+}
+```
+
 ---
 
 # 5. User Profile API
@@ -2696,6 +2734,7 @@ Admin endpoints require Admin role.
 | `DELETE` | `/api/admin/users/{id}`                                         |        Yes (Admin) | Delete user                                                        |
 | `GET`    | `/api/admin/support/tickets`                                    |        Yes (Admin) | List all support tickets                                           |
 | `PUT`    | `/api/admin/support/tickets/{ticketId}/status`                  |        Yes (Admin) | Update support ticket status                                       |
+| `GET`    | `/api/admin/bookings/refund-requests`                           |        Yes (Admin) | List booking refund requests                                       |
 | `PUT`    | `/api/admin/bookings/{bookingId}/refund`                        |        Yes (Admin) | Approve or reject pending booking refund request                   |
 | `GET`    | `/api/Users/me`                                                 |                Yes | Get profile with loyalty stats and active challenges               |
 | `PUT`    | `/api/Users/me`                                                 |                Yes | Update profile                                                     |
