@@ -84,6 +84,7 @@ public class UserProfileService : IUserProfileService
             ProfilePictureUrl = user.ProfilePictureUrl,
             IdType = user.IdType?.ToString(),
             IdNumber = user.IdNumber,
+            HasSetIdentityDetails = !string.IsNullOrWhiteSpace(user.IdNumber),
             PreferredLanguage = string.IsNullOrWhiteSpace(user.PreferredLanguage) ? "en" : user.PreferredLanguage,
             CountryCode = user.Country?.CountryCode ?? string.Empty,
             CountryName = user.Country?.CountryName ?? string.Empty,
@@ -129,6 +130,19 @@ public class UserProfileService : IUserProfileService
                 {
                     result = (false, true, "User not found.");
                     return;
+                }
+
+                var normalizedIdNumber = dto.IdNumber?.Trim();
+                if (!string.IsNullOrWhiteSpace(normalizedIdNumber))
+                {
+                    if (!string.IsNullOrWhiteSpace(user.IdNumber))
+                    {
+                        result = (false, false, "Identity details cannot be changed once they are set. Please contact support.");
+                        return;
+                    }
+
+                    user.IdNumber = normalizedIdNumber;
+                    user.IdType = dto.IdType;
                 }
 
                 // Domain-level uniqueness checks

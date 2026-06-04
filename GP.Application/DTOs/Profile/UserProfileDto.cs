@@ -12,6 +12,7 @@ public class UserProfileDto
     public string? ProfilePictureUrl { get; set; }
     public string? IdType { get; set; }
     public string? IdNumber { get; set; }
+    public bool HasSetIdentityDetails { get; set; }
     public string PreferredLanguage { get; set; } = "en";
 
     // Country

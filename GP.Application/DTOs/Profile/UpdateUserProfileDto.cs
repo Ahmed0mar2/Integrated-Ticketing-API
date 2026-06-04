@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using GP.Domain.Enums;
 
 namespace GP.Application.DTOs.Profile;
 
@@ -22,4 +23,8 @@ public class UpdateUserProfileDto
     [Phone]
     [MaxLength(20)]
     public string? PhoneNumber { get; set; }
+
+    public IdType? IdType { get; set; }
+
+    public string? IdNumber { get; set; }
 }

@@ -187,7 +187,7 @@ namespace GP.Application.Services
         {
             var cutoff = AppTime.GetScheduleNow().AddDays(-7);
 
-            return await _dbContext.RouteSearchLogs
+            var topRoutes = await _dbContext.RouteSearchLogs
                 .AsNoTracking()
                 .Where(log => log.SearchedAt >= cutoff)
                 .GroupBy(log => new { log.OriginGov, log.DestinationGov })
@@ -195,12 +195,65 @@ namespace GP.Application.Services
                 .ThenBy(group => group.Key.OriginGov)
                 .ThenBy(group => group.Key.DestinationGov)
                 .Take(3)
-                .Select(group => new PopularRouteDto
+                .Select(group => new
                 {
-                    OriginGov = group.Key.OriginGov,
-                    DestinationGov = group.Key.DestinationGov
+                    group.Key.OriginGov,
+                    group.Key.DestinationGov
                 })
                 .ToListAsync(cancellationToken);
+
+            if (topRoutes.Count == 0)
+                return [];
+
+            var governorateNames = topRoutes
+                .SelectMany(route => new[] { route.OriginGov?.Trim(), route.DestinationGov?.Trim() })
+                .Where(name => !string.IsNullOrWhiteSpace(name))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            var governorateLookups = await _dbContext.Stops
+                .AsNoTracking()
+                .Where(s => s.Governorate != null && governorateNames.Contains(s.Governorate))
+                .Select(s => new { s.Governorate, s.GovernorateAr })
+                .ToListAsync(cancellationToken);
+
+            var governorateMap = governorateLookups
+                .GroupBy(x => x.Governorate!)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(x => x.GovernorateAr)
+                        .FirstOrDefault(ar => !string.IsNullOrWhiteSpace(ar)) ?? string.Empty,
+                    StringComparer.OrdinalIgnoreCase);
+
+            return topRoutes.Select(route =>
+            {
+                var originGovEn = route.OriginGov?.Trim() ?? string.Empty;
+                var destinationGovEn = route.DestinationGov?.Trim() ?? string.Empty;
+
+                var originGovAr = originGovEn;
+                if (!string.IsNullOrWhiteSpace(originGovEn)
+                    && governorateMap.TryGetValue(originGovEn, out var originAr)
+                    && !string.IsNullOrWhiteSpace(originAr))
+                {
+                    originGovAr = originAr;
+                }
+
+                var destinationGovAr = destinationGovEn;
+                if (!string.IsNullOrWhiteSpace(destinationGovEn)
+                    && governorateMap.TryGetValue(destinationGovEn, out var destinationAr)
+                    && !string.IsNullOrWhiteSpace(destinationAr))
+                {
+                    destinationGovAr = destinationAr;
+                }
+
+                return new PopularRouteDto
+                {
+                    OriginGovAr = originGovAr,
+                    OriginGovEn = originGovEn,
+                    DestinationGovAr = destinationGovAr,
+                    DestinationGovEn = destinationGovEn
+                };
+            }).ToList();
         }
 
         private async Task<PagedResult<TripSearchResponseDto>> SearchDirectCoreAsync(

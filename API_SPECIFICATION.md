@@ -832,6 +832,7 @@ No request body.
     "profilePictureUrl": "images/profiles/abcd.jpg",
     "idType": "NationalId",
     "idNumber": "29805151234567",
+    "hasSetIdentityDetails": true,
     "preferredLanguage": "en",
     "countryCode": "EG",
     "countryName": "Egypt",
@@ -875,21 +876,28 @@ No request body.
   "familyName": "Mohamed",
   "lastName": "Hassan",
   "email": "new-email@example.com",
-  "phoneNumber": "+201234567891"
+  "phoneNumber": "+201234567891",
+  "idType": 1,
+  "idNumber": "29805151234567"
 }
 ```
 ### Request Field Reference
-| Field       | Type   | Required | Notes                |
-| ----------- | ------ | -------- | -------------------- |
-| firstName   | string | Yes      | Max 50               |
-| familyName  | string | No       | Max 50               |
-| lastName    | string | Yes      | Max 50               |
-| email       | string | No       | Unique + valid email |
-| phoneNumber | string | No       | Unique + valid phone |
+| Field       | Type   | Required | Notes                                                        |
+| ----------- | ------ | -------- | ------------------------------------------------------------ |
+| firstName   | string | Yes      | Max 50                                                       |
+| familyName  | string | No       | Max 50                                                       |
+| lastName    | string | Yes      | Max 50                                                       |
+| email       | string | No       | Unique + valid email                                         |
+| phoneNumber | string | No       | Unique + valid phone                                         |
+| idType      | int    | No       | 1=NationalId,2=Passport,3=DrivingLicense,4=StudentId,5=Other |
+| idNumber    | string | No       | First set only; rejected if identity details already exist   |
 ### Response Example (200 OK)
 ```json
 { "success": true, "message": "Profile updated successfully.", "data": null, "errors": null, "timestamp": "2026-03-10T00:00:00Z" }
 ```
+
+### Notes
+- Identity details can be set once. If `idNumber` is provided after it already exists, the API returns 400 with: "Identity details cannot be changed once they are set. Please contact support."
 
 ## 5.3 Upload Profile Picture
 ### Endpoint Overview
@@ -1219,9 +1227,9 @@ Query string parameters:
   "success": true,
   "message": "Popular routes retrieved successfully.",
   "data": [
-    { "originGov": "Cairo", "destinationGov": "Alexandria" },
-    { "originGov": "Giza", "destinationGov": "Cairo" },
-    { "originGov": "Beheira", "destinationGov": "Alexandria" }
+    { "originGovAr": "القاهرة", "originGovEn": "Cairo", "destinationGovAr": "الإسكندرية", "destinationGovEn": "Alexandria" },
+    { "originGovAr": "الجيزة", "originGovEn": "Giza", "destinationGovAr": "القاهرة", "destinationGovEn": "Cairo" },
+    { "originGovAr": "البحيرة", "originGovEn": "Beheira", "destinationGovAr": "الإسكندرية", "destinationGovEn": "Alexandria" }
   ],
   "errors": null,
   "timestamp": "2026-05-07T10:30:00Z"
