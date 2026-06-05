@@ -1589,10 +1589,14 @@ No request body.
         "agencyNameAr": "جو باص",
         "className": "Business",
         "classNameAr": "درجة رجال الاعمال",
-        "origin": "رمسيس",
-        "originGov": "Cairo",
-        "destination": "سيدي جابر",
-        "destinationGov": "Alexandria",
+        "originStationNameAr": "رمسيس",
+        "originStationNameEn": "Ramses",
+        "originGovAr": "القاهرة",
+        "originGovEn": "Cairo",
+        "destinationStationNameAr": "سيدي جابر",
+        "destinationStationNameEn": "Sidi Gaber",
+        "destinationGovAr": "الاسكندرية",
+        "destinationGovEn": "Alexandria",
         "boardingTime": "2026-04-02T07:20:00",
         "dropoffTime": "2026-04-02T10:00:00",
         "passengers": [
@@ -1600,11 +1604,6 @@ No request body.
             "name": "Ali Hassan",
             "idNumber": "29805151111121",
             "seatNumber": "7"
-          },
-          {
-            "name": "Sara Mohamed",
-            "idNumber": "A12345678",
-            "seatNumber": "8"
           }
         ]
       }
@@ -1924,6 +1923,7 @@ No request body.
       "amount": -360.0,
       "type": "TICKET_PURCHASE",
       "description": "Checkout for multiple trips.",
+      "descriptionAr": "دفع قيمة تذاكر متعددة",
       "bookingId": null,
       "createdAt": "2026-03-31T00:10:00Z"
     },
@@ -1932,6 +1932,7 @@ No request body.
       "amount": 500.0,
       "type": "DEPOSIT",
       "description": "Deposit via simulated card ending in 4242",
+      "descriptionAr": "إيداع عبر بطاقة افتراضية تنتهي بـ 4242",
       "bookingId": null,
       "createdAt": "2026-03-31T01:20:00Z"
     }
@@ -1974,29 +1975,27 @@ Base route: `/api/Loyalty`
   "data": {
     "items": [
       {
-        "transactionId": 81,
-        "amount": 300,
-        "description": "Welcome quest reward",
-        "source": "ChallengeReward",
-        "status": "Available",
-        "createdAt": "2026-05-07T09:15:00Z"
+        "transactionId": 141,
+        "amount": 39,
+        "description": "Earned from 2-leg Booking",
+        "descriptionAr": "نقاط مكتسبة من حجز يشمل 2 رحلة",
+        "source": "BookingEarned",
+        "status": "Pending",
+        "createdAt": "2026-06-05T03:47:40.3840961Z"
       },
       {
-        "transactionId": 80,
-        "amount": -120,
-        "description": "Ticket Discount",
+        "transactionId": 136,
+        "amount": -153,
+        "description": "Ticket Discount (Consumed from Batch #84)",
+        "descriptionAr": "خصم التذكرة (تم استهلاكها من الدفعة #84)",
         "source": "Redemption",
         "status": "Spent",
-        "createdAt": "2026-05-06T18:20:00Z"
+        "createdAt": "2026-06-05T03:19:16.3369554Z"
       }
-    ],
-    "totalCount": 24,
-    "pageSize": 10,
-    "totalPages": 3,
-    "currentPage": 1
+    ]
   },
   "errors": null,
-  "timestamp": "2026-05-07T09:16:00Z"
+  "timestamp": "2026-06-05T04:00:00Z"
 }
 ```
 
@@ -2332,10 +2331,14 @@ Query string parameters:
         "sellerName": "Ahmed Hassan",
         "seatsCount": 2,
         "tripDetails": {
-          "origin": "رمسيس",
-          "destination": "سيدي جابر",
-          "originGov": "Cairo",
-          "destinationGov": "Alexandria",
+          "originStationNameAr": "رمسيس",
+          "originStationNameEn": "Ramses",
+          "originGovAr": "القاهرة",
+          "originGovEn": "Cairo",
+          "destinationStationNameAr": "سيدي جابر",
+          "destinationStationNameEn": "Sidi Gaber",
+          "destinationGovAr": "الاسكندرية",
+          "destinationGovEn": "Alexandria",
           "agencyName": "GoBus",
           "agencyNameAr": "جو باص",
           "time": "2026-04-02T07:20:00",

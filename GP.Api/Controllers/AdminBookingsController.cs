@@ -127,6 +127,7 @@ public class AdminBookingsController : ControllerBase
             Amount = booking.TotalPrice,
             Type = TransactionType.Refund,
             Description = "Ticket refund approved.",
+            DescriptionAr = "تمت الموافقة على استرداد قيمة التذكرة",
             BookingId = booking.BookingId
         });
 

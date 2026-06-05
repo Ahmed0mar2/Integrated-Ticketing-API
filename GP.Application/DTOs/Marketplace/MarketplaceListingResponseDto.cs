@@ -13,10 +13,14 @@ public class MarketplaceListingResponseDto
 
 public class MarketplaceTripDetailsDto
 {
-    public string Origin { get; set; } = string.Empty;
-    public string Destination { get; set; } = string.Empty;
-    public string OriginGov { get; set; } = string.Empty;
-    public string DestinationGov { get; set; } = string.Empty;
+    public string OriginStationNameAr { get; set; } = string.Empty;
+    public string OriginStationNameEn { get; set; } = string.Empty;
+    public string? OriginGovAr { get; set; }
+    public string? OriginGovEn { get; set; }
+    public string DestinationStationNameAr { get; set; } = string.Empty;
+    public string DestinationStationNameEn { get; set; } = string.Empty;
+    public string? DestinationGovAr { get; set; }
+    public string? DestinationGovEn { get; set; }
     public string AgencyName { get; set; } = string.Empty;
     public string? AgencyNameAr { get; set; }
     public DateTime Time { get; set; }

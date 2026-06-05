@@ -326,7 +326,7 @@ namespace GP.Application.Services
 
                         int actualPointsToDeduct = (int)(discountEgp / pointToEgpValue);
 
-                        await _loyaltyService.DeductPointsFifoAsync(userId, actualPointsToDeduct, "Ticket Discount", null, cancellationToken);
+                        await _loyaltyService.DeductPointsFifoAsync(userId, actualPointsToDeduct, "Ticket Discount", "خصم تذكرة", null, cancellationToken);
                     }
 
                     decimal finalPrice = Math.Max(grandTotal - discountEgp, 10.00m);
@@ -420,7 +420,8 @@ namespace GP.Application.Services
                         UserId = user.UserId,
                         Amount = -finalPrice,
                         Type = TransactionType.TicketPurchase,
-                        Description = "Checkout for multiple trips."
+                        Description = "Checkout for multiple trips.",
+                        DescriptionAr = "دفع قيمة تذاكر متعددة"
                     });
 
                     if (request.PointsToRedeem <= 0)
@@ -443,6 +444,7 @@ namespace GP.Application.Services
                             Amount = earnedPoints,
                             AvailableAmount = earnedPoints,
                             Description = $"Earned from {distinctTrips}-leg Booking",
+                            DescriptionAr = $"نقاط مكتسبة من حجز يشمل {distinctTrips} رحلة",
                             Source = PointSource.BookingEarned,
                             Status = PointTransactionStatus.Pending,
                             CreatedAt = now,
@@ -533,10 +535,14 @@ namespace GP.Application.Services
                     AgencyNameAr = b.Occurrence.Trip.Agency.AgencyNameAr,
                     ClassName = b.CoachClass.Name,
                     ClassNameAr = b.CoachClass.ClassNameAr,
-                    Origin = b.OriginStation.ArabicName,
-                    OriginGov = b.OriginStation.Governorate ?? "Unknown",
-                    Destination = b.DestinationStation.ArabicName,
-                    DestinationGov = b.DestinationStation.Governorate ?? "Unknown",
+                    OriginStationNameAr = b.OriginStation.ArabicName,
+                    OriginStationNameEn = b.OriginStation.EnglishName,
+                    OriginGovAr = b.OriginStation.GovernorateAr,
+                    OriginGovEn = b.OriginStation.Governorate,
+                    DestinationStationNameAr = b.DestinationStation.ArabicName,
+                    DestinationStationNameEn = b.DestinationStation.EnglishName,
+                    DestinationGovAr = b.DestinationStation.GovernorateAr,
+                    DestinationGovEn = b.DestinationStation.Governorate,
                     BoardingTime = boardingTime,
                     DropoffTime = dropoffTime,
                     Passengers = b.BookingPassengers

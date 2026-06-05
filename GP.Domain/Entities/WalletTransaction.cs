@@ -15,8 +15,11 @@ namespace GP.Domain.Entities
         public decimal Amount { get; set; }
         public TransactionType Type { get; set; }
 
-        // e.g., "Deposit via Visa ending in 4242" or "Ticket Purchase for Booking #1024"
+        // e.g., "Deposit via Visa ending in 4242"
         public string Description { get; set; } = string.Empty;
+
+        // NEW: Arabic localization
+        public string DescriptionAr { get; set; } = string.Empty;
 
         public int? BookingId { get; set; }
 

@@ -23,9 +23,7 @@ namespace GP.Application.Services
 
         public async Task<string> DepositAsync(int userId, DepositRequestDto request, CancellationToken cancellationToken = default)
         {
-            
             await Task.Delay(2000, cancellationToken);
-
             var strategy = _dbContext.Database.CreateExecutionStrategy();
 
             return await strategy.ExecuteAsync(async () =>
@@ -47,7 +45,8 @@ namespace GP.Application.Services
                         UserId = userId,
                         Amount = request.Amount,
                         Type = TransactionType.Deposit,
-                        Description = $"Deposit via simulated card ending in {maskedCard}"
+                        Description = $"Deposit via simulated card ending in {maskedCard}",
+                        DescriptionAr = $"إيداع عبر بطاقة افتراضية تنتهي بـ {maskedCard}"
                     };
 
                     _dbContext.WalletTransactions.Add(ledgerEntry);
@@ -79,6 +78,7 @@ namespace GP.Application.Services
                     Amount = t.Amount,
                     Type = ToTransactionTypeToken(t.Type),
                     Description = t.Description,
+                    DescriptionAr = t.DescriptionAr,
                     BookingId = t.BookingId,
                     CreatedAt = DateTime.SpecifyKind(t.CreatedAt, DateTimeKind.Utc)
                 })

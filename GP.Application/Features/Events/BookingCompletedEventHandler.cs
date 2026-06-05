@@ -65,6 +65,7 @@ namespace GP.Application.Features.Events
                         Amount = uc.Challenge.RewardPoints,
                         AvailableAmount = uc.Challenge.RewardPoints,
                         Description = $"Completed Challenge: {uc.Challenge.Title}",
+                        DescriptionAr = $"تم إنجاز التحدي: {uc.Challenge.TitleAr}",
                         Source = PointSource.ChallengeReward,
                         Status = PointTransactionStatus.Available,
                         CreatedAt = now,

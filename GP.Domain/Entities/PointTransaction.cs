@@ -11,9 +11,9 @@ namespace GP.Domain.Entities
 
         public int Amount { get; set; }
         public int AvailableAmount { get; set; }
-
-        // e.g., "Earned from Trip to Alexandria", "Redeemed for Checkout Discount"
         public string Description { get; set; } = string.Empty;
+
+        public string DescriptionAr { get; set; } = string.Empty;
 
         // Nullable because redemptions aren't always tied to a specific booking they earned points from
         public int? BookingId { get; set; }

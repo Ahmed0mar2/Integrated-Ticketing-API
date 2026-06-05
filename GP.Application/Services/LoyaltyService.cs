@@ -40,7 +40,7 @@ namespace GP.Application.Services
             return ApiResponse.Ok($"Expired {expiring.Count} point transaction(s).");
         }
 
-        public async Task<bool> DeductPointsFifoAsync(int userId, int pointsToDeduct, string description, int? bookingId = null, CancellationToken cancellationToken = default)
+        public async Task<bool> DeductPointsFifoAsync(int userId, int pointsToDeduct, string description, string descriptionAr, int? bookingId = null, CancellationToken cancellationToken = default)
         {
             var now = AppTime.GetScheduleNow();
             var earnTransactions = await _dbContext.PointTransactions
@@ -75,6 +75,7 @@ namespace GP.Application.Services
                     Amount = -deduction,
                     AvailableAmount = 0,
                     Description = $"{description} (Consumed from Batch #{transaction.Id})",
+                    DescriptionAr = $"{descriptionAr} (تم استهلاكها من الدفعة #{transaction.Id})",
                     BookingId = bookingId,
                     ParentTransactionId = transaction.Id,
                     Status = PointTransactionStatus.Spent,

@@ -177,6 +177,7 @@ public class MarketplaceService : IMarketplaceService
                     Amount = -listing.AskingPrice,
                     Type = TransactionType.TicketPurchase,
                     Description = "Purchased ticket from marketplace",
+                    DescriptionAr = "شراء تذكرة من السوق",
                     BookingId = null
                 });
 
@@ -186,6 +187,7 @@ public class MarketplaceService : IMarketplaceService
                     Amount = listing.AskingPrice,
                     Type = TransactionType.Deposit,
                     Description = "Ticket sold on marketplace",
+                    DescriptionAr = "بيع تذكرة في السوق",
                     BookingId = null
                 });
 
@@ -383,10 +385,14 @@ public class MarketplaceService : IMarketplaceService
                 SeatsCount = booking.SeatsBooked,
                 TripDetails = new MarketplaceTripDetailsDto
                 {
-                    Origin = booking.OriginStation.ArabicName,
-                    Destination = booking.DestinationStation.ArabicName,
-                    OriginGov = booking.OriginStation.Governorate ?? "Unknown",
-                    DestinationGov = booking.DestinationStation.Governorate ?? "Unknown",
+                    OriginStationNameAr = booking.OriginStation.ArabicName,
+                    OriginStationNameEn = booking.OriginStation.EnglishName,
+                    OriginGovAr = booking.OriginStation.GovernorateAr,
+                    OriginGovEn = booking.OriginStation.Governorate,
+                    DestinationStationNameAr = booking.DestinationStation.ArabicName,
+                    DestinationStationNameEn = booking.DestinationStation.EnglishName,
+                    DestinationGovAr = booking.DestinationStation.GovernorateAr,
+                    DestinationGovEn = booking.DestinationStation.Governorate,
                     AgencyName = booking.Occurrence.Trip.Agency.AgencyName,
                     AgencyNameAr = booking.Occurrence.Trip.Agency.AgencyNameAr,
                     Time = boardingTime,

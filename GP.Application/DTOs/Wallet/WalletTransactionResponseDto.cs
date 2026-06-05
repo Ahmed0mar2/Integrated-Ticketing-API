@@ -12,6 +12,7 @@ namespace GP.Application.DTOs.Wallet
         public decimal Amount { get; set; }
         public string Type { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
+        public string DescriptionAr { get; set; } = string.Empty;
         public int? BookingId { get; set; }
         public DateTime CreatedAt { get; set; }
     }
