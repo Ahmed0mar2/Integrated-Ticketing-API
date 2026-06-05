@@ -162,6 +162,7 @@ namespace GP.Application.Services
                     TransactionId = pt.Id,
                     Amount = pt.Amount,
                     Description = pt.Description,
+                    DescriptionAr = pt.DescriptionAr,
                     Source = pt.Source.ToString(),
                     Status = pt.Status.ToString(),
                     CreatedAt = pt.CreatedAt
