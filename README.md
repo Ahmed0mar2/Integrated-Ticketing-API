@@ -346,11 +346,12 @@ After running migrations, you can log in with the seeded admin account:
 
 ### 🔔 Notifications Inbox (`/api/Notifications`)
 
-| Method  | Endpoint                       | Description                                  | Auth Required |
-| ------- | ------------------------------ | -------------------------------------------- | ------------- |
-| `GET`   | `/api/Notifications?limit=50`  | Retrieve latest notifications (newest first) | ✅             |
-| `PATCH` | `/api/Notifications/{id}/read` | Mark one notification as read                | ✅             |
-| `PATCH` | `/api/Notifications/read-all`  | Mark all unread notifications as read        | ✅             |
+| Method   | Endpoint                       | Description                                   | Auth Required |
+| -------- | ------------------------------ | --------------------------------------------- | ------------- |
+| `GET`    | `/api/Notifications?limit=50`  | Retrieve latest notifications (newest first)  | ✅             |
+| `PATCH`  | `/api/Notifications/{id}/read` | Mark one notification as read                 | ✅             |
+| `PATCH`  | `/api/Notifications/read-all`  | Mark all unread notifications as read         | ✅             |
+| `DELETE` | `/api/Notifications/{id}`      | Delete a specific notification from the inbox | ✅             |
 
 ### 🆘 Support Tickets (`/api/Support`)
 
@@ -389,16 +390,16 @@ Current notification types:
 
 ### 🛡️ Admin Support (`/api/admin/support`)
 
-| Method | Endpoint                                  | Auth Required | Description                         |
-| ------ | ----------------------------------------- | ------------- | ----------------------------------- |
-| `GET`  | `/api/admin/support/tickets`              | ✅             | List all support tickets            |
-| `PUT`  | `/api/admin/support/tickets/{ticketId}/status` | ✅             | Update support ticket status        |
+| Method | Endpoint                                       | Auth Required | Description                  |
+| ------ | ---------------------------------------------- | ------------- | ---------------------------- |
+| `GET`  | `/api/admin/support/tickets`                   | ✅             | List all support tickets     |
+| `PUT`  | `/api/admin/support/tickets/{ticketId}/status` | ✅             | Update support ticket status |
 
 ### 🛡️ Admin Bookings (`/api/admin`)
 
-| Method | Endpoint                                | Auth Required | Description                                |
-| ------ | --------------------------------------- | ------------- | ------------------------------------------ |
-| `GET`  | `/api/admin/bookings/refund-requests`   | ✅             | List booking refund requests               |
+| Method | Endpoint                                 | Auth Required | Description                                |
+| ------ | ---------------------------------------- | ------------- | ------------------------------------------ |
+| `GET`  | `/api/admin/bookings/refund-requests`    | ✅             | List booking refund requests               |
 | `PUT`  | `/api/admin/bookings/{bookingId}/refund` | ✅             | Approve or reject a pending refund request |
 
 ### 🧑‍💻 User Profile 
@@ -409,11 +410,11 @@ These endpoints were added as part of the User Profile epic. They allow authenti
 
 | Method | Endpoint                        | Auth Required | Description                                                                                                                                       |
 | ------ | ------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/users/me`                 | ✅             | Get current user's profile (including ID type/number and preferred language), loyalty points, active challenges, and wallet balance             |
+| `GET`  | `/api/users/me`                 | ✅             | Get current user's profile (including ID type/number and preferred language), loyalty points, active challenges, and wallet balance               |
 | `PUT`  | `/api/users/me`                 | ✅             | Update current user's basic profile info (first/family/last name, email, phone). Email & phone uniqueness validated at domain and identity levels |
 | `POST` | `/api/users/me/profile-picture` | ✅             | Upload or replace user's profile picture (multipart file). Allowed extensions: `.jpg`, `.jpeg`, `.png`                                            |
 | `POST` | `/api/users/fcm-token`          | ✅             | Register or update user's FCM token for offline push notifications                                                                                |
-| `PUT`  | `/api/users/language`           | ✅             | Update user's preferred language (`ar` or `en`) for server-side localized push notifications                                                     |
+| `PUT`  | `/api/users/language`           | ✅             | Update user's preferred language (`ar` or `en`) for server-side localized push notifications                                                      |
 
 ### 🎁 Loyalty (`/api/Loyalty`)
 
@@ -438,12 +439,12 @@ These endpoints were added as part of the User Profile epic. They allow authenti
 
 ### 🏪 Marketplace (`/api/Marketplace`)
 
-| Method | Endpoint                              | Description                          | Auth Required |
-| ------ | ------------------------------------- | ------------------------------------ | ------------- |
-| `POST` | `/api/Marketplace/list`               | List a booking for resale            | ✅             |
+| Method | Endpoint                                    | Description                                                           | Auth Required |
+| ------ | ------------------------------------------- | --------------------------------------------------------------------- | ------------- |
+| `POST` | `/api/Marketplace/list`                     | List a booking for resale                                             | ✅             |
 | `POST` | `/api/Marketplace/listings/{listingId}/buy` | Purchase a listed booking (alias: `/api/Marketplace/buy/{listingId}`) | ✅             |
-| `GET`  | `/api/Marketplace/active`             | Retrieve active marketplace listings | ❌             |
-| `POST` | `/api/Marketplace/cancel/{listingId}` | Delist a marketplace listing         | ✅             |
+| `GET`  | `/api/Marketplace/active`                   | Retrieve active marketplace listings                                  | ❌             |
+| `POST` | `/api/Marketplace/cancel/{listingId}`       | Delist a marketplace listing                                          | ✅             |
 
 ### 💳 Wallet (`/api/Wallet`)
 

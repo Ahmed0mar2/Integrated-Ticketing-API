@@ -63,5 +63,27 @@ namespace GP.Api.Controllers
             await _notificationService.MarkAllAsReadAsync(userId.Value, cancellationToken);
             return Ok(ApiResponse.Ok("All notifications marked as read."));
         }
+
+        [HttpDelete("{id}")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> DeleteNotification(int id, CancellationToken cancellationToken)
+        {
+            var userId = User.GetDomainUserId();
+
+            if (userId == null)
+            {
+                return Unauthorized(ApiResponse.ErrorResponse("User is not authenticated."));
+            }
+
+            var success = await _notificationService.DeleteNotificationAsync(userId.Value, id, cancellationToken);
+
+            if (!success)
+            {
+                return NotFound(ApiResponse.ErrorResponse("Notification not found."));
+            }
+
+            return Ok(ApiResponse.SuccessResponse("Notification deleted successfully."));
+        }
     }
 }

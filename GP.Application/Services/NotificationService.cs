@@ -171,5 +171,20 @@ namespace GP.Application.Services
 
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
+        public async Task<bool> DeleteNotificationAsync(int userId, int notificationId, CancellationToken cancellationToken = default)
+        {
+            var notification = await _dbContext.Notifications
+                .FirstOrDefaultAsync(n => n.Id == notificationId && n.UserId == userId, cancellationToken);
+
+            if (notification == null)
+            {
+                return false;
+            }
+
+            _dbContext.Notifications.Remove(notification);
+            await _dbContext.SaveChangesAsync(cancellationToken);
+
+            return true;
+        }
     }
 }

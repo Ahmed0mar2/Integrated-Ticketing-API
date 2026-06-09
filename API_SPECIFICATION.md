@@ -2479,6 +2479,32 @@ All endpoints require authenticated JWT user context.
   "timestamp": "2026-05-09T19:31:00Z"
 }
 ```
+## 14.4 Delete Specific Notification
+
+### Endpoint Overview
+- **Method:** `DELETE`
+- **URL:** `/api/Notifications/{id}`
+- **Business Use Case:** Permanently deletes a specific notification from the authenticated user's inbox.
+
+### Authentication / Authorization
+- **JWT Required:** Yes
+- **Role Required:** Authenticated user
+
+### Path Parameters
+| Parameter | Type | Required | Description                                 |
+| :-------- | :--- | :------- | :------------------------------------------ |
+| `id`      | int  | Yes      | The unique ID of the notification to delete |
+
+### Response Example (200 OK)
+```json
+{
+  "success": true,
+  "message": "Notification deleted successfully.",
+  "data": null,
+  "errors": null,
+  "timestamp": "2026-06-09T10:00:00Z"
+}
+```
 
 ---
 
@@ -2737,6 +2763,7 @@ Admin endpoints require Admin role.
 | `GET`    | `/api/Notifications`                                            |                Yes | Retrieve latest notifications inbox entries                        |
 | `PATCH`  | `/api/Notifications/{id}/read`                                  |                Yes | Mark one notification as read                                      |
 | `PATCH`  | `/api/Notifications/read-all`                                   |                Yes | Mark all unread notifications as read                              |
+| `DELETE` | `/api/Notifications/{id}`                                       |                Yes | Delete a specific notification from the inbox                      |
 | `WS`     | `/hubs/notifications`                                           |          JWT (Hub) | Subscribe to real-time notifications via `ReceiveNotification`     |
 | `GET`    | `/api/admin/users`                                              |        Yes (Admin) | List all users                                                     |
 | `GET`    | `/api/admin/users/{id}`                                         |        Yes (Admin) | Get user detail                                                    |

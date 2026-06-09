@@ -15,5 +15,6 @@ namespace GP.Application.Interfaces
         Task<List<NotificationDto>> GetUserNotificationsAsync(int userId, int limit = 50, CancellationToken cancellationToken = default);
         Task MarkAsReadAsync(int notificationId, int userId, CancellationToken cancellationToken = default);
         Task MarkAllAsReadAsync(int userId, CancellationToken cancellationToken = default);
+        Task<bool> DeleteNotificationAsync(int userId, int notificationId, CancellationToken cancellationToken = default);
     }
 }
