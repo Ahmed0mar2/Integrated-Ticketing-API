@@ -309,6 +309,7 @@ namespace GP.Application.Services
                     var now = AppTime.GetScheduleNow();
                     var pendingBookings = await QueryActivePendingBookingsForUser(userId, now)
                         .Include(b => b.Occurrence)
+                            .ThenInclude(o => o.Trip)
                         .Include(b => b.BookingPassengers)
                         .OrderBy(b => b.BookingTime)
                         .ToListAsync(cancellationToken);
@@ -318,6 +319,7 @@ namespace GP.Application.Services
 
                     var grandTotal = pendingBookings.Sum(b => b.TotalPrice);
                     decimal discountEgp = 0m;
+
                     if (request.PointsToRedeem > 0)
                     {
                         decimal requestedDiscount = request.PointsToRedeem * pointToEgpValue;
@@ -325,7 +327,6 @@ namespace GP.Application.Services
                         discountEgp = Math.Min(requestedDiscount, maxDiscount);
 
                         int actualPointsToDeduct = (int)(discountEgp / pointToEgpValue);
-
                         await _loyaltyService.DeductPointsFifoAsync(userId, actualPointsToDeduct, "Ticket Discount", "خصم تذكرة", null, cancellationToken);
                     }
 
@@ -353,8 +354,9 @@ namespace GP.Application.Services
 
                             var proportional = Math.Round(booking.TotalPrice / grandTotal * appliedDiscount, 2, MidpointRounding.AwayFromZero);
                             proportional = Math.Min(proportional, remainingDiscount);
-                            booking.TotalPrice = Math.Max(0m, booking.TotalPrice - proportional);
-                            remainingDiscount -= proportional;
+                            var actualDeduction = Math.Min(booking.TotalPrice, proportional);
+                            booking.TotalPrice -= actualDeduction;
+                            remainingDiscount -= actualDeduction;
                         }
                     }
 
@@ -363,17 +365,12 @@ namespace GP.Application.Services
                     foreach (var booking in pendingBookings)
                     {
                         var inventory = await _dbContext.TripOccurrenceClassInventories
-                            .FirstOrDefaultAsync(i => i.TripOccurrenceId == booking.OccurrenceId && i.CoachClassId == booking.CoachClassId, cancellationToken);
-
-                        if (inventory == null)
-                            throw new CartValidationException("Inventory data missing.");
-
-                        // Backward compatibility for legacy pending rows created before seat selection support.
+                            .FirstOrDefaultAsync(i => i.TripOccurrenceId == booking.OccurrenceId && i.CoachClassId == booking.CoachClassId, cancellationToken) ?? throw new CartValidationException("Inventory data missing.");
                         var hasPlaceholderSeats = booking.BookingPassengers.Any(HasPlaceholderSeat);
 
                         if (hasPlaceholderSeats)
                         {
-                            var key = (booking.OccurrenceId, booking.CoachClassId);
+                            var key = ((int)booking.OccurrenceId, (int)booking.CoachClassId);
                             if (!seatTracker.TryGetValue(key, out var reservedSeats))
                             {
                                 var alreadyTaken = await _dbContext.BookingPassengers
@@ -424,27 +421,93 @@ namespace GP.Application.Services
                         DescriptionAr = "دفع قيمة تذاكر متعددة"
                     });
 
+                    int roundTripCount = 0;
+                    int multiDestCount = 0;
+
                     if (request.PointsToRedeem <= 0)
                     {
-                        int distinctTrips = pendingBookings.Select(c => c.OccurrenceId).Distinct().Count();
-                        decimal bonusMultiplier = distinctTrips switch
-                        {
-                            >= 3 => 1.25m,
-                            2 => 1.15m,
-                            _ => 1.00m
-                        };
+                        var orderedLegs = pendingBookings
+                            .Select(b => b.Occurrence)
+                            .DistinctBy(o => o.TripOccurrenceId)
+                            .OrderBy(o => o.DepartureDateTime)
+                            .ToList();
 
-                        int earnedPoints = (int)(finalPrice * earnRate * bonusMultiplier);
-                        var departureDate = pendingBookings.Min(c => c.Occurrence.DepartureDateTime);
+                        var occurrenceMultipliers = orderedLegs.ToDictionary(o => o.TripOccurrenceId, o => 1.00m);
+
+                        for (int i = 0; i < orderedLegs.Count; i++)
+                        {
+                            for (int j = i + 1; j < orderedLegs.Count; j++)
+                            {
+                                var legA = orderedLegs[i];
+                                var legB = orderedLegs[j];
+
+                                bool isGeographicRoundTrip = legA.Trip.OriginStationId == legB.Trip.DestinationStationId &&
+                                                             legA.Trip.DestinationStationId == legB.Trip.OriginStationId;
+
+                                // Return trip must be strictly before the 1st day of (Departure Month + 2)
+                                var cutoffDate = legA.DepartureDateTime.Date.AddDays(1 - legA.DepartureDateTime.Day).AddMonths(3);
+                                bool isWithinTimeWindow = legB.DepartureDateTime < cutoffDate;
+
+                                if (isGeographicRoundTrip && isWithinTimeWindow)
+                                {
+                                    roundTripCount++;
+
+                                    if (occurrenceMultipliers[legA.TripOccurrenceId] < 1.15m) occurrenceMultipliers[legA.TripOccurrenceId] = 1.15m;
+                                    if (occurrenceMultipliers[legB.TripOccurrenceId] < 1.15m) occurrenceMultipliers[legB.TripOccurrenceId] = 1.15m;
+                                }
+                            }
+                        }
+
+                        // Check for Multi-Destination Chains
+                        int chainLength = 1;
+                        var currentChainIndices = new List<int> { 0 };
+
+                        for (int i = 0; i < orderedLegs.Count - 1; i++)
+                        {
+                            if (orderedLegs[i].Trip.DestinationStationId == orderedLegs[i + 1].Trip.OriginStationId)
+                            {
+                                chainLength++;
+                                currentChainIndices.Add(i + 1);
+                            }
+                            else
+                            {
+                                if (chainLength >= 3)
+                                {
+                                    multiDestCount++;
+
+                                    foreach (int idx in currentChainIndices)
+                                        occurrenceMultipliers[orderedLegs[idx].TripOccurrenceId] = 1.25m;
+                                }
+                                chainLength = 1;
+                                currentChainIndices = new List<int> { i + 1 };
+                            }
+                        }
+                        if (chainLength >= 3)
+                        {
+                            multiDestCount++;
+
+                            foreach (int idx in currentChainIndices)
+                                occurrenceMultipliers[orderedLegs[idx].TripOccurrenceId] = 1.25m;
+                        }
+
+                        // Calculate final points using the individual booking prices and multipliers
+                        int totalEarnedPoints = 0;
+                        foreach (var booking in pendingBookings)
+                        {
+                            decimal multiplier = occurrenceMultipliers[booking.OccurrenceId];
+                            totalEarnedPoints += (int)(booking.TotalPrice * earnRate * multiplier);
+                        }
+
+                        var departureDate = orderedLegs[0].DepartureDateTime;
                         var referenceBookingId = pendingBookings[0].BookingId;
 
                         var earnTransaction = new PointTransaction
                         {
                             UserId = userId,
-                            Amount = earnedPoints,
-                            AvailableAmount = earnedPoints,
-                            Description = $"Earned from {distinctTrips}-leg Booking",
-                            DescriptionAr = $"نقاط مكتسبة من حجز يشمل {distinctTrips} رحلة",
+                            Amount = totalEarnedPoints,
+                            AvailableAmount = totalEarnedPoints,
+                            Description = "Earned from Booking Checkout",
+                            DescriptionAr = "نقاط مكتسبة من إتمام عملية الحجز",
                             Source = PointSource.BookingEarned,
                             Status = PointTransactionStatus.Pending,
                             CreatedAt = now,
@@ -452,16 +515,16 @@ namespace GP.Application.Services
                             BookingId = referenceBookingId,
                             ExpiresAt = departureDate.AddMonths(4)
                         };
-                        _dbContext.PointTransactions.Add(earnTransaction);
 
+                        _dbContext.PointTransactions.Add(earnTransaction);
                         await _dbContext.SaveChangesAsync(cancellationToken);
 
                         await _notificationService.SendNotificationAsync(
                             userId,
                             "Points Earned! 🎉",
-                            $"You just earned {earnedPoints} points for your booking!",
+                            $"You just earned {totalEarnedPoints} points for your booking!",
                             "لقد كسبت نقاط! 🎉",
-                            $"لقد كسبت {earnedPoints} نقطة لإتمام حجزك!",
+                            $"لقد كسبت {totalEarnedPoints} نقطة لإتمام حجزك!",
                             "POINTS_EARNED",
                             cancellationToken);
                     }
@@ -471,6 +534,14 @@ namespace GP.Application.Services
                     }
 
                     await transaction.CommitAsync(cancellationToken);
+
+                    await _mediator.Publish(new BookingCompletedEvent(
+                        userId,
+                        pendingBookings.Count,
+                        finalPrice,
+                        roundTripCount,
+                        multiDestCount
+                        ), cancellationToken);
 
                     return $"Checkout successful. {finalPrice:0.00} was deducted from your wallet for {pendingBookings.Count} trip(s).";
                 }
@@ -497,7 +568,6 @@ namespace GP.Application.Services
                 }
             });
         }
-
         public async Task<BookingCartResponseDto?> GetActiveCartAsync(int userId, CancellationToken cancellationToken = default)
         {
             var now = AppTime.GetScheduleNow();
@@ -794,7 +864,7 @@ namespace GP.Application.Services
                         }
 
                         // 3. Fire the event safely! Progress is now strictly tied to arrival.
-                        await _mediator.Publish(new BookingCompletedEvent(user.UserId, completedLegs, totalSpendForTheseTrips), cancellationToken);
+                        await _mediator.Publish(new BookingCompletedEvent(user.UserId, completedLegs, totalSpendForTheseTrips, 0, 0), cancellationToken);
                     }
                 }
             }

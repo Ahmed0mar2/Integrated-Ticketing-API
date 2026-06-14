@@ -42,8 +42,8 @@ namespace GP.Application.Features.Events
                 {
                     ChallengeType.TotalTrips => notification.DistinctTripsCount,
                     ChallengeType.TotalSpend => (int)notification.FinalPrice,
-                    ChallengeType.RoundTrip => notification.DistinctTripsCount == 2 ? 1 : 0,
-                    ChallengeType.MultiDestination => notification.DistinctTripsCount >= 3 ? 1 : 0,
+                    ChallengeType.RoundTrip => notification.VerifiedRoundTrips,
+                    ChallengeType.MultiDestination => notification.VerifiedMultiDestinations,
                     _ => 0
                 };
 
