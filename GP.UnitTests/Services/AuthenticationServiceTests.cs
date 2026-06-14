@@ -120,14 +120,14 @@ public class AuthenticationServiceTests
         var store = new Mock<IUserStore<ApplicationUser>>();
         return new Mock<UserManager<ApplicationUser>>(
             store.Object,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null);
+            null!,
+            null!,
+            null!,
+            null!,
+            null!,
+            null!,
+            null!,
+            null!);
     }
 
     private static Mock<ApplicationDbContext> CreateDbContextMock(out SqliteConnection connection)
@@ -167,7 +167,7 @@ internal class TestAsyncQueryProvider<TEntity> : IAsyncQueryProvider
 
     public object Execute(Expression expression)
     {
-        return _inner.Execute(expression);
+        return _inner.Execute(expression)!;
     }
 
     public TResult Execute<TResult>(Expression expression)

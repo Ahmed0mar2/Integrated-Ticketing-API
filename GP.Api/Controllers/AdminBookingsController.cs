@@ -49,7 +49,7 @@ public class AdminBookingsController : ControllerBase
                 UserEmail = b.User.Email,
                 UserPhone = b.User.Phone,
                 TotalPrice = b.TotalPrice,
-                RefundStatus = b.RefundStatus!.ToString(),
+                RefundStatus = b.RefundStatus!.ToString()!,
                 BookingStatus = b.Status.ToString(),
                 OriginStationName = b.OriginStation.EnglishName,
                 DestinationStationName = b.DestinationStation.EnglishName,
