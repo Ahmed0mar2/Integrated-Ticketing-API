@@ -1,4 +1,5 @@
 ﻿using GP.Application.Common;
+using GP.Application.DTOs.Admin;
 using GP.Application.DTOs.Bookings;
 using GP.Application.Events;
 using GP.Application.Interfaces;
@@ -911,6 +912,112 @@ namespace GP.Application.Services
             }
 
             await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+        public async Task<string> ProcessRefundDecisionAsync(int bookingId, AdminRefundDecisionDto request, CancellationToken cancellationToken = default)
+        {
+            // 1. Fetch the booking with all necessary relations
+            var booking = await _dbContext.Bookings
+                .Include(b => b.User)
+                .Include(b => b.Occurrence)
+                .FirstOrDefaultAsync(b => b.BookingId == bookingId, cancellationToken);
+
+            if (booking == null)
+                throw new Exception("Booking not found.");
+
+            if (booking.RefundStatus != RefundRequestStatus.Requested)
+                throw new Exception("Refund request is not pending.");
+
+            var now = AppTime.GetScheduleNow();
+
+            // Block refunds for trips that already happened
+            if (booking.Status == BookingStatus.Completed || booking.Occurrence.DepartureDateTime <= now)
+            {
+                // Auto-reject the request because it's invalid
+                booking.RefundStatus = RefundRequestStatus.Rejected;
+                booking.UpdatedAt = now;
+                await _dbContext.SaveChangesAsync(cancellationToken);
+                throw new Exception("Cannot refund a trip that has already departed or been completed.");
+            }
+
+            if (!request.IsApproved)
+            {
+                booking.RefundStatus = RefundRequestStatus.Rejected;
+                booking.UpdatedAt = now;
+
+                await _dbContext.SaveChangesAsync(cancellationToken);
+
+                await _notificationService.SendNotificationAsync(
+                    booking.UserId,
+                    "Refund Rejected",
+                    "Sorry, your ticket refund request was denied.",
+                    "تم رفض طلب الاسترداد",
+                    "نأسف، تم رفض طلب استرداد تذكرتك.",
+                    "REFUND_REJECTED",
+                    cancellationToken);
+
+                return "Refund request rejected.";
+            }
+
+            // --- APPROVAL FLOW ---
+
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+
+            try
+            {
+                booking.RefundStatus = RefundRequestStatus.Approved;
+                booking.Status = BookingStatus.Cancelled;
+                booking.PaymentStatus = PaymentStatus.Refunded;
+                booking.UpdatedAt = now;
+
+                // 1. Return the money
+                booking.User.WalletBalance += booking.TotalPrice;
+
+                _dbContext.WalletTransactions.Add(new WalletTransaction
+                {
+                    UserId = booking.UserId,
+                    Amount = booking.TotalPrice,
+                    Type = TransactionType.Refund,
+                    Description = "Ticket refund approved.",
+                    DescriptionAr = "تمت الموافقة على استرداد قيمة التذكرة",
+                    BookingId = booking.BookingId
+                });
+
+                // The Points Clawback
+                // Calculate the base points they earned for this specific ticket
+                decimal earnRate = _configuration.GetValue<decimal>("LoyaltySettings:EarnRatePercentage", 0.05m);
+                int pointsToClawback = (int)(booking.TotalPrice * earnRate);
+
+                if (pointsToClawback > 0)
+                {
+                    await _loyaltyService.DeductPointsFifoAsync(
+                        booking.UserId,
+                        pointsToClawback,
+                        "Refund Clawback",
+                        "استرداد نقاط بسبب إلغاء الحجز",
+                        null,
+                        cancellationToken);
+                }
+
+                await _dbContext.SaveChangesAsync(cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+
+                // 2. Notify the user
+                await _notificationService.SendNotificationAsync(
+                    booking.UserId,
+                    "Refund Approved",
+                    $"{booking.TotalPrice} EGP has been refunded to your wallet.",
+                    "تم استرداد المبلغ",
+                    $"تمت إضافة {booking.TotalPrice} جنيه إلى محفظتك.",
+                    "REFUND_APPROVED",
+                    cancellationToken);
+
+                return "Refund request approved and wallet credited.";
+            }
+            catch
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                throw;
+            }
         }
 
         private IQueryable<Booking> QueryActivePendingBookingsForUser(int userId, DateTime now)

@@ -1,4 +1,5 @@
-﻿using GP.Application.DTOs.Bookings;
+﻿using GP.Application.DTOs.Admin;
+using GP.Application.DTOs.Bookings;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,5 +19,6 @@ namespace GP.Application.Interfaces
         Task ReleaseExpiredHoldsAsync(CancellationToken cancellationToken = default);
         Task ProcessCompletedTripsAsync(CancellationToken cancellationToken = default);
         Task ProcessUpcomingBoardingAlertsAsync(CancellationToken cancellationToken = default);
+        Task<string> ProcessRefundDecisionAsync(int bookingId, AdminRefundDecisionDto request, CancellationToken cancellationToken = default);
     }
 }
