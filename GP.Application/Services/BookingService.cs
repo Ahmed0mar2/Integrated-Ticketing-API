@@ -311,6 +311,10 @@ namespace GP.Application.Services
                     var pendingBookings = await QueryActivePendingBookingsForUser(userId, now)
                         .Include(b => b.Occurrence)
                             .ThenInclude(o => o.Trip)
+                                .ThenInclude(t => t.OriginStation)
+                        .Include(b => b.Occurrence)
+                             .ThenInclude(o => o.Trip)
+                                 .ThenInclude(t => t.DestinationStation)
                         .Include(b => b.BookingPassengers)
                         .OrderBy(b => b.BookingTime)
                         .ToListAsync(cancellationToken);
@@ -442,8 +446,10 @@ namespace GP.Application.Services
                                 var legA = orderedLegs[i];
                                 var legB = orderedLegs[j];
 
-                                bool isGeographicRoundTrip = legA.Trip.OriginStationId == legB.Trip.DestinationStationId &&
-                                                             legA.Trip.DestinationStationId == legB.Trip.OriginStationId;
+                                bool isGeographicRoundTrip = legA.Trip.OriginStation.Governorate == legB.Trip.DestinationStation.Governorate &&
+                                                             legA.Trip.DestinationStation.Governorate == legB.Trip.OriginStation.Governorate &&
+                                                             !string.IsNullOrWhiteSpace(legA.Trip.OriginStation.Governorate) &&
+                                                             !string.IsNullOrWhiteSpace(legA.Trip.DestinationStation.Governorate);
 
                                 // Return trip must be strictly before the 1st day of (Departure Month + 2)
                                 var cutoffDate = legA.DepartureDateTime.Date.AddDays(1 - legA.DepartureDateTime.Day).AddMonths(3);
@@ -465,7 +471,10 @@ namespace GP.Application.Services
 
                         for (int i = 0; i < orderedLegs.Count - 1; i++)
                         {
-                            if (orderedLegs[i].Trip.DestinationStationId == orderedLegs[i + 1].Trip.OriginStationId)
+                            bool isContinuousJourney = orderedLegs[i].Trip.DestinationStation.Governorate == orderedLegs[i + 1].Trip.OriginStation.Governorate &&
+                                                       !string.IsNullOrWhiteSpace(orderedLegs[i].Trip.DestinationStation.Governorate);
+
+                            if (isContinuousJourney)
                             {
                                 chainLength++;
                                 currentChainIndices.Add(i + 1);
@@ -492,13 +501,13 @@ namespace GP.Application.Services
                         }
 
                         // Calculate final points using the individual booking prices and multipliers
-                        int totalEarnedPoints = 0;
+                        decimal totalDecimalPoints = 0m;
                         foreach (var booking in pendingBookings)
                         {
                             decimal multiplier = occurrenceMultipliers[booking.OccurrenceId];
-                            totalEarnedPoints += (int)(booking.TotalPrice * earnRate * multiplier);
+                            totalDecimalPoints += (booking.TotalPrice * earnRate * multiplier);
                         }
-
+                        int totalEarnedPoints = (int)totalDecimalPoints;
                         var departureDate = orderedLegs[0].DepartureDateTime;
                         var referenceBookingId = pendingBookings[0].BookingId;
 
@@ -960,64 +969,68 @@ namespace GP.Application.Services
 
             // --- APPROVAL FLOW ---
 
-            await using var transaction = await _dbContext.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+            var strategy = _dbContext.Database.CreateExecutionStrategy();
 
-            try
+            return await strategy.ExecuteAsync(async () =>
             {
-                booking.RefundStatus = RefundRequestStatus.Approved;
-                booking.Status = BookingStatus.Cancelled;
-                booking.PaymentStatus = PaymentStatus.Refunded;
-                booking.UpdatedAt = now;
+                await using var transaction = await _dbContext.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
 
-                // 1. Return the money
-                booking.User.WalletBalance += booking.TotalPrice;
-
-                _dbContext.WalletTransactions.Add(new WalletTransaction
+                try
                 {
-                    UserId = booking.UserId,
-                    Amount = booking.TotalPrice,
-                    Type = TransactionType.Refund,
-                    Description = "Ticket refund approved.",
-                    DescriptionAr = "تمت الموافقة على استرداد قيمة التذكرة",
-                    BookingId = booking.BookingId
-                });
+                    booking.RefundStatus = RefundRequestStatus.Approved;
+                    booking.Status = BookingStatus.Cancelled;
+                    booking.PaymentStatus = PaymentStatus.Refunded;
+                    booking.UpdatedAt = now;
 
-                // The Points Clawback
-                // Calculate the base points they earned for this specific ticket
-                decimal earnRate = _configuration.GetValue<decimal>("LoyaltySettings:EarnRatePercentage", 0.05m);
-                int pointsToClawback = (int)(booking.TotalPrice * earnRate);
+                    // 1. Return the money
+                    booking.User.WalletBalance += booking.TotalPrice;
 
-                if (pointsToClawback > 0)
-                {
-                    await _loyaltyService.DeductPointsFifoAsync(
+                    _dbContext.WalletTransactions.Add(new WalletTransaction
+                    {
+                        UserId = booking.UserId,
+                        Amount = booking.TotalPrice,
+                        Type = TransactionType.Refund,
+                        Description = "Ticket refund approved.",
+                        DescriptionAr = "تمت الموافقة على استرداد قيمة التذكرة",
+                        BookingId = booking.BookingId
+                    });
+
+                    // 2. The Points Clawback
+                    decimal earnRate = _configuration.GetValue<decimal>("LoyaltySettings:EarnRatePercentage", 0.05m);
+                    int pointsToClawback = (int)(booking.TotalPrice * earnRate);
+
+                    if (pointsToClawback > 0)
+                    {
+                        await _loyaltyService.DeductPointsFifoAsync(
+                            booking.UserId,
+                            pointsToClawback,
+                            "Refund Clawback",
+                            "استرداد نقاط بسبب إلغاء الحجز",
+                            null,
+                            cancellationToken);
+                    }
+
+                    await _dbContext.SaveChangesAsync(cancellationToken);
+                    await transaction.CommitAsync(cancellationToken);
+
+                    // 3. Notify the user
+                    await _notificationService.SendNotificationAsync(
                         booking.UserId,
-                        pointsToClawback,
-                        "Refund Clawback",
-                        "استرداد نقاط بسبب إلغاء الحجز",
-                        null,
+                        "Refund Approved",
+                        $"{booking.TotalPrice} EGP has been refunded to your wallet.",
+                        "تم استرداد المبلغ",
+                        $"تمت إضافة {booking.TotalPrice} جنيه إلى محفظتك.",
+                        "REFUND_APPROVED",
                         cancellationToken);
+
+                    return "Refund request approved and wallet credited.";
                 }
-
-                await _dbContext.SaveChangesAsync(cancellationToken);
-                await transaction.CommitAsync(cancellationToken);
-
-                // 2. Notify the user
-                await _notificationService.SendNotificationAsync(
-                    booking.UserId,
-                    "Refund Approved",
-                    $"{booking.TotalPrice} EGP has been refunded to your wallet.",
-                    "تم استرداد المبلغ",
-                    $"تمت إضافة {booking.TotalPrice} جنيه إلى محفظتك.",
-                    "REFUND_APPROVED",
-                    cancellationToken);
-
-                return "Refund request approved and wallet credited.";
-            }
-            catch
-            {
-                await transaction.RollbackAsync(cancellationToken);
-                throw;
-            }
+                catch
+                {
+                    await transaction.RollbackAsync(cancellationToken);
+                    throw;
+                }
+            });
         }
 
         private IQueryable<Booking> QueryActivePendingBookingsForUser(int userId, DateTime now)
