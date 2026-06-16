@@ -812,79 +812,59 @@ namespace GP.Application.Services
         public async Task ProcessCompletedTripsAsync(CancellationToken cancellationToken = default)
         {
             var now = AppTime.GetScheduleNow();
-
-            var completedCandidates = await _dbContext.Bookings
+            var activeCandidates = await _dbContext.Bookings
                 .Include(b => b.User)
                 .Include(b => b.Occurrence)
-                .Where(b => b.Status == BookingStatus.Confirmed
-                         && b.Occurrence.ArrivalDateTime <= now)
+                    .ThenInclude(o => o.Trip)
+                        .ThenInclude(t => t.TripStopTimes)
+                .Where(b => b.Status == BookingStatus.Confirmed && b.Occurrence.DepartureDateTime <= now)
                 .ToListAsync(cancellationToken);
 
-            foreach (var booking in completedCandidates)
-            {
-                booking.Status = BookingStatus.Completed;
-                booking.UpdatedAt = now;
-
-                // Existing domain field for completed trips count
-                booking.User.TotalTripsCount += 1;
-                booking.User.UpdatedAt = now;
-            }
-
-            var pendingPoints = await _dbContext.PointTransactions
-                .Where(pt => pt.Status == PointTransactionStatus.Pending
-                             && pt.UnlocksAt.HasValue
-                             && pt.UnlocksAt <= now)
-                .ToListAsync(cancellationToken);
-
-            foreach (var pt in pendingPoints)
-            {
-                pt.Status = PointTransactionStatus.Available;
-            }
-
-            var unlockedPointsByUser = pendingPoints
-                .GroupBy(pt => pt.UserId)
-                .Select(g => new { UserId = g.Key, TotalUnlocked = g.Sum(pt => pt.Amount) });
-
-            foreach (var userPoints in unlockedPointsByUser)
-            {
-                var user = await _dbContext.Users.FindAsync(new object[] { userPoints.UserId }, cancellationToken);
-                if (user != null)
-                {
-                    // 1. Give them their earned points
-                    user.LoyaltyPointsBalance += userPoints.TotalUnlocked;
-
-                    // 2. Calculate gamification metrics for the trips that just arrived
-                    var userFinishedTrips = pendingPoints
-                        .Where(p => p.UserId == userPoints.UserId && p.BookingId.HasValue)
-                        .ToList();
-
-                    if (userFinishedTrips.Count > 0)
-                    {
-                        int completedLegs = userFinishedTrips.Count;
-                        decimal totalSpendForTheseTrips = 0;
-
-                        foreach (var pt in userFinishedTrips)
-                        {
-                            var booking = await _dbContext.Bookings.FindAsync(new object[] { pt.BookingId!.Value }, cancellationToken);
-                            if (booking != null)
-                            {
-                                // Add the price to the gamification tracker
-                                totalSpendForTheseTrips += booking.TotalPrice;
-                            }
-                        }
-
-                        // 3. Fire the event safely! Progress is now strictly tied to arrival.
-                        await _mediator.Publish(new BookingCompletedEvent(user.UserId, completedLegs, totalSpendForTheseTrips, 0, 0), cancellationToken);
-                    }
-                }
-            }
-
-            if (completedCandidates.Count == 0 && pendingPoints.Count == 0)
+            if (!activeCandidates.Any())
                 return;
 
-            await _dbContext.SaveChangesAsync(cancellationToken);
-        }
+            var strategy = _dbContext.Database.CreateExecutionStrategy();
+            await strategy.ExecuteAsync(async () =>
+            {
+                await using var transaction = await _dbContext.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
+                try
+                {
+                    int processedCount = 0;
 
+                    foreach (var booking in activeCandidates)
+                    {
+                        var localTimes = ResolvePassengerLocalTimes(booking);
+
+                        if (localTimes.DropoffTime <= now)
+                        {
+                            booking.Status = BookingStatus.Completed;
+                            booking.UpdatedAt = now;
+
+
+                            await _mediator.Publish(new BookingCompletedEvent(
+                                booking.UserId,
+                                1,
+                                booking.TotalPrice,
+                                0,
+                                0), cancellationToken);
+
+                            processedCount++;
+                        }
+                    }
+
+                    if (processedCount > 0)
+                    {
+                        await _dbContext.SaveChangesAsync(cancellationToken);
+                        await transaction.CommitAsync(cancellationToken);
+                    }
+                }
+                catch
+                {
+                    await transaction.RollbackAsync(cancellationToken);
+                    throw;
+                }
+            });
+        }
         public async Task ProcessUpcomingBoardingAlertsAsync(CancellationToken cancellationToken = default)
         {
             var now = AppTime.GetScheduleNow();
