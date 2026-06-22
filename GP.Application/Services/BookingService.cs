@@ -509,6 +509,7 @@ namespace GP.Application.Services
                         }
                         int totalEarnedPoints = (int)totalDecimalPoints;
                         var departureDate = orderedLegs[0].DepartureDateTime;
+                        var estimatedArrival = orderedLegs.Last().ArrivalDateTime;
                         var referenceBookingId = pendingBookings[0].BookingId;
 
                         var earnTransaction = new PointTransaction
@@ -521,9 +522,9 @@ namespace GP.Application.Services
                             Source = PointSource.BookingEarned,
                             Status = PointTransactionStatus.Pending,
                             CreatedAt = now,
-                            UnlocksAt = departureDate,
+                            UnlocksAt = estimatedArrival,
                             BookingId = referenceBookingId,
-                            ExpiresAt = departureDate.AddMonths(4)
+                            ExpiresAt = estimatedArrival.AddMonths(4)
                         };
 
                         _dbContext.PointTransactions.Add(earnTransaction);
@@ -812,6 +813,7 @@ namespace GP.Application.Services
         public async Task ProcessCompletedTripsAsync(CancellationToken cancellationToken = default)
         {
             var now = AppTime.GetScheduleNow();
+
             var activeCandidates = await _dbContext.Bookings
                 .Include(b => b.User)
                 .Include(b => b.Occurrence)
@@ -829,18 +831,30 @@ namespace GP.Application.Services
                 await using var transaction = await _dbContext.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, cancellationToken);
                 try
                 {
-                    int processedCount = 0;
+                    bool changesMade = false;
 
                     foreach (var booking in activeCandidates)
                     {
                         var localTimes = ResolvePassengerLocalTimes(booking);
 
+                        // Check if they physically reached their specific destination station
                         if (localTimes.DropoffTime <= now)
                         {
                             booking.Status = BookingStatus.Completed;
                             booking.UpdatedAt = now;
 
+                            // Instantly unlock points tied to this specific booking
+                            var linkedPoints = await _dbContext.PointTransactions
+                                .Where(pt => pt.BookingId == booking.BookingId && pt.Status == PointTransactionStatus.Pending)
+                                .ToListAsync(cancellationToken);
 
+                            foreach (var pt in linkedPoints)
+                            {
+                                pt.Status = PointTransactionStatus.Available;
+                                booking.User.LoyaltyPointsBalance += pt.Amount;
+                            }
+
+                            // Fire Gamification Event
                             await _mediator.Publish(new BookingCompletedEvent(
                                 booking.UserId,
                                 1,
@@ -848,11 +862,11 @@ namespace GP.Application.Services
                                 0,
                                 0), cancellationToken);
 
-                            processedCount++;
+                            changesMade = true;
                         }
                     }
 
-                    if (processedCount > 0)
+                    if (changesMade)
                     {
                         await _dbContext.SaveChangesAsync(cancellationToken);
                         await transaction.CommitAsync(cancellationToken);

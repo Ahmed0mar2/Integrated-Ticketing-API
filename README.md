@@ -458,6 +458,12 @@ These endpoints were added as part of the User Profile epic. They allow authenti
 
 ---
 
+## 🗄️ Database Architecture
+
+Below is the Entity Relationship Diagram (ERD) showcasing the database schema utilized to normalize transit agency data and securely manage transactions, reservations, and ticketing.
+
+![Rihla Database ERD](./assets/erd.png)
+
 ## 👥 Team & Acknowledgements
 
 This project was developed as the backend infrastructure for our graduation project at the **Faculty of Engineering at Shoubra, Benha University**.
